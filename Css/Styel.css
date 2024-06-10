@@ -218,11 +218,8 @@ html {
   color: #000000;
 }
 
-.order-room {
-  padding: 8rem 7% 1.4rem;
-  font-size: 1.5rem;
-  color: #000000;
-  margin-top: 2rem;
+.kamar .row .menu-card .order-room {
+  margin-top: 1rem;
   display: inline-block;
   padding: 1rem 3rem;
   font-size: 1rem;
@@ -231,6 +228,13 @@ html {
   border-radius: 0.5rem;
   cursor: pointer;
 }
+
+.kamar .row .menu-card .order-room:hover {
+  background-color: #61677a;
+  transition: 0.5s;
+}
+
+
 
 /* Contact */
 
