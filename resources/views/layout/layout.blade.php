@@ -18,7 +18,6 @@
     <!-- Feather icon -->
     <script src="https://unpkg.com/feather-icons"></script>
     <!-- Styel -->
-    <link rel="stylesheet" href="CSS/order.css" />
     <link rel="stylesheet" href="CSS/style.css" />
     @yield('styles')
 
