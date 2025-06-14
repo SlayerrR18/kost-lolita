@@ -27,7 +27,10 @@ Home page
     <body>
     <!-- Navbar Start-->
     <nav class="navbar">
-        <a href="#" class="navbar-logo">Kost<span>Lolita</span></a>
+        <a href="#" class="navbar-logo">
+            <img src="{{ asset('img/Logo.png') }}" alt="Kost Lolita Logo" class="logo-img">
+            Kost<span>Lolita</span>
+        </a>
         <div class="isi-navbar">
             <a href="#home">Home</a>
             <a href="#about">About</a>
@@ -35,7 +38,7 @@ Home page
             <a href="#contact">Contact</a>
         </div>
         <div class="navbar-icon">
-           <a href="{{ route('auth.login') }}" class="login-link">
+            <a href="{{ route('login') }}" class="login-link">
                 <i data-feather="user"></i> Login
             </a>
             <a href="#" id="hamburger-menu"><i data-feather="menu"></i></a>
@@ -58,7 +61,7 @@ Home page
         <h2>Tentang <span>Kami</span></h2>
         <div class="row">
             <div class="about-img">
-                <img class="img-responsive" src="img/about.1.jpg" alt="Kamar tidur">
+                <img class="img-responsive" src="img/about.jpg" alt="Kamar tidur">
             </div>
             <div class="content">
                 <h3>Mengapa memilih kami?</h3>
@@ -71,38 +74,64 @@ Home page
     <!-- About End -->
 
     <!-- Kamar Start -->
-    <section id="kamar" class="kamar">
-        <h2>Fasilitas <span>Kami</span></h2>
-        <p>Kami menyediakan kost putra dan juga kontrakan dengan berbagai pilihan fasilitas</p>
-        <div class="row">
-            <div class="menu-card">
-                <img src="img/kamar-1.jpg" alt="Kamar tidur standar" class="menu-card-img">
-                <div class="menu-card-content">
-                    <h3 class="model-kamar">- Kamar Biasa -</h3>
-                    <p>Kamar ini dilengkapi dengan kasur, lemari, meja dan kamar mandi dalam</p>
-                    <p class="price">IDR 550K</p>
-                    <div class="order-room-container">
-                        <a href="/order" class="order-room-link">
-                            <button class="order-room" type="button">Pesan Sekarang</button>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="menu-card">
-                <img src="img/kontrakan.jpg" alt="Kontrakan rumah" class="menu-card-img">
-                <div class="menu-card-content">
-                    <h3 class="model-kamar">- Kontrakan -</h3>
-                    <p>Kontrakan ini dilengkapi dengan 1 kamar tidur, dapur, dan 2 kamar mandi dalam</p>
-                    <p class="price">IDR 6.000.000 /1 Tahun</p>
-                    <div class="order-room-container">
-                        <a href="/order" class="order-room-link">
-                            <button class="order-room" type="button">Pesan Sekarang</button>
-                        </a>
-                    </div>
-                </div>
-            </div>
+    <section id="kamar" class="rooms">
+    <div class="container">
+        <div class="section-header">
+            <h2>Fasilitas <span>Kami</span></h2>
+            <p>Pilihan kamar nyaman dengan berbagai fasilitas untuk kenyamanan Anda</p>
         </div>
-    </section>
+
+        <div class="rooms-grid">
+            @forelse($kosts as $kost)
+            <div class="room-card">
+                <div class="room-image">
+                    @if($kost->foto)
+                        <img src="{{ asset('storage/'.$kost->foto) }}" alt="Kamar {{ $kost->nomor_kamar }}">
+                    @else
+                        <img src="{{ asset('img/default-room.jpg') }}" alt="Default Room Image">
+                    @endif
+                    <div class="room-tag">{{ $kost->status }}</div>
+                </div>
+
+                <div class="room-content">
+                    <h3>Kamar {{ $kost->nomor_kamar }}</h3>
+
+                    <div class="room-features">
+                        @foreach($kost->fasilitas as $fasilitas)
+                            <div class="feature-item">
+                                <i data-feather="check-circle"></i>
+                                <span>{{ $fasilitas }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="room-price">
+                        <div class="price-tag">
+                            <span class="amount">Rp {{ number_format($kost->harga, 0, ',', '.') }}</span>
+                            <span class="period">/ bulan</span>
+                        </div>
+                        @if($kost->isAvailable())
+                        <a href="{{ route('order.create', $kost->id) }}" class="btn-book">
+                            <i data-feather="key"></i>
+                            Pesan Sekarang
+                        </a>
+                        @else
+                        <button class="btn-book disabled" disabled>
+                            <i data-feather="x-circle"></i>
+                            Tidak Tersedia
+                        </button>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="no-rooms">
+                <p>Belum ada kamar tersedia</p>
+            </div>
+            @endforelse
+        </div>
+    </div>
+</section>
     <!-- Kamar End -->
 
     <!-- Contact Start -->

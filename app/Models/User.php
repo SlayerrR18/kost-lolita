@@ -21,6 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'kost_id',
+        'tanggal_masuk',
+        'tanggal_keluar',
+        'penghuni',
     ];
 
     /**
@@ -41,4 +46,31 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function($user) {
+            // Delete related orders
+            $user->orders()->delete();
+
+            // Delete related kost records
+            if($user->kost) {
+                $user->kost->update([
+                    'status' => 'Kosong',
+                    'penghuni' => null
+                ]);
+            }
+        });
+    }
+
+    public function kost()
+    {
+        return $this->belongsTo(Kost::class, 'kost_id');
+    }
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }
