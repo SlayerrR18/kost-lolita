@@ -8,13 +8,13 @@
     .main-content {
         background: #f6f8fa;
         min-height: 100vh;
-        padding: 24px 16px; /* Kurangi padding */
+        padding: 24px 16px;
     }
 
     .dashboard-container {
         max-width: 1200px;
-        margin: 0; /* Hilangkan margin auto */
-        padding-left: 0; /* Kurangi padding kiri */
+        margin: 0;
+        padding-left: 0;
     }
 
     .welcome-date {

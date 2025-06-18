@@ -10,6 +10,7 @@ use App\Http\Controllers\admin\AccountController;
 use App\Http\Controllers\admin\FinancialController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -97,5 +98,11 @@ Route::group(['prefix' => 'admin/financial', 'middleware' => ['auth', 'role:admi
 
 // Route untuk logout user
 Route::post('/logout', [UserLogoutController::class, 'logout'])->name('user.logout');
+
+// Route untuk pesan
+Route::middleware(['auth'])->group(function () {
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
+});
 
 

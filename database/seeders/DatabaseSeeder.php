@@ -15,8 +15,8 @@ class DatabaseSeeder extends Seeder
          \App\Models\User::create([
         'name' => 'Admin',
         'email' => 'admin@example.com',
-        'password' => bcrypt('admin123'), // Ganti password sesuai keinginan
-        'role' => 'admin', // Pastikan kolom 'role' ada di tabel users
+        'password' => bcrypt('admin123'), 
+        'role' => 'admin',
     ]);
     }
 }

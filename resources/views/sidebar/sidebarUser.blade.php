@@ -40,7 +40,7 @@
         <span class="menu-title">GENERAL</span>
         <ul class="nav-menu">
             <li>
-                <a href="#"
+                <a href="{{ route('messages.index') }}"
                    class="nav-link {{ request()->is('admin/report*') ? 'active' : '' }}">
                     <i data-feather="file-text"></i>
                     <span>Report</span>
