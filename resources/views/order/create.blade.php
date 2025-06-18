@@ -53,114 +53,182 @@
                       class="needs-validation"
                       novalidate>
                     @csrf
+                    <input type="hidden" name="kost_id" value="{{ $kost->id }}">
 
                     @if(session('error'))
-                    <div class="alert alert-danger mb-4">
+                    <div class="alert alert-danger">
+                        <i data-feather="alert-circle" class="me-2"></i>
                         {{ session('error') }}
                     </div>
                     @endif
 
-                    <input type="hidden" name="kost_id" value="{{ $kost->id }}">
-
                     <div class="form-section">
                         <h3>Data Pribadi</h3>
                         <div class="form-group">
-                            <label>Nama Lengkap</label>
-                            <input type="text" name="name" class="form-control" required>
+                            <label class="required">Nama Lengkap</label>
+                            <input type="text"
+                                   name="name"
+                                   class="form-control @error('name') is-invalid @enderror"
+                                   value="{{ old('name') }}"
+                                   required>
+                            @error('name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" name="email" class="form-control" required>
-                            <small class="form-text">Email ini akan digunakan untuk login akun Anda</small>
+                            <label class="required">Email</label>
+                            <input type="email"
+                                   name="email"
+                                   class="form-control @error('email') is-invalid @enderror"
+                                   value="{{ old('email') }}"
+                                   required>
+                            <div class="form-text">
+                                <i data-feather="info" class="feather-small me-1"></i>
+                                Email ini akan digunakan untuk login akun Anda
+                            </div>
+                            @error('email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
+                        <div class="form-group">
+                            <label class="required">No. WhatsApp</label>
+                            <div class="input-group">
+                                <span class="input-group-text">+62</span>
+                                <input type="tel"
+                                       name="phone"
+                                       class="form-control @error('phone') is-invalid @enderror"
+                                       value="{{ old('phone') }}"
+                                       placeholder="8xxxxxxxxxx"
+                                       pattern="8[0-9]{8,11}"
+                                       required>
+                            </div>
+                            <div class="form-text">
+                                <i data-feather="info" class="feather-small me-1"></i>
+                                Informasi akun akan dikirim ke WhatsApp Anda
+                            </div>
+                            @error('phone')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label class="required">Alamat Lengkap</label>
+                            <textarea name="alamat"
+                                      class="form-control @error('alamat') is-invalid @enderror"
+                                      rows="3"
+                                      required>{{ old('alamat') }}</textarea>
+                            @error('alamat')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Informasi Sewa</h3>
                         <div class="row">
-                            <div class="col">
+                            <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>No. Telepon</label>
-                                    <input type="tel" name="phone" class="form-control" required>
+                                    <label class="required">Lama Sewa</label>
+                                    <select name="duration"
+                                            class="form-select @error('duration') is-invalid @enderror"
+                                            required>
+                                        @for($i = 1; $i <= 12; $i++)
+                                            <option value="{{ $i }}" {{ old('duration') == $i ? 'selected' : '' }}>
+                                                {{ $i }} Bulan
+                                            </option>
+                                        @endfor
+                                    </select>
+                                    @error('duration')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="required">Tanggal Masuk</label>
+                                    <input type="date"
+                                           name="tanggal_masuk"
+                                           class="form-control @error('tanggal_masuk') is-invalid @enderror"
+                                           value="{{ old('tanggal_masuk', date('Y-m-d')) }}"
+                                           min="{{ date('Y-m-d') }}"
+                                           required>
+                                    @error('tanggal_masuk')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="total-section mt-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="total-label">Total Pembayaran</div>
+                                <div class="total-amount">
+                                    Rp <span id="totalAmount">{{ number_format($kost->harga, 0, ',', '.') }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-section">
-                        <h3>Dokumen</h3>
+                        <h3>Dokumen & Pembayaran</h3>
+
                         <div class="form-group">
-                            <label>Foto KTP</label>
+                            <label class="required">Foto KTP</label>
                             <div class="custom-file-upload">
-                                <input type="file" name="ktp_image" accept="image/*" required id="ktp_image">
+                                <input type="file"
+                                       name="ktp_image"
+                                       id="ktp_image"
+                                       accept="image/*"
+                                       class="@error('ktp_image') is-invalid @enderror"
+                                       required>
                                 <label for="ktp_image">
-                                    <i data-feather="upload"></i>
+                                    <i data-feather="upload-cloud"></i>
                                     <span>Pilih File KTP</span>
                                 </label>
                             </div>
+                            @error('ktp_image')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="form-group">
-                            <label>Alamat Lengkap</label>
-                            <textarea name="alamat" class="form-control" rows="3" required></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Bukti Pembayaran</label>
-                            <div class="payment-info">
+                            <label class="required">Bukti Transfer</label>
+                            <div class="payment-info mb-3">
                                 <div class="bank-details">
-                                    <h4>Informasi Rekening:</h4>
-                                    <p>Bank BCA</p>
-                                    <p class="account-number">1234567890</p>
-                                    <p>a.n Kost Lolita</p>
-                                </div>
-                                <div class="custom-file-upload">
-                                    <input type="file" name="bukti_pembayaran" accept="image/*" required id="payment_proof">
-                                    <label for="payment_proof">
-                                        <i data-feather="upload"></i>
-                                        <span>Upload Bukti Transfer</span>
-                                    </label>
+                                    <h4>
+                                        <i data-feather="credit-card" class="me-2"></i>
+                                        Informasi Pembayaran
+                                    </h4>
+                                    <div class="bank-item">
+                                        <div class="bank-name">Bank BCA</div>
+                                        <div class="account-number">1234567890</div>
+                                        <div class="account-name">a.n Kost Lolita</div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="duration" class="form-label">Lama Sewa (Bulan)</label>
-                                <select class="form-select @error('duration') is-invalid @enderror"
-                                        id="duration" name="duration" required>
-                                    @for($i = 1; $i <= 12; $i++)
-                                        <option value="{{ $i }}">{{ $i }} Bulan</option>
-                                    @endfor
-                                </select>
-                                @error('duration')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <div class="custom-file-upload">
+                                <input type="file"
+                                       name="bukti_pembayaran"
+                                       id="bukti_pembayaran"
+                                       accept="image/*"
+                                       class="@error('bukti_pembayaran') is-invalid @enderror"
+                                       required>
+                                <label for="bukti_pembayaran">
+                                    <i data-feather="upload-cloud"></i>
+                                    <span>Upload Bukti Transfer</span>
+                                </label>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="tanggal_masuk" class="form-label">Tanggal Masuk</label>
-                                <input type="date" class="form-control @error('tanggal_masuk') is-invalid @enderror"
-                                       id="tanggal_masuk" name="tanggal_masuk"
-                                       min="{{ date('Y-m-d') }}" required>
-                                @error('tanggal_masuk')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Total Pembayaran</label>
-                        <div class="form-control bg-light">
-                            Rp <span id="totalPembayaran">{{ number_format($kost->harga, 0, ',', '.') }}</span>
+                            @error('bukti_pembayaran')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
 
                     <button type="submit" class="btn-submit">
                         <i data-feather="check-circle"></i>
-                        Kirim Pesanan
+                        <span>Kirim Pesanan</span>
                     </button>
                 </form>
             </div>
@@ -392,54 +460,108 @@
     font-size: 1.25rem;
     font-weight: 600;
     color: #1e293b;
-    margin: 0.5rem 0;
+    margin: 0.25rem 0;
 }
 
-.btn-submit {
-    width: 100%;
+.account-name {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.total-section {
+    background: #f0fdf4;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.total-label {
+    color: #064e3b;
+    font-size: 0.875rem;
+}
+
+.total-amount {
+    color: #059669;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.form-text {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    background: #1a7f5a;
-    color: white;
-    border: none;
+}
+
+.input-group-text {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #64748b;
+}
+
+.required:after {
+    content: " *";
+    color: #ef4444;
+}
+
+.feather-small {
+    width: 14px;
+    height: 14px;
+}
+
+.bank-item {
+    background: #f8fafc;
     padding: 1rem;
-    border-radius: 10px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
+    border-radius: 8px;
+    margin-top: 0.5rem;
 }
 
-.btn-submit:hover {
-    background: #15664a;
-    transform: translateY(-1px);
+.bank-name {
+    color: #64748b;
+    font-size: 0.875rem;
 }
 
-.alert {
+.account-number {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0.25rem 0;
+}
+
+.account-name {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.total-section {
+    background: #f0fdf4;
     padding: 1rem;
-    border-radius: 10px;
-    margin-bottom: 1.5rem;
+    border-radius: 8px;
 }
 
-.alert-danger {
-    background: #fef2f2;
-    border: 1px solid #fee2e2;
-    color: #dc2626;
+.total-label {
+    color: #064e3b;
+    font-size: 0.875rem;
 }
 
-@media (max-width: 768px) {
-    .order-container {
-        padding: 1rem;
-    }
+.total-amount {
+    color: #059669;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
 
-    .room-preview-card {
-        margin-bottom: 2rem;
-    }
+.form-text {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+}
 
-    .facility-grid {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    }
+.input-group-text {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #64748b;
 }
 </style>
 @endpush
@@ -447,7 +569,11 @@
 @push('js')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    feather.replace();
+    feather.replace({
+        'width': 18,
+        'height': 18,
+        'stroke-width': 2
+    });
 
     // Form validation
     const form = document.querySelector('form');
@@ -464,19 +590,34 @@ document.addEventListener('DOMContentLoaded', function() {
     fileInputs.forEach(input => {
         input.addEventListener('change', function() {
             const label = this.nextElementSibling;
+            const span = label.querySelector('span');
             if (this.files.length > 0) {
-                label.querySelector('span').textContent = this.files[0].name;
+                const fileName = this.files[0].name;
+                span.textContent = fileName.length > 25
+                    ? fileName.substring(0, 22) + '...'
+                    : fileName;
             }
         });
     });
 
-    document.getElementById('duration').addEventListener('change', function() {
+    // Calculate total amount
+    const durationSelect = document.querySelector('select[name="duration"]');
+    durationSelect.addEventListener('change', function() {
         const hargaPerBulan = {{ $kost->harga }};
-        const durasi = this.value;
+        const durasi = parseInt(this.value);
         const total = hargaPerBulan * durasi;
 
-        document.getElementById('totalPembayaran').textContent =
+        document.getElementById('totalAmount').textContent =
             new Intl.NumberFormat('id-ID').format(total);
+    });
+
+    // Phone number formatting
+    const phoneInput = document.querySelector('input[name="phone"]');
+    phoneInput.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+        if (this.value.startsWith('0')) {
+            this.value = this.value.substring(1);
+        }
     });
 });
 </script>

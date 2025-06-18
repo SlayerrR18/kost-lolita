@@ -45,7 +45,7 @@
                             </td>
                             <td class="text-center">
                                 @if($order->bukti_pembayaran)
-                                    <button type="button" class="btn btn-sm btn-light" onclick="showImage('{{ Storage::url($order->bukti_pembayaran) }}')">
+                                    <button type="button" class="btn btn-sm btn-light" onclick="showImage('{{ asset('storage/' . $order->bukti_pembayaran) }}')" title="Lihat Bukti">
                                         <i data-feather="image" class="me-1"></i>
                                         Lihat Bukti
                                     </button>
@@ -213,6 +213,38 @@
     </div>
 </div>
 
+<!-- Reject Confirmation Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header border-bottom bg-danger text-white">
+                <h5 class="modal-title">
+                    <i data-feather="x-circle" class="me-2"></i>
+                    Tolak Pesanan
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="text-danger mb-4">
+                    <i data-feather="alert-triangle" style="width: 64px; height: 64px;"></i>
+                </div>
+                <h5 class="mb-3">Konfirmasi Penolakan</h5>
+                <p class="mb-0">Apakah Anda yakin ingin menolak pesanan ini? Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer border-top">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                    <i data-feather="x" class="me-2"></i>
+                    Batal
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmReject">
+                    <i data-feather="trash-2" class="me-2"></i>
+                    Ya, Tolak
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('css')
 <style>
 .icon-sm {
@@ -338,7 +370,20 @@ function processConfirmation() {
 }
 
 function rejectOrder(orderId) {
-    fetch(`/admin/financial/orders/${orderId}/reject`, {
+    currentOrderId = orderId;
+    new bootstrap.Modal(document.getElementById('rejectModal')).show();
+}
+
+document.getElementById('confirmReject').addEventListener('click', function() {
+    if (!currentOrderId) return;
+
+    // Show loading state
+    const rejectBtn = document.querySelector('#rejectModal .btn-danger');
+    const originalContent = rejectBtn.innerHTML;
+    rejectBtn.disabled = true;
+    rejectBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Memproses...`;
+
+    fetch(`/admin/financial/orders/${currentOrderId}/reject`, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -349,7 +394,7 @@ function rejectOrder(orderId) {
     .then(response => response.json())
     .then(data => {
         if(data.success) {
-            location.reload();
+            window.location.reload();
         } else {
             alert('Gagal menolak pesanan: ' + data.message);
         }
@@ -357,8 +402,13 @@ function rejectOrder(orderId) {
     .catch(error => {
         console.error('Error:', error);
         alert('Terjadi kesalahan saat menolak pesanan');
+    })
+    .finally(() => {
+        // Reset button state
+        rejectBtn.disabled = false;
+        rejectBtn.innerHTML = originalContent;
     });
-}
+});
 
 // Initialize Feather Icons
 document.addEventListener('DOMContentLoaded', function() {

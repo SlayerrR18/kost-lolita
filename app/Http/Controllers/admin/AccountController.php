@@ -54,7 +54,7 @@ class AccountController extends Controller
             $user = User::create([
                 'name'     => $validated['name'],
                 'email'    => $validated['email'],
-                'password' => Hash::make($validated['password']),
+                'password' => Hash::make($validated['password123']),
                 'role'     => 'user',
             ]);
 

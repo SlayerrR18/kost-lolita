@@ -236,7 +236,9 @@
                         </td>
                         <td>
                             @if($transaction->bukti_pembayaran)
-                                <button type="button" class="btn btn-icon" onclick="showImage('{{ Storage::url($transaction->bukti_pembayaran) }}')" title="Lihat Bukti">
+                                <button type="button" class="btn btn-icon"
+                                        onclick="showImage('{{ asset('storage/' . $transaction->bukti_pembayaran) }}')"
+                                        title="Lihat Bukti">
                                     <i data-feather="eye"></i>
                                 </button>
                             @else

@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\User;
 use App\Models\Financial;
 use App\Models\Kost;
+use App\Services\WhatsAppService; 
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -15,12 +16,30 @@ use Illuminate\Http\Request;
 
 class FinancialController extends Controller
 {
+    protected $whatsappService;
+
+    public function __construct(WhatsAppService $whatsappService)
+    {
+        $this->whatsappService = $whatsappService;
+    }
+
     public function index()
     {
         $transactions = Financial::with('kost')
             ->orderBy('tanggal_transaksi', 'desc')
             ->get();
-        $kosts = Kost::all(); 
+        $kosts = Kost::all();
+
+        // Debugging
+        foreach($transactions as $transaction) {
+            if($transaction->bukti_pembayaran) {
+                \Log::info('Bukti pembayaran path:', [
+                    'path' => $transaction->bukti_pembayaran,
+                    'full_url' => asset('storage/' . $transaction->bukti_pembayaran),
+                    'exists' => Storage::disk('public')->exists($transaction->bukti_pembayaran)
+                ]);
+            }
+        }
 
         return view('admin.financial.index', compact('transactions', 'kosts'));
     }
@@ -39,7 +58,9 @@ class FinancialController extends Controller
         try {
             if ($request->hasFile('bukti_pembayaran')) {
                 $file = $request->file('bukti_pembayaran');
-                $path = $file->store('bukti-pembayaran', 'public');
+                // Ubah cara penyimpanan file
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('bukti-pembayaran', $fileName, 'public');
                 $validated['bukti_pembayaran'] = $path;
             }
 
@@ -101,6 +122,39 @@ class FinancialController extends Controller
         try {
             DB::beginTransaction();
 
+            // Generate password yang aman
+            $password = Str::random(8);
+
+            // Create user account
+            $user = User::create([
+                'name' => $order->name,
+                'email' => $order->email,
+                'password' => Hash::make($password),
+                'role' => 'user',
+                'phone' => $order->phone,
+                'address' => $order->alamat,
+                'kost_id' => $order->kost_id
+            ]);
+
+            // Prepare WhatsApp message
+            $message = "✅ *Konfirmasi Pesanan Kost Lolita*\n\n"
+                    . "Halo {$order->name},\n"
+                    . "Pesanan kamar kost Anda telah dikonfirmasi.\n\n"
+                    . "*Detail Kamar:*\n"
+                    . "🏠 Nomor Kamar: {$order->kost->nomor_kamar}\n"
+                    . "📅 Tanggal Masuk: " . $order->tanggal_masuk->format('d/m/Y') . "\n"
+                    . "📅 Tanggal Keluar: " . $order->tanggal_keluar->format('d/m/Y') . "\n"
+                    . "⏱️ Durasi: {$order->duration} bulan\n\n"
+                    . "*Kredensial Akun:*\n"
+                    . "📧 Email: {$user->email}\n"
+                    . "🔑 Password: {$password}\n\n"
+                    . "Silakan login menggunakan kredensial di atas.\n"
+                    . "Untuk keamanan, harap segera ganti password Anda setelah login.\n\n"
+                    . "Terima kasih telah memilih Kost Lolita! 🙏";
+
+            // Send WhatsApp message
+            $messageSent = $this->whatsappService->sendMessage($order->phone, $message);
+
             // Create financial record
             Financial::create([
                 'kost_id' => $order->kost_id,
@@ -108,21 +162,13 @@ class FinancialController extends Controller
                 'tanggal_transaksi' => now(),
                 'total' => $order->kost->harga * $order->duration,
                 'status' => 'Pemasukan',
-                'bukti_pembayaran' => $order->bukti_pembayaran // Ubah dari bukti_transaksi
+                'bukti_pembayaran' => $order->bukti_pembayaran
             ]);
 
             // Update order status
-            $order->update(['status' => 'confirmed']);
-
-            // Create user account
-            $user = User::create([
-                'name' => $order->name,
-                'email' => $order->email,
-                'password' => Hash::make('password123'),
-                'role' => 'user',
-                'phone' => $order->phone,
-                'address' => $order->alamat,
-                'kost_id' => $order->kost_id
+            $order->update([
+                'status' => 'confirmed',
+                'user_id' => $user->id
             ]);
 
             // Update kost status
@@ -131,26 +177,24 @@ class FinancialController extends Controller
                 'penghuni' => $user->id
             ]);
 
-            // Link order to user
-            $order->update(['user_id' => $user->id]);
-
             DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Pesanan berhasil dikonfirmasi',
+                'whatsapp_sent' => $messageSent,
                 'data' => [
                     'name' => $user->name,
                     'email' => $user->email,
-                    'room_number' => $order->kost->nomor_kamar,
-                    'duration' => $order->duration,
-                    'tanggal_masuk' => $order->tanggal_masuk,
-                    'tanggal_keluar' => $order->tanggal_keluar
+                    'room_number' => $order->kost->nomor_kamar
                 ]
             ]);
 
         } catch (\Exception $e) {
             DB::rollback();
+            \Log::channel('whatsapp')->error('Confirmation failed', [
+                'error' => $e->getMessage()
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal mengkonfirmasi pesanan: ' . $e->getMessage()
@@ -166,5 +210,110 @@ class FinancialController extends Controller
             ->get();
 
         return view('admin.financial.pending-orders', compact('pendingOrders'));
+    }
+
+    public function rejectOrder(Order $order)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Update order status
+            $order->update(['status' => 'rejected']);
+
+            // Send WhatsApp notification
+            try {
+                $message = "Halo {$order->name},\n\n"
+                        . "Mohon maaf, pesanan kamar kost Anda tidak dapat kami konfirmasi.\n"
+                        . "Pembayaran Anda akan kami kembalikan sesuai dengan prosedur yang berlaku.\n\n"
+                        . "Jika ada pertanyaan, silakan hubungi admin kami.\n\n"
+                        . "Terima kasih.";
+
+                app(WhatsAppService::class)->sendMessage($order->phone, $message);
+            } catch (\Exception $e) {
+                \Log::error('WhatsApp notification failed: ' . $e->getMessage());
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pesanan berhasil ditolak'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            \Log::error('Order rejection failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menolak pesanan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function graph(Request $request)
+    {
+        // Get filter parameters
+        $year = $request->get('year', now()->year);
+        $month = $request->get('month');
+        $type = $request->get('type', 'all');
+
+        // Build base query
+        $query = Financial::query();
+
+        // Apply year filter
+        $query->whereYear('tanggal_transaksi', $year);
+
+        // Apply month filter if selected
+        if ($month) {
+            $query->whereMonth('tanggal_transaksi', $month);
+        }
+
+        // Get monthly data with proper ordering
+        $monthlyData = $query->selectRaw('
+                MONTH(tanggal_transaksi) as bulan,
+                SUM(CASE WHEN status = "Pemasukan" THEN total ELSE 0 END) as income,
+                SUM(CASE WHEN status = "Pengeluaran" THEN total ELSE 0 END) as expense
+            ')
+            ->groupBy('bulan')
+            ->orderByRaw('bulan ASC')
+            ->get();
+
+        // Format data for charts
+        $months = [];
+        $incomeData = [];
+        $expenseData = [];
+        $profitData = [];
+
+        foreach ($monthlyData as $data) {
+            $months[] = date('F', mktime(0, 0, 0, $data->bulan, 1));
+            $incomeData[] = (float)$data->income;
+            $expenseData[] = (float)$data->expense;
+            $profitData[] = (float)($data->income - $data->expense);
+        }
+
+        // Calculate yearly totals
+        $yearlyTotals = [
+            'income' => array_sum($incomeData),
+            'expense' => array_sum($expenseData),
+            'profit' => array_sum($profitData)
+        ];
+
+        // Get available years for filter
+        $availableYears = Financial::selectRaw('YEAR(tanggal_transaksi) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        return view('admin.financial.grafik', compact(
+            'months',
+            'incomeData',
+            'expenseData',
+            'profitData',
+            'yearlyTotals',
+            'availableYears',
+            'year',
+            'month',
+            'type'
+        ));
     }
 }

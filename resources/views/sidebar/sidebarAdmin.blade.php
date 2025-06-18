@@ -33,12 +33,32 @@
                     <span>Manajemen Akun</span>
                 </a>
             </li>
-            <li>
-                <a href="{{ route('admin.financial.index') }}"
-                   class="nav-link {{ request()->is('admin/keuangan*') ? 'active' : '' }}">
-                    <i data-feather="trending-up"></i>
+            <li class="nav-item-dropdown">
+                <a href="#" class="nav-link dropdown-toggle {{ request()->is('admin/keuangan*') ? 'active' : '' }}"
+                   data-bs-toggle="collapse" data-bs-target="#financeSubmenu"
+                   aria-expanded="false">
+                    <i data-feather="dollar-sign"></i>
                     <span>Manajemen Keuangan</span>
+                    <i data-feather="chevron-down" class="dropdown-icon"></i>
                 </a>
+                <div class="collapse" id="financeSubmenu">
+                    <ul class="nav-submenu">
+                        <li>
+                            <a href="{{ route('admin.financial.index') }}"
+                               class="nav-sublink {{ request()->routeIs('admin.financial.index') ? 'active' : '' }}">
+                                <i data-feather="credit-card"></i>
+                                <span>Transaksi Keuangan</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.financial.graph') }}"
+                               class="nav-sublink {{ request()->is('admin/keuangan/grafik*') ? 'active' : '' }}">
+                                <i data-feather="bar-chart-2"></i>
+                                <span>Grafik Keuangan</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
             <li>
                 <a href="{{ route('admin.financial.pending-orders') }}"
@@ -282,6 +302,65 @@ form .nav-link:hover {
 .text-warning i {
     color: #eab308;
     stroke-width: 1.5;
+}
+
+.nav-item-dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    justify-content: space-between;
+}
+
+.dropdown-icon {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+}
+
+.dropdown-toggle[aria-expanded="true"] .dropdown-icon {
+    transform: rotate(180deg);
+}
+
+.nav-submenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    padding-left: 32px;
+}
+
+.nav-sublink {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    color: #64748b;
+    text-decoration: none;
+    border-radius: 12px;
+    margin-bottom: 4px;
+    transition: all 0.3s ease;
+    font-size: 13px;
+}
+
+.nav-sublink:hover {
+    background: #f1f5f9;
+    color: #1a7f5a;
+    text-decoration: none;
+}
+
+.nav-sublink.active {
+    background: #e6f4ea;
+    color: #1a7f5a;
+}
+
+.nav-sublink i {
+    width: 18px;
+    height: 18px;
+    margin-right: 12px;
+}
+
+.collapse {
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 </style>
 <script src="https://unpkg.com/feather-icons"></script>

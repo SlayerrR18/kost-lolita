@@ -89,6 +89,10 @@ Route::group(['prefix' => 'admin/financial', 'middleware' => ['auth', 'role:admi
         ->name('admin.financial.confirm-order');
     Route::post('/orders/{order}/reject', [FinancialController::class, 'rejectOrder'])
         ->name('admin.financial.reject-order');
+
+    // Route untuk grafik keuangan
+    Route::get('/graph', [FinancialController::class, 'graph'])
+        ->name('admin.financial.graph');
 });
 
 // Route untuk logout user
