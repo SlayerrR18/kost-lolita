@@ -7,7 +7,7 @@ use App\Models\Order;
 use App\Models\User;
 use App\Models\Financial;
 use App\Models\Kost;
-use App\Services\WhatsAppService; 
+use App\Services\WhatsAppService;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -186,7 +186,11 @@ class FinancialController extends Controller
                 'data' => [
                     'name' => $user->name,
                     'email' => $user->email,
-                    'room_number' => $order->kost->nomor_kamar
+                    'room_number' => $order->kost->nomor_kamar,
+                    'duration' => $order->duration,
+                    // Format dates properly
+                    'tanggal_masuk' => $order->tanggal_masuk->format('Y-m-d'),
+                    'tanggal_keluar' => $order->tanggal_keluar->format('Y-m-d')
                 ]
             ]);
 

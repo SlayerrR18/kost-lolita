@@ -331,25 +331,24 @@ function processConfirmation() {
     .then(response => response.json())
     .then(data => {
         if(data.success) {
-            // Format dates
-            const tanggalMasuk = new Date(data.data.tanggal_masuk).toLocaleDateString('id-ID', {
+            // Format dates properly
+            const tanggalMasuk = new Date(data.data.tanggal_masuk);
+            const tanggalKeluar = new Date(data.data.tanggal_keluar);
+
+            const options = {
                 day: 'numeric',
                 month: 'long',
-                year: 'numeric'
-            });
-            const tanggalKeluar = new Date(data.data.tanggal_keluar).toLocaleDateString('id-ID', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            });
+                year: 'numeric',
+                timeZone: 'Asia/Jakarta'
+            };
 
             // Update success modal content
             document.getElementById('confirmName').textContent = data.data.name;
             document.getElementById('confirmEmail').textContent = data.data.email;
             document.getElementById('confirmRoom').textContent = data.data.room_number;
             document.getElementById('confirmDuration').textContent = data.data.duration;
-            document.getElementById('confirmCheckIn').textContent = tanggalMasuk;
-            document.getElementById('confirmCheckOut').textContent = tanggalKeluar;
+            document.getElementById('confirmCheckIn').textContent = tanggalMasuk.toLocaleDateString('id-ID', options);
+            document.getElementById('confirmCheckOut').textContent = tanggalKeluar.toLocaleDateString('id-ID', options);
 
             // Hide confirm modal and show success modal
             bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
