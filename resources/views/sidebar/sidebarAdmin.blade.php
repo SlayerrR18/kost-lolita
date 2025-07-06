@@ -78,6 +78,9 @@
                    class="nav-link {{ request()->is('admin/report*') ? 'active' : '' }}">
                     <i data-feather="file-text"></i>
                     <span>Report</span>
+                    @if(isset($totalUnread) && $totalUnread > 0)
+                        <span class="badge-unread">{{ $totalUnread }}</span>
+                    @endif
                 </a>
             </li>
             <li>
@@ -361,6 +364,19 @@ form .nav-link:hover {
 .collapse {
     padding-top: 4px;
     padding-bottom: 4px;
+}
+
+.badge-unread {
+    background: #dc2626;
+    color: #fff;
+    border-radius: 50%;
+    padding: 2px 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 8px;
+    min-width: 24px;
+    text-align: center;
+    display: inline-block;
 }
 </style>
 <script src="https://unpkg.com/feather-icons"></script>

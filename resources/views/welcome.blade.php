@@ -21,6 +21,7 @@ Home page
     <script src="https://unpkg.com/feather-icons"></script>
     <!-- Styel -->
     <link rel="stylesheet" href="css/style.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
   </head>
 
@@ -85,10 +86,30 @@ Home page
             @forelse($kosts as $kost)
             <div class="room-card">
                 <div class="room-image">
-                    @if($kost->foto)
-                        <img src="{{ asset('storage/'.$kost->foto) }}" alt="Kamar {{ $kost->nomor_kamar }}">
+                    @php
+                        $fotos = is_array($kost->foto) ? $kost->foto : (empty($kost->foto) ? [] : [$kost->foto]);
+                    @endphp
+
+                    @if(count($fotos) > 0)
+                        <div id="carouselKost{{ $kost->id }}" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                @foreach($fotos as $i => $foto)
+                                    <div class="carousel-item {{ $i == 0 ? 'active' : '' }}">
+                                        <img src="{{ asset('storage/'.$foto) }}" class="d-block w-100" style="height:200px;object-fit:cover;border-radius:12px;" alt="Kamar {{ $kost->nomor_kamar }}">
+                                    </div>
+                                @endforeach
+                            </div>
+                            @if(count($fotos) > 1)
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselKost{{ $kost->id }}" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselKost{{ $kost->id }}" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                            @endif
+                        </div>
                     @else
-                        <img src="{{ asset('img/default-room.jpg') }}" alt="Default Room Image">
+                        <img src="{{ asset('img/default-room.jpg') }}" class="d-block w-100" style="height:200px;object-fit:cover;border-radius:12px;" alt="Default Room Image">
                     @endif
                     <div class="room-tag">{{ $kost->status }}</div>
                 </div>
@@ -181,5 +202,6 @@ Home page
       feather.replace();
     </script>
     <script src="js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

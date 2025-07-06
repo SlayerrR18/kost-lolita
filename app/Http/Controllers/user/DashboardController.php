@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Order;
 
 
 class DashboardController extends Controller
@@ -20,7 +21,16 @@ class DashboardController extends Controller
     {
 
         $user = Auth::user();
-        // $kost = $user->kost;
-        return view('user.dashboard', compact('user'));
+        $order = Order::where('user_id', $user->id)
+            ->where('status', 'confirmed')
+            ->first();
+        $remainingContract = 0;
+        if ($order) {
+            $remainingContract = $order->tanggal_keluar->diffInDays(now());
+        }
+        if ($remainingContract < 0) {
+            $remainingContract = 0;
+        }
+        return view('user.dashboard', compact('user', 'remainingContract'));
     }
 }

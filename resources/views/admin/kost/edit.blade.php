@@ -61,7 +61,7 @@
                 <label for="foto">Foto Kamar</label>
                 <div class="foto-container">
                     <div class="custom-file-upload">
-                        <input type="file" id="foto" name="foto" accept="image/*" class="hidden-file-input">
+                        <input type="file" id="foto" name="foto[]" accept="image/*" multiple>
                         <label for="foto" class="file-label">
                             <i data-feather="upload"></i>
                             <span>Pilih Foto Baru</span>
@@ -274,24 +274,24 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 document.getElementById('foto').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
+    const files = e.target.files;
+    const container = document.querySelector('.foto-container');
+    container.querySelectorAll('.foto-preview').forEach(preview => preview.remove()); // Remove old previews
+
+    Array.from(files).forEach((file) => {
         const reader = new FileReader();
         reader.onload = function(e) {
-            let preview = document.querySelector('.foto-preview');
-            if (!preview) {
-                preview = document.createElement('div');
-                preview.className = 'foto-preview';
-                document.querySelector('.foto-container').appendChild(preview);
-            }
+            const preview = document.createElement('div');
+            preview.className = 'foto-preview';
             preview.innerHTML = `<img src="${e.target.result}" alt="Preview Foto">`;
+            container.appendChild(preview);
         }
         reader.readAsDataURL(file);
+    });
 
-        // Update label text
-        const label = document.querySelector('.file-label span');
-        label.textContent = file.name;
-    }
+    // Update label text
+    const label = document.querySelector('.file-label span');
+    label.textContent = files.length > 1 ? `${files.length} files selected` : files[0].name;
 });
 </script>
 @endpush

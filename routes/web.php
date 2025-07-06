@@ -105,4 +105,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
 });
 
+// Route untuk riwayat pemesanan user
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/user/history', [\App\Http\Controllers\user\HistoryController::class, 'index'])->name('user.history.index');
+});
+
 

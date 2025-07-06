@@ -27,10 +27,10 @@
                 </a>
             </li>
             <li>
-                <a href="#"
-                   class="nav-link {{ request()->is('admin/akun*') ? 'active' : '' }}">
-                    <i data-feather="users"></i>
-                    <span>Riwayat</span>
+                <a href="{{ route('user.history.index') }}"
+                   class="nav-link {{ request()->routeIs('user.history.index') ? 'active' : '' }}">
+                    <i data-feather="credit-card"></i>
+                    <span>Riwayat Transaksi</span>
                 </a>
             </li>
         </ul>
@@ -44,6 +44,9 @@
                    class="nav-link {{ request()->is('admin/report*') ? 'active' : '' }}">
                     <i data-feather="file-text"></i>
                     <span>Report</span>
+                    @if(isset($admin) && $admin->unread_count > 0)
+                        <span class="badge-unread">{{ $admin->unread_count }}</span>
+                    @endif
                 </a>
             </li>
             <li>
@@ -269,6 +272,19 @@ form .nav-link:hover {
 .text-warning i {
     color: #eab308;
     stroke-width: 1.5;
+}
+
+.badge-unread {
+    background: #dc2626;
+    color: #fff;
+    border-radius: 50%;
+    padding: 2px 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 8px;
+    min-width: 24px;
+    text-align: center;
+    display: inline-block;
 }
 </style>
 <script src="https://unpkg.com/feather-icons"></script>

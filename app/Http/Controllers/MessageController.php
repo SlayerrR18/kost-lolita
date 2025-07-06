@@ -20,9 +20,20 @@ class MessageController extends Controller
                 ->select('user_id')
                 ->distinct()
                 ->get()
-                ->map(function($message) {
-                    return $message->user;
-                });
+                ->map(function($message) use ($adminId) {
+                    $user = $message->user;
+                    if ($user && $user->id != $adminId) {
+                        // Hitung pesan dari user ini yang belum dibaca admin
+                        $unread = Message::where('user_id', $user->id)
+                            ->where('admin_id', $adminId)
+                            ->where('is_read', false)
+                            ->count();
+                        $user->unread_count = $unread;
+                        return $user;
+                    }
+                    return null;
+                })
+                ->filter();
 
             $messages = [];
             $selectedUserId = request('user_id');
@@ -37,7 +48,10 @@ class MessageController extends Controller
                   ->get();
             }
 
-            return view('admin.report.index', compact('conversations', 'messages', 'selectedUserId', 'userId', 'adminId'));
+            $totalUnread = $conversations->sum('unread_count');
+            return view('admin.report.index', compact(
+                'conversations', 'messages', 'selectedUserId', 'userId', 'adminId', 'totalUnread'
+            ));
         } else {
             // For user view
             $messages = Message::where(function($query) use ($user) {

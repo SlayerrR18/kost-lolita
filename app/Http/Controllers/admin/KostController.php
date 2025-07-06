@@ -27,16 +27,20 @@ class KostController extends Controller
         $validatedData = $request->validate([
             'nomor_kamar' => 'required|string|unique:kosts,nomor_kamar',
             'fasilitas' => 'required|array',
-            'foto' => 'required|image|mimes:jpeg,png,jpg|max:10248',
+            'foto' => 'required|array',
+            'foto.*' => 'image|mimes:jpeg,png,jpg|max:51200',
             'status' => 'required|in:Kosong,Terisi',
             'harga' => 'required|numeric',
         ]);
 
         try {
             if ($request->hasFile('foto')) {
-                $foto = $request->file('foto');
-                $filename = time() . '_' . $foto->getClientOriginalName();
-                $validatedData['foto'] = $foto->storeAs('kost', $filename, 'public');
+                $fotoArr = [];
+                foreach ($request->file('foto') as $foto) {
+                    $filename = time() . '_' . $foto->getClientOriginalName();
+                    $fotoArr[] = $foto->storeAs('kost', $filename, 'public');
+                }
+                $validatedData['foto'] = $fotoArr;
             }
 
             Kost::create($validatedData);
@@ -66,20 +70,26 @@ class KostController extends Controller
             'fasilitas' => 'required|array',
             'status' => 'required|in:Kosong,Terisi',
             'harga' => 'required|numeric',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:10248',
+            'foto' => 'nullable|array',
+            'foto.*' => 'image|mimes:jpeg,png,jpg|max:51200',
         ]);
 
         try {
             if ($request->hasFile('foto')) {
                 // Hapus foto lama
                 if ($kost->foto) {
-                    Storage::disk('public')->delete($kost->foto);
+                    foreach ($kost->foto as $foto) {
+                        Storage::disk('public')->delete($foto);
+                    }
                 }
 
                 // Simpan foto baru
-                $foto = $request->file('foto');
-                $filename = time() . '_' . $foto->getClientOriginalName();
-                $validatedData['foto'] = $foto->storeAs('kost', $filename, 'public');
+                $fotoArr = [];
+                foreach ($request->file('foto') as $foto) {
+                    $filename = time() . '_' . $foto->getClientOriginalName();
+                    $fotoArr[] = $foto->storeAs('kost', $filename, 'public');
+                }
+                $validatedData['foto'] = $fotoArr;
             }
 
             $kost->update($validatedData);
@@ -101,7 +111,9 @@ class KostController extends Controller
 
             // Hapus foto jika ada
             if ($kost->foto) {
-                Storage::disk('public')->delete($kost->foto);
+                foreach ($kost->foto as $foto) {
+                    Storage::disk('public')->delete($foto);
+                }
             }
 
             $kost->delete();

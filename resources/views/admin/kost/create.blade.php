@@ -175,9 +175,9 @@
                         <i data-feather="upload" class="me-2"></i>
                         Pilih Foto
                     </div>
-                    <input type="file" id="foto" name="foto" accept="image/*">
+                    <input type="file" id="foto" name="foto[]" accept="image/*" multiple>
                 </div>
-                <small class="text-muted d-block mt-2">Format: JPG, PNG (Max: 2MB)</small>
+                <small class="text-muted d-block mt-2">Format: JPG, PNG</small>
             </div>
 
             <button type="submit" class="btn-submit">

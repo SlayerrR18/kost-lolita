@@ -191,11 +191,10 @@
                             @endif
                         </td>
                         <td>
-                            @if($kost->foto)
-                                @php
-                                    $fotoPath = str_replace('public/', '', $kost->foto);
-                                @endphp
-                                <img src="{{ asset('storage/' . $fotoPath) }}" alt="Foto Kamar" class="room-image">
+                           @if(is_array($kost->foto) && count($kost->foto) > 0)
+                                <img src="{{ asset('storage/' . $kost->foto[0]) }}" alt="Foto Kamar" class="room-image">
+                            @elseif(is_string($kost->foto) && !empty($kost->foto))
+                                <img src="{{ asset('storage/' . $kost->foto) }}" alt="Foto Kamar" class="room-image">
                             @else
                                 <span class="text-muted">Tidak ada foto</span>
                             @endif

@@ -14,8 +14,28 @@
         <div class="col-md-5">
             <div class="room-preview-card sticky-top">
                 <div class="room-image">
-                    @if($kost->foto)
-                        <img src="{{ asset('storage/'.$kost->foto) }}" alt="Kamar {{ $kost->nomor_kamar }}" class="room-img">
+                    @php
+                        $fotos = is_array($kost->foto) ? $kost->foto : (empty($kost->foto) ? [] : [$kost->foto]);
+                    @endphp
+
+                    @if(count($fotos) > 0)
+                        <div id="carouselOrderKost{{ $kost->id }}" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                @foreach($fotos as $i => $foto)
+                                    <div class="carousel-item {{ $i == 0 ? 'active' : '' }}">
+                                        <img src="{{ asset('storage/'.$foto) }}" class="d-block w-100 room-img" alt="Kamar {{ $kost->nomor_kamar }}">
+                                    </div>
+                                @endforeach
+                            </div>
+                            @if(count($fotos) > 1)
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselOrderKost{{ $kost->id }}" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselOrderKost{{ $kost->id }}" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                            @endif
+                        </div>
                     @endif
                     <div class="room-tag">Tersedia</div>
                 </div>

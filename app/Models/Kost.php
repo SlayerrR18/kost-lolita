@@ -23,6 +23,10 @@ class Kost extends Model
         'tanggal_keluar'
     ];
 
+    protected $casts = [
+        'foto' => 'array',
+    ];
+
     public function isAvailable()
     {
         return $this->status === 'Kosong';
