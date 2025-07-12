@@ -134,7 +134,7 @@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-title">Sisa Kontrak</div>
-            <div class="stat-value">{{ $remainingContract}} Kontrak</div>
+            <div class="stat-value">{{ $remainingContract}} Hari</div>
             <div class="stat-icon">
                 <i data-feather="home"></i>
             </div>
