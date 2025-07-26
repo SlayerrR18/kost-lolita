@@ -27,15 +27,16 @@ html {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.4rem 7%;
-    background-color: rgba(255, 255, 255, 0.95);
+    padding: 1.2rem 7%;
+    background-color: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(10px);
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 999;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+    border-radius: 0 0 24px 24px;
 }
 
 .navbar-logo {
@@ -45,51 +46,187 @@ html {
     text-decoration: none;
     font-size: 1.8rem;
     font-weight: 700;
-    color: var(--primary);
+    color: #1e293b;
+    transition: transform 0.3s ease;
+}
+
+.navbar-logo:hover {
+    transform: translateY(-2px);
 }
 
 .navbar-logo .logo-img {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(26, 127, 90, 0.08);
 }
 
 .navbar-logo span {
-    color: #1a7f5a;
+    background: linear-gradient(90deg, #1a7f5a 0%, #16c79a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .isi-navbar {
     display: flex;
-    gap: 2rem;
+    gap: 2.5rem;
+    align-items: center;
 }
 
 .isi-navbar a {
-    color: #000000;
+    color: #64748b;
+    font-size: 1.05rem;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.isi-navbar a:hover {
+    color: #1a7f5a;
+    background: rgba(26, 127, 90, 0.08);
+}
+
+.isi-navbar a.active {
+    color: #1a7f5a;
+    background: rgba(26, 127, 90, 0.08);
+}
+
+.isi-navbar a::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background: linear-gradient(90deg, #1a7f5a 0%, #16c79a 100%);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+    opacity: 0;
+}
+
+.isi-navbar a:hover::after,
+.isi-navbar a.active::after {
+    width: 60%;
+    opacity: 1;
+}
+
+.login-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.5rem;
+    background: linear-gradient(90deg, #1a7f5a 0%, #16c79a 100%);
+    color: white !important;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 1.05rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(26, 127, 90, 0.15);
+}
+
+.login-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(26, 127, 90, 0.2);
+    background: linear-gradient(90deg, #16c79a 0%, #1a7f5a 100%);
+}
+
+#hamburger-menu {
+    display: none;
+    color: #1e293b;
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+#hamburger-menu:hover {
+    background: rgba(26, 127, 90, 0.08);
+    color: #1a7f5a;
+}
+
+/* Modern Navbar */
+.navbar-modern {
+    position: fixed;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 1200px;
+    background: linear-gradient(90deg, #1a7f5a 0%, #16c79a 100%);
+    backdrop-filter: blur(10px);
+    border-radius: 100px;
+    padding: 1rem 2rem;
+    z-index: 1000;
+}
+
+.navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.navbar-logo {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+}
+
+.navbar-center {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 100px;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-contact {
+    background: rgba(255, 255, 255, 0.9);
+    color: #1a7f5a;
+    text-decoration: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 100px;
     font-size: 1rem;
     font-weight: 500;
     transition: all 0.3s ease;
 }
 
-.isi-navbar a:hover {
-    color: #1a7f5a;
-}
-
-.login-link {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1.25rem;
-    background: #1a7f5a;
-    color: white !important;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.login-link:hover {
-    background: #15664a;
+.nav-contact:hover {
+    background: #fff;
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Hero Section */
@@ -97,7 +234,7 @@ html {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    background-image:
         url("../img/bg.jpg");
     background-size: cover;
     background-position: center;
@@ -409,13 +546,14 @@ footer .credits {
 }
 /* Rooms Section */
 .rooms {
-    padding: 5rem 0;
+    padding: 8rem 0 5rem 0; /* Ubah padding top dari 5rem ke 8rem */
     background-color: #f8fafc;
 }
 
 .section-header {
     text-align: center;
-    margin-bottom: 3rem;
+    margin: 2rem 0 3rem 0;
+    padding: 0 1rem;
 }
 
 .section-header h2 {
@@ -435,23 +573,27 @@ footer .credits {
 }
 
 .rooms-grid {
-    display: grid;
-    grid-template-columns: repeat(
-        auto-fit,
-        minmax(380px, 1fr)
-    ); /* Increased from 340px */
-    gap: 2rem; /* Increased from 1rem */
-    padding: 1.5rem; /* Increased from 1rem */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
 }
 
 .room-card {
-    background: white;
-    border-radius: 16px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(26, 127, 90, 0.1);
     overflow: hidden;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    max-width: 480px; /* Increased from 400px */
-    margin: 0 auto;
+    max-width: 400px;
+    width: 100%;
+    margin-bottom: 2rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.room-card:hover {
+    transform: translateY(-8px) scale(1.025);
+    box-shadow: 0 16px 40px 0 rgba(26, 127, 90, 0.15),
+        0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .room-image {
@@ -534,23 +676,142 @@ footer .credits {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: var(--primary);
+    background: linear-gradient(90deg, #1a7f5a 80%, #16c79a 100%);
     color: white;
-    padding: 0.875rem 1.75rem; /* Increased padding */
+    padding: 0.875rem 1.75rem;
     border-radius: 8px;
-    text-decoration: none;
     font-weight: 500;
-    transition: all 0.3s ease;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(26, 127, 90, 0.1);
+    border: none;
+    text-decoration: none;
+    transition: background 0.2s, box-shadow 0.2s;
 }
 
-.btn-book:hover {
-    background: #1a7f5a;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(26, 127, 90, 0.15);
+.btn-book.disabled,
+.btn-book[disabled] {
+    background: #e5e7eb;
+    color: #b0b0b0;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 #hamburger-menu {
     display: none;
+    color: #1e293b;
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+#hamburger-menu:hover {
+    background: rgba(26, 127, 90, 0.08);
+    color: #1a7f5a;
+}
+
+/* Contract Page Styles */
+.contract-container {
+    padding: 8rem 7% 4rem;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.contract-title {
+    font-size: 2rem;
+    color: #1a7f5a;
+    margin-bottom: 2rem;
+    font-weight: 700;
+}
+
+.contract-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.contract-card {
+    background: #fff;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.profile-header {
+    padding: 2rem;
+    text-align: center;
+    background: linear-gradient(90deg, #1a7f5a 0%, #16c79a 100%);
+}
+
+.profile-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+}
+
+.info-section {
+    padding: 2rem;
+}
+
+.info-section h2 {
+    color: #1a7f5a;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.info-group {
+    margin-bottom: 1.2rem;
+}
+
+.info-group label {
+    display: block;
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+
+.info-group p {
+    color: #1e293b;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.extend-contract-btn {
+    display: block;
+    width: calc(100% - 4rem);
+    margin: 0 2rem 2rem;
+    padding: 1rem;
+    background: linear-gradient(90deg, #1a7f5a 0%, #16c79a 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.extend-contract-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 127, 90, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .contract-container {
+        padding: 6rem 5% 3rem;
+    }
+
+    .contract-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Laptop */
@@ -567,24 +828,23 @@ footer .credits {
     }
 
     .navbar {
-        padding: 1.4rem 5%;
-    }
-
-    #hamburger-menu {
-        display: inline-block;
-        margin-left: 1rem;
+        padding: 1rem 5%;
     }
 
     .isi-navbar {
-        position: absolute;
-        top: 100%;
+        position: fixed;
+        top: 80px; /* Adjust based on navbar height */
         right: -100%;
-        background-color: white;
-        width: 250px;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        width: 270px;
         height: 100vh;
         padding: 2rem;
-        transition: 0.3s;
-        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        transition: 0.3s ease-in-out;
+        box-shadow: -4px 0 15px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
 
     .isi-navbar.active {
@@ -593,24 +853,33 @@ footer .credits {
 
     .isi-navbar a {
         display: block;
-        margin: 1rem 0;
         font-size: 1.1rem;
+        padding: 0.8rem 1rem;
     }
 
-    .contact .row {
-        flex-wrap: wrap;
+    #hamburger-menu {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    .contact .row .map {
-        height: 40rem;
+    .navbar-modern {
+        top: 1rem;
+        width: 95%;
+        padding: 0.75rem 1.5rem;
     }
 
-    .contact .row form {
-        padding-top: 0;
+    .navbar-center {
+        display: none;
     }
-    .rooms-grid {
-        grid-template-columns: 1fr;
-        padding: 0.5rem;
+
+    .nav-contact {
+        font-size: 0.9rem;
+        padding: 0.4rem 1rem;
+    }
+
+    .rooms {
+        padding-top: 7rem; /* Sesuaikan untuk mobile */
     }
 }
 

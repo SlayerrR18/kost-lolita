@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Manajemen Keuangan')
+@section('title', 'Riwayat Pesanan')
 
 @push('css')
 <style>
@@ -201,14 +201,16 @@
 @section('content')
 <div class="financial-container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="page-title">Manajemen Keuangan</h1>
+        <h1 class="page-title">Daftar Pesanan</h1>
         <button type="button" class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
             <i data-feather="plus-circle"></i>
             <span class="ms-2">Tambah Transaksi</span>
         </button>
     </div>
 
-    <div class="financial-card">
+    <!-- Pemasukan Table -->
+    <div class="financial-card mb-4">
+        <h5 class="mb-3">Pemasukan</h5>
         <div class="table-responsive">
             <table class="table">
                 <thead>
@@ -223,14 +225,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($transactions as $transaction)
+                    @forelse($transactions->where('status', 'Pemasukan') as $transaction)
                     <tr>
                         <td>{{ $transaction->kost->nomor_kamar }}</td>
                         <td>{{ $transaction->nama_transaksi }}</td>
                         <td>{{ $transaction->tanggal_transaksi->format('d/m/Y') }}</td>
                         <td>Rp {{ number_format($transaction->total, 0, ',', '.') }}</td>
                         <td>
-                            <span class="status-badge {{ $transaction->status === 'Pemasukan' ? 'status-pemasukan' : 'status-pengeluaran' }}">
+                            <span class="status-badge status-pemasukan">
                                 {{ $transaction->status }}
                             </span>
                         </td>
@@ -256,7 +258,67 @@
                         <td colspan="7" class="text-center py-4">
                             <div class="empty-state">
                                 <i data-feather="inbox" class="empty-state-icon mb-2"></i>
-                                <p class="empty-state-text">Belum ada data transaksi</p>
+                                <p class="empty-state-text">Belum ada data transaksi pemasukan</p>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pengeluaran Table -->
+    <div class="financial-card">
+        <h5 class="mb-3">Pengeluaran</h5>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>No Kamar</th>
+                        <th>Nama Transaksi</th>
+                        <th>Tanggal</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Bukti</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($transactions->where('status', 'Pengeluaran') as $transaction)
+                    <tr>
+                        <td>{{ $transaction->kost->nomor_kamar }}</td>
+                        <td>{{ $transaction->nama_transaksi }}</td>
+                        <td>{{ $transaction->tanggal_transaksi->format('d/m/Y') }}</td>
+                        <td>Rp {{ number_format($transaction->total, 0, ',', '.') }}</td>
+                        <td>
+                            <span class="status-badge status-pengeluaran">
+                                {{ $transaction->status }}
+                            </span>
+                        </td>
+                        <td>
+                            @if($transaction->bukti_pembayaran)
+                                <button type="button" class="btn btn-icon"
+                                        onclick="showImage('{{ asset('storage/' . $transaction->bukti_pembayaran) }}')"
+                                        title="Lihat Bukti">
+                                    <i data-feather="eye"></i>
+                                </button>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-icon btn-delete" onclick="deleteTransaction({{ $transaction->id }})" title="Hapus">
+                                <i data-feather="trash-2"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <div class="empty-state">
+                                <i data-feather="inbox" class="empty-state-icon mb-2"></i>
+                                <p class="empty-state-text">Belum ada data transaksi pengeluaran</p>
                             </div>
                         </td>
                     </tr>
@@ -266,6 +328,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- Add Transaction Modal -->
 <div class="modal fade" id="addTransactionModal" tabindex="-1">

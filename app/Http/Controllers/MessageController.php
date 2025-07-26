@@ -49,8 +49,12 @@ class MessageController extends Controller
             }
 
             $totalUnread = $conversations->sum('unread_count');
+
+            // Get all users for new chat functionality
+            $users = User::where('role', 'user')->get();
+
             return view('admin.report.index', compact(
-                'conversations', 'messages', 'selectedUserId', 'userId', 'adminId', 'totalUnread'
+                'conversations', 'messages', 'selectedUserId', 'userId', 'adminId', 'totalUnread', 'users'
             ));
         } else {
             // For user view
@@ -104,7 +108,8 @@ class MessageController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => $message
+                'message' => $message,
+                'redirect_url' => route('messages.index', ['user_id' => $request->recipient_id])
             ]);
 
         } catch (ValidationException $e) {

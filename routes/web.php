@@ -11,6 +11,8 @@ use App\Http\Controllers\admin\FinancialController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\user\ContractController;
+use App\Http\Controllers\user\HistoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,7 +25,10 @@ use App\Http\Controllers\MessageController;
 |
 */
 
-Route::get('/', [HomeController::class, 'index'])->name('welcome');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/about', [HomeController::class, 'about'])->name('about');
+Route::get('/kamar', [HomeController::class, 'kamarContact'])->name('kamar');
+
 
 // Route untuk halaman order
 Route::get('/order/create/{kost}', [OrderController::class, 'create'])->name('order.create');
@@ -90,10 +95,6 @@ Route::group(['prefix' => 'admin/financial', 'middleware' => ['auth', 'role:admi
         ->name('admin.financial.confirm-order');
     Route::post('/orders/{order}/reject', [FinancialController::class, 'rejectOrder'])
         ->name('admin.financial.reject-order');
-
-    // Route untuk grafik keuangan
-    Route::get('/graph', [FinancialController::class, 'graph'])
-        ->name('admin.financial.graph');
 });
 
 // Route untuk logout user
@@ -101,13 +102,20 @@ Route::post('/logout', [UserLogoutController::class, 'logout'])->name('user.logo
 
 // Route untuk pesan
 Route::middleware(['auth'])->group(function () {
+    // Chat routes
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
     Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
 });
 
 // Route untuk riwayat pemesanan user
 Route::middleware(['auth', 'role:user'])->group(function () {
-    Route::get('/user/history', [\App\Http\Controllers\user\HistoryController::class, 'index'])->name('user.history.index');
+    Route::get('/user/history', [HistoryController::class, 'index'])->name('user.history.index');
+});
+
+// Route untuk kontrak
+Route::middleware(['auth'])->group(function () {
+    Route::get('/contract', [ContractController::class, 'index'])->name('user.contract');
+    Route::post('/contract/extend', [ContractController::class, 'extend'])->name('user.contract.extend');
 });
 
 

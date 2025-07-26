@@ -19,7 +19,7 @@ class Order extends Model
         'ktp_image',
         'bukti_pembayaran',
         'phone',
-        'alamat', // Tambahkan alamat
+        'alamat', 
         'tanggal_masuk',
         'tanggal_keluar',
         'duration'

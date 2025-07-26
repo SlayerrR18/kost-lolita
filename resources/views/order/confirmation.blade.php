@@ -44,7 +44,7 @@
         </div>
 
         <div class="action-buttons">
-            <a href="{{ route('welcome') }}" class="btn-secondary">
+            <a href="{{ route('home') }}" class="btn-secondary">
                 <i data-feather="home"></i>
                 Kembali ke Beranda
             </a>

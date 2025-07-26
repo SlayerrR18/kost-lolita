@@ -173,7 +173,7 @@
 @section('content')
 <div class="account-container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="page-title mb-0">Manajemen Akun</h1>
+        <h1 class="page-title mb-0">Penghuni Kost</h1>
         <a href="{{ route('admin.account.create') }}" class="btn btn-add">
             <i data-feather="plus-circle" class="me-2"></i>
             Tambah Akun

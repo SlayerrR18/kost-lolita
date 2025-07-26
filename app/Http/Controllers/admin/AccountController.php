@@ -35,6 +35,11 @@ class AccountController extends Controller
         return view('admin.account.create', compact('kosts'));
     }
 
+    public function show(User $user)
+    {
+        return view('admin.account.show', compact('user'));
+    }
+
     // Simpan akun user baru
     public function store(Request $request)
     {
@@ -229,4 +234,5 @@ class AccountController extends Controller
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
 }

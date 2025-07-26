@@ -18,7 +18,7 @@ class DashboardController extends Controller
         $this->middleware('role:admin');
     }
 
-    public function index()
+    public function index (Request $request)
     {
 
         $total_kamar_kosong = Kost::where('status', 'Kosong')->count();
@@ -29,12 +29,73 @@ class DashboardController extends Controller
 
         $total_pemasukan = $total_pemasukan_kotor - $total_pengeluaran;
 
+        // Get filter parameters
+        $year = $request->get('year', now()->year);
+        $month = $request->get('month');
+        $type = $request->get('type', 'all');
+
+        // Build base query
+        $query = Financial::query();
+
+        // Apply year filter
+        $query->whereYear('tanggal_transaksi', $year);
+
+        // Apply month filter if selected
+        if ($month) {
+            $query->whereMonth('tanggal_transaksi', $month);
+        }
+
+        // Get monthly data with proper ordering
+        $monthlyData = $query->selectRaw('
+                MONTH(tanggal_transaksi) as bulan,
+                SUM(CASE WHEN status = "Pemasukan" THEN total ELSE 0 END) as income,
+                SUM(CASE WHEN status = "Pengeluaran" THEN total ELSE 0 END) as expense
+            ')
+            ->groupBy('bulan')
+            ->orderByRaw('bulan ASC')
+            ->get();
+
+        // Format data for charts
+        $months = [];
+        $incomeData = [];
+        $expenseData = [];
+        $profitData = [];
+
+        foreach ($monthlyData as $data) {
+            $months[] = date('F', mktime(0, 0, 0, $data->bulan, 1));
+            $incomeData[] = (float)$data->income;
+            $expenseData[] = (float)$data->expense;
+            $profitData[] = (float)($data->income - $data->expense);
+        }
+
+        // Calculate yearly totals
+        $yearlyTotals = [
+            'income' => array_sum($incomeData),
+            'expense' => array_sum($expenseData),
+            'profit' => array_sum($profitData)
+        ];
+
+        // Get available years for filter
+        $availableYears = Financial::selectRaw('YEAR(tanggal_transaksi) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
         return view('admin.dashboard', compact(
             'total_kamar_kosong',
             'total_penghuni',
             'total_pengeluaran',
             'total_pemasukan',
-            'total_pemasukan_kotor'
+            'total_pemasukan_kotor',
+            'availableYears',
+            'year',
+            'month',
+            'type',
+            'yearlyTotals',
+            'incomeData',
+            'expenseData',
+            'profitData',
+            'months'
         ));
     }
 }

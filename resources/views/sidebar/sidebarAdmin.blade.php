@@ -23,17 +23,24 @@
                 <a href="{{ route('admin.kost.index') }}"
                    class="nav-link {{ request()->routeIs('admin.kost.*') ? 'active' : '' }}">
                     <i data-feather="home"></i>
-                    <span>Manajemen Kost</span>
+                    <span>Manajemen Kamar</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.account.index') }}"
                    class="nav-link {{ request()->is('admin/akun*') ? 'active' : '' }}">
                     <i data-feather="users"></i>
-                    <span>Manajemen Akun</span>
+                    <span> Penghuni Kost</span>
                 </a>
             </li>
-            <li class="nav-item-dropdown">
+             <li>
+                <a href="{{ route('admin.financial.index') }}"
+                   class="nav-link {{ request()->is('admin/keuangan*') ? 'active' : '' }}">
+                    <i data-feather="dollar-sign"></i>
+                    <span>Daftar Pesanan</span>
+                </a>
+            </li>
+            {{-- <li class="nav-item-dropdown">
                 <a href="#" class="nav-link dropdown-toggle {{ request()->is('admin/keuangan*') ? 'active' : '' }}"
                    data-bs-toggle="collapse" data-bs-target="#financeSubmenu"
                    aria-expanded="false">
@@ -59,7 +66,7 @@
                         </li>
                     </ul>
                 </div>
-            </li>
+            </li> --}}
             <li>
                 <a href="{{ route('admin.financial.pending-orders') }}"
                    class="nav-link {{ request()->is('admin/pesanan*') ? 'active' : '' }}">
@@ -77,7 +84,7 @@
                 <a href="{{ route('messages.index') }}"
                    class="nav-link {{ request()->is('admin/report*') ? 'active' : '' }}">
                     <i data-feather="file-text"></i>
-                    <span>Report</span>
+                    <span>Chat</span>
                     @if(isset($totalUnread) && $totalUnread > 0)
                         <span class="badge-unread">{{ $totalUnread }}</span>
                     @endif

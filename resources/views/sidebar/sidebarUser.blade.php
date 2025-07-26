@@ -20,8 +20,8 @@
                 </a>
             </li>
             <li>
-                <a href="#"
-                   class="nav-link {{ request()->routeIs('user.kost.*') ? 'active' : '' }}">
+                <a href="{{ route('user.contract') }}"
+                   class="nav-link {{ request()->routeIs('user.contract.*') ? 'active' : '' }}">
                     <i data-feather="home"></i>
                     <span>Kontrak</span>
                 </a>
@@ -43,7 +43,7 @@
                 <a href="{{ route('messages.index') }}"
                    class="nav-link {{ request()->is('admin/report*') ? 'active' : '' }}">
                     <i data-feather="file-text"></i>
-                    <span>Report</span>
+                    <span>Chat</span>
                     @if(isset($admin) && $admin->unread_count > 0)
                         <span class="badge-unread">{{ $admin->unread_count }}</span>
                     @endif

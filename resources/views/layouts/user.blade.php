@@ -9,6 +9,15 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Feather Icons -->
     <script src="https://unpkg.com/feather-icons"></script>
+    <!-- Custom CSS -->
+    <style>
+        /* Base styles */
+        .main-content {
+            background: #f6f8fa;
+            min-height: 100vh;
+            padding: 24px 16px;
+        }
+    </style>
     @stack('css')
 </head>
 <body>
