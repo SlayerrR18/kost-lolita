@@ -9,11 +9,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Feather Icons -->
     <script src="https://unpkg.com/feather-icons"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css" rel="stylesheet">
     <style>
         /* Layout styles */
         body {
             min-height: 100vh;
-            background: #f8f9fa;
+            background: #f8fafc;
         }
 
         .wrapper {
@@ -37,10 +38,11 @@
         /* Main content styles */
         .main-content {
             flex: 1;
-            margin-left: 280px;
-            padding: 24px;
+            margin-left: 320px;
+            padding: 20px;
             min-height: 100vh;
-            background: #f8f9fa;
+            background: #f8fafc;
+            transition: margin-left 0.3s ease;
         }
 
         /* Sidebar nav menu */
@@ -93,6 +95,7 @@
             feather.replace();
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('js')
 </body>
 </html>

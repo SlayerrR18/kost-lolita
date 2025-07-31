@@ -4,86 +4,103 @@
 
 @section('content')
 <div class="main-content">
-    <div class="page-header mb-4">
-        <div class="row align-items-center">
-            <div class="col">
-                <h3 class="page-title">Konfirmasi Pesanan</h3>
-                <p class="text-muted">Kelola pesanan yang menunggu konfirmasi</p>
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="page-title">Konfirmasi Pesanan</h1>
+                <p class="mb-0">Kelola pesanan yang menunggu konfirmasi</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-light" onclick="window.location.reload()">
+                    <i data-feather="refresh-cw" class="me-2"></i>
+                    Refresh
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-4">
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
             @if($pendingOrders->count() > 0)
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="text-nowrap">No Kamar</th>
-                            <th>Nama Pemesan</th>
-                            <th>Kontak</th>
-                            <th class="text-center">Bukti Pembayaran</th>
-                            <th>Waktu Pemesanan</th>
-                            <th class="text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($pendingOrders as $order)
-                        <tr>
-                            <td>
-                                <span class="fw-medium">Kamar {{ $order->kost->nomor_kamar }}</span>
-                                <div class="small text-muted">Rp {{ number_format($order->kost->harga, 0, ',', '.') }}/bulan</div>
-                            </td>
-                            <td>
-                                <div class="fw-medium">{{ $order->name }}</div>
-                                <div class="small text-muted">{{ $order->alamat }}</div>
-                            </td>
-                            <td>
-                                <div><i data-feather="mail" class="icon-sm me-2"></i>{{ $order->email }}</div>
-                                <div><i data-feather="phone" class="icon-sm me-2"></i>{{ $order->phone }}</div>
-                            </td>
-                            <td class="text-center">
-                                @if($order->bukti_pembayaran)
-                                    <button type="button" class="btn btn-sm btn-light" onclick="showImage('{{ asset('storage/' . $order->bukti_pembayaran) }}')" title="Lihat Bukti">
-                                        <i data-feather="image" class="me-1"></i>
-                                        Lihat Bukti
-                                    </button>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
-                            <td>
-                                <div>{{ $order->created_at->format('d M Y') }}</div>
-                                <div class="small text-muted">{{ $order->created_at->format('H:i') }}</div>
-                                <div class="small text-muted">{{ $order->created_at->diffForHumans() }}</div>
-                            </td>
-                            <td>
-                                <div class="d-flex gap-2 justify-content-center">
-                                    <button type="button"
-                                            class="btn btn-sm btn-success d-flex align-items-center gap-2"
-                                            onclick="showConfirmModal('{{ $order->id }}')">
-                                        <i data-feather="check"></i>
-                                        Terima
-                                    </button>
-                                    <button type="button"
-                                            class="btn btn-sm btn-danger d-flex align-items-center gap-2"
-                                            onclick="rejectOrder('{{ $order->id }}')">
-                                        <i data-feather="x"></i>
-                                        Tolak
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>No Kamar</th>
+                                <th>Nama Pemesan</th>
+                                <th>Kontak</th>
+                                <th class="text-center">Bukti</th>
+                                <th>Waktu</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($pendingOrders as $order)
+                            <tr>
+                                <td>
+                                    <div class="fw-medium">Kamar {{ $order->kost->nomor_kamar }}</div>
+                                    <div class="small text-muted">
+                                        Rp {{ number_format($order->kost->harga, 0, ',', '.') }}/bulan
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-medium">{{ $order->name }}</div>
+                                    <div class="small text-muted">{{ $order->alamat }}</div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <i data-feather="mail" class="text-muted" style="width:14px"></i>
+                                        <span>{{ $order->email }}</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i data-feather="phone" class="text-muted" style="width:14px"></i>
+                                        <span>{{ $order->phone }}</span>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    @if($order->bukti_pembayaran)
+                                        <button type="button"
+                                                class="btn btn-sm btn-light btn-action"
+                                                onclick="showImage('{{ asset('storage/' . $order->bukti_pembayaran) }}')">
+                                            <i data-feather="file-text"></i>
+                                            Lihat
+                                        </button>
+                                    @else
+                                        <span class="badge bg-warning">Belum Ada</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="fw-medium">{{ $order->created_at->format('d M Y') }}</div>
+                                    <div class="small text-muted">{{ $order->created_at->format('H:i') }}</div>
+                                    <div class="small text-muted">{{ $order->created_at->diffForHumans() }}</div>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <button type="button"
+                                                class="btn btn-sm btn-success btn-action"
+                                                onclick="showConfirmModal('{{ $order->id }}')">
+                                            <i data-feather="check"></i>
+                                            Terima
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-sm btn-danger btn-action"
+                                                onclick="rejectOrder('{{ $order->id }}')">
+                                            <i data-feather="x"></i>
+                                            Tolak
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             @else
-            <div class="text-center py-5">
-                <i data-feather="inbox" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
-                <h5 class="text-muted mb-0">Tidak ada pesanan yang menunggu konfirmasi</h5>
-            </div>
+                <div class="empty-state">
+                    <i data-feather="inbox" class="empty-state-icon"></i>
+                    <h5>Tidak Ada Pesanan Pending</h5>
+                    <p class="text-muted mb-0">Semua pesanan sudah dikonfirmasi</p>
+                </div>
             @endif
         </div>
     </div>
@@ -98,7 +115,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0">
-                <img src="" id="previewImage" class="img-fluid w-100 rounded">
+                <img src="" id="previewImage" class="img-fluid w-100 rounded preview-image">
             </div>
         </div>
     </div>
@@ -247,53 +264,183 @@
 
 @push('css')
 <style>
-.icon-sm {
-    width: 16px;
-    height: 16px;
-    stroke-width: 2.5px;
-}
+    /* Modern Container */
+    .main-content {
+        padding: 2rem;
+        background: #f8fafc;
+        min-height: 100vh;
+    }
 
-.table > :not(caption) > * > * {
-    padding: 1rem;
-}
+    /* Enhanced Header */
+    .page-header {
+        background: linear-gradient(135deg, #1a7f5a 0%, #16c79a 100%);
+        border-radius: 24px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: 0 4px 20px rgba(26, 127, 90, 0.15);
+    }
 
-.table tbody tr:hover {
-    background-color: #f8f9fa;
-}
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+    }
 
-.img-thumbnail {
-    transition: transform 0.2s;
-}
+    /* Card Styles */
+    .card {
+        border-radius: 16px;
+        overflow: hidden;
+    }
 
-.img-thumbnail:hover {
-    transform: scale(1.05);
-}
+    /* Table Improvements */
+    .table {
+        margin: 0;
+    }
 
-.modal-header .btn-close {
-    margin: -0.5rem -0.5rem -0.5rem auto;
-}
+    .table th {
+        background: #f8fafc;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+    }
 
-.table-borderless > tbody > tr > td {
-    padding: 0.25rem 0;
-}
+    .table td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
 
-.alert-info {
-    background-color: #f8f9fa;
-    border-color: #e9ecef;
-}
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
 
-.modal-content {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-}
+    .table tbody tr:hover {
+        background: #f1f5f9;
+    }
 
-.modal .btn-close {
-    background-size: 0.8em;
-}
+    /* Action Buttons */
+    .btn-action {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
 
-.spinner-border {
-    width: 1rem;
-    height: 1rem;
-}
+    .btn-action:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-action i {
+        width: 16px;
+        height: 16px;
+    }
+
+    .btn-success {
+        background: #16a34a;
+        border-color: #16a34a;
+    }
+
+    .btn-success:hover {
+        background: #15803d;
+        border-color: #15803d;
+    }
+
+    .btn-danger {
+        background: #dc2626;
+        border-color: #dc2626;
+    }
+
+    .btn-danger:hover {
+        background: #b91c1c;
+        border-color: #b91c1c;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-state-icon {
+        width: 64px;
+        height: 64px;
+        color: #94a3b8;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Modal Improvements */
+    .modal-content {
+        border-radius: 16px;
+        border: none;
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-footer {
+        padding: 1.5rem;
+    }
+
+    /* Preview Image */
+    .preview-image {
+        border-radius: 12px;
+        width: 100%;
+        height: auto;
+        transition: transform 0.3s ease;
+    }
+
+    .preview-image:hover {
+        transform: scale(1.02);
+    }
+
+    /* Status Badge */
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+
+    .status-pending {
+        background: #fff7ed;
+        color: #c2410c;
+    }
+
+    /* Info Cards */
+    .info-card {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+    }
+
+    .info-label {
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: #1e293b;
+    }
 </style>
 @endpush
 

@@ -12,10 +12,22 @@
     <!-- Custom CSS -->
     <style>
         /* Base styles */
-        .main-content {
+        body {
+            min-height: 100vh;
             background: #f6f8fa;
+        }
+
+        .main-content {
+            margin-left: 320px;
             min-height: 100vh;
             padding: 24px 16px;
+            transition: margin-left 0.3s ease;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 100px;
+            }
         }
     </style>
     @stack('css')

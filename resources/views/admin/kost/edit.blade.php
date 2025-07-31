@@ -19,7 +19,8 @@
                 <label>Fasilitas</label>
                 <div class="fasilitas-container">
                     @php
-                        $fasilitas = is_array($kost->fasilitas) ? $kost->fasilitas : [];
+                        $fasilitas = is_string($kost->fasilitas) ? json_decode($kost->fasilitas, true) : [];
+                        $fasilitas = $fasilitas ?: [];
                     @endphp
 
                     @if(count($fasilitas) > 0)
@@ -68,9 +69,16 @@
                         </label>
                     </div>
                     @if($kost->foto)
-                        <div class="foto-preview">
-                            <img src="{{ asset('storage/' . $kost->foto) }}" alt="Foto Kamar">
-                        </div>
+                        @php
+                            $photos = is_string($kost->foto) ? json_decode($kost->foto, true) : [];
+                            $photos = $photos ?: [];
+                        @endphp
+
+                        @foreach($photos as $photo)
+                            <div class="foto-preview">
+                                <img src="{{ asset('storage/' . $photo) }}" alt="Foto Kamar">
+                            </div>
+                        @endforeach
                     @endif
                 </div>
             </div>

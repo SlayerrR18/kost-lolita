@@ -97,6 +97,13 @@ Route::group(['prefix' => 'admin/financial', 'middleware' => ['auth', 'role:admi
         ->name('admin.financial.reject-order');
 });
 
+Route::prefix('admin/financial')->name('admin.financial.')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/income', [FinancialController::class, 'income'])->name('income');
+    Route::get('/expense', [FinancialController::class, 'expense'])->name('expense');
+    Route::post('/store', [FinancialController::class, 'store'])->name('store');
+    Route::delete('/{financial}', [FinancialController::class, 'destroy'])->name('destroy');
+});
+
 // Route untuk logout user
 Route::post('/logout', [UserLogoutController::class, 'logout'])->name('user.logout');
 

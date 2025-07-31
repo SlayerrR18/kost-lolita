@@ -24,7 +24,8 @@ class Kost extends Model
     ];
 
     protected $casts = [
-        'foto' => 'array',
+        'fasilitas' => 'array',
+        'foto' => 'array'
     ];
 
     public function isAvailable()

@@ -10,11 +10,22 @@ use Illuminate\Support\Facades\Storage;
 
 class KostController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $kosts = Kost::all();
+        $query = Kost::query();
 
-        return view('admin.kost.index', compact('kosts'));
+        if ($request->search) {
+            $query->where('nomor_kamar', 'like', '%' . $request->search . '%');
+        }
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+        if ($request->price) {
+            $query->orderBy('harga', $request->price);
+        }
+
+        $kosts = $query->get();
+        return view('admin.kosT.index', compact('kosts'));
     }
 
     public function create()
@@ -65,43 +76,36 @@ class KostController extends Controller
 
     public function update(Request $request, Kost $kost)
     {
-        $validatedData = $request->validate([
-            'nomor_kamar' => 'required|string|unique:kosts,nomor_kamar,'.$kost->id,
+        $validated = $request->validate([
+            'nomor_kamar' => 'required',
             'fasilitas' => 'required|array',
-            'status' => 'required|in:Kosong,Terisi',
+            'status' => 'required',
             'harga' => 'required|numeric',
-            'foto' => 'nullable|array',
-            'foto.*' => 'image|mimes:jpeg,png,jpg|max:51200',
+            'foto.*' => 'image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
-        try {
-            if ($request->hasFile('foto')) {
-                // Hapus foto lama
-                if ($kost->foto) {
-                    foreach ($kost->foto as $foto) {
-                        Storage::disk('public')->delete($foto);
-                    }
-                }
+        // Encode fasilitas array menjadi JSON sebelum disimpan
+        $kost->fasilitas = json_encode($request->fasilitas);
 
-                // Simpan foto baru
-                $fotoArr = [];
-                foreach ($request->file('foto') as $foto) {
-                    $filename = time() . '_' . $foto->getClientOriginalName();
-                    $fotoArr[] = $foto->storeAs('kost', $filename, 'public');
-                }
-                $validatedData['foto'] = $fotoArr;
+        // Update data lainnya
+        $kost->nomor_kamar = $request->nomor_kamar;
+        $kost->status = $request->status;
+        $kost->harga = $request->harga;
+
+        // Handle foto uploads
+        if ($request->hasFile('foto')) {
+            $photos = [];
+            foreach ($request->file('foto') as $photo) {
+                $path = $photo->store('kost-photos', 'public');
+                $photos[] = $path;
             }
-
-            $kost->update($validatedData);
-
-            return redirect()->route('admin.kost.index')
-                ->with('success', 'Kamar berhasil diupdate');
-
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
-                ->withInput();
+            $kost->foto = json_encode($photos);
         }
+
+        $kost->save();
+
+        return redirect()->route('admin.kost.index')
+            ->with('success', 'Kamar berhasil diperbarui');
     }
 
     public function destroy($id)

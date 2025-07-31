@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class FinancialController extends Controller
 {
@@ -44,36 +45,93 @@ class FinancialController extends Controller
         return view('admin.financial.index', compact('transactions', 'kosts'));
     }
 
+    public function income()
+    {
+        $transactions = Financial::with('kost')
+            ->where('status', 'Pemasukan')
+            ->latest('tanggal_transaksi')
+            ->get();
+
+        $totalIncome = $transactions->sum('total');
+        $kosts = Kost::all();
+
+        return view('admin.financial.income', compact('transactions', 'totalIncome', 'kosts'));
+    }
+
+    public function expense()
+    {
+        $transactions = Financial::with('kost')
+            ->where('status', 'Pengeluaran')
+            ->latest('tanggal_transaksi')
+            ->get();
+
+        $totalExpense = $transactions->sum('total');
+        $kosts = Kost::all();
+
+        return view('admin.financial.expense', compact('transactions', 'totalExpense', 'kosts'));
+    }
+
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'kost_id' => 'required|exists:kosts,id',
-            'nama_transaksi' => 'required|string',
-            'tanggal_transaksi' => 'required|date',
-            'total' => 'required|numeric',
-            'status' => 'required|in:Pemasukan,Pengeluaran',
-            'bukti_pembayaran' => 'required|image|mimes:jpeg,png,jpg|max:5120'
-        ]);
-
         try {
+            $validated = $request->validate([
+                'kost_id' => 'required|exists:kosts,id',
+                'nama_transaksi' => 'required|string|max:255',
+                'tanggal_transaksi' => 'required|date|before_or_equal:today',
+                'total' => 'required|numeric|min:0',
+                'status' => 'required|in:Pemasukan,Pengeluaran',
+                'bukti_pembayaran' => 'required|image|mimes:jpeg,png,jpg|max:5120',
+                'keterangan' => 'nullable|string|max:1000'
+            ]);
+
+            DB::beginTransaction();
+
             if ($request->hasFile('bukti_pembayaran')) {
                 $file = $request->file('bukti_pembayaran');
-                // Ubah cara penyimpanan file
-                $fileName = time() . '_' . $file->getClientOriginalName();
+                $fileName = time() . '_' . Str::slug($file->getClientOriginalName()) . '.' . $file->getClientOriginalExtension();
                 $path = $file->storeAs('bukti-pembayaran', $fileName, 'public');
                 $validated['bukti_pembayaran'] = $path;
             }
 
-            Financial::create($validated);
+            // Add additional fields
+            $validated['created_by'] = auth()->id();
+            $validated['updated_by'] = auth()->id();
 
-            return redirect()
-                ->route('admin.financial.index')
-                ->with('success', 'Transaksi berhasil ditambahkan');
+            $transaction = Financial::create($validated);
+
+            // Update kost status if needed
+            if ($validated['status'] === 'Pemasukan') {
+                $kost = Kost::find($validated['kost_id']);
+                if ($kost) {
+                    $kost->last_payment_date = $validated['tanggal_transaksi'];
+                    $kost->save();
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaksi berhasil ditambahkan',
+                'data' => $transaction->load('kost')
+            ]);
+
+        } catch (ValidationException $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors()
+            ], 422);
+
         } catch (\Exception $e) {
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            DB::rollback();
+            \Log::error('Transaction creation failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -250,6 +308,55 @@ class FinancialController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menolak pesanan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getFinancialSummary()
+    {
+        try {
+            $currentMonth = now()->format('m');
+            $currentYear = now()->format('Y');
+
+            $summary = [
+                'total_income' => Financial::where('status', 'Pemasukan')
+                    ->whereMonth('tanggal_transaksi', $currentMonth)
+                    ->whereYear('tanggal_transaksi', $currentYear)
+                    ->sum('total'),
+
+                'total_expense' => Financial::where('status', 'Pengeluaran')
+                    ->whereMonth('tanggal_transaksi', $currentMonth)
+                    ->whereYear('tanggal_transaksi', $currentYear)
+                    ->sum('total'),
+
+                'latest_transactions' => Financial::with('kost')
+                    ->latest('tanggal_transaksi')
+                    ->take(5)
+                    ->get(),
+
+                'monthly_stats' => Financial::selectRaw('
+                    YEAR(tanggal_transaksi) as year,
+                    MONTH(tanggal_transaksi) as month,
+                    status,
+                    SUM(total) as total
+                ')
+                ->whereYear('tanggal_transaksi', $currentYear)
+                ->groupBy('year', 'month', 'status')
+                ->get()
+            ];
+
+            $summary['profit'] = $summary['total_income'] - $summary['total_expense'];
+
+            return response()->json([
+                'success' => true,
+                'data' => $summary
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to get financial summary: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil ringkasan keuangan'
             ], 500);
         }
     }
