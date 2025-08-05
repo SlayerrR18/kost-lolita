@@ -160,7 +160,7 @@
     <div class="login-container">
         <div class="login-header">
             <img src="{{ asset('img/Logo.png') }}" alt="Kost Lolita Logo">
-            <h1>Selamat Datang Di Kost Lolita!</h1>
+            <h1>Selamat Datang <br> Di Kost Lolita!</h1>
             <p>Silakan masuk untuk mengakses akun Anda</p>
         </div>
 

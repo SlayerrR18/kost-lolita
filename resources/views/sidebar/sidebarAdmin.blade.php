@@ -37,7 +37,7 @@
             <li class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#financialDropdown">
                     <i data-feather="dollar-sign"></i>
-                    <span>Daftar Pesanan</span>
+                    <span>Riwayat Keuangan</span>
                     <i data-feather="chevron-down" class="dropdown-icon"></i>
                 </a>
                 <div class="collapse" id="financialDropdown">
