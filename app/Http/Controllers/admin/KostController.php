@@ -84,15 +84,12 @@ class KostController extends Controller
             'foto.*' => 'image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
-        // Encode fasilitas array menjadi JSON sebelum disimpan
         $kost->fasilitas = json_encode($request->fasilitas);
 
-        // Update data lainnya
         $kost->nomor_kamar = $request->nomor_kamar;
         $kost->status = $request->status;
         $kost->harga = $request->harga;
 
-        // Handle foto uploads
         if ($request->hasFile('foto')) {
             $photos = [];
             foreach ($request->file('foto') as $photo) {
@@ -113,7 +110,6 @@ class KostController extends Controller
         try {
             $kost = Kost::findOrFail($id);
 
-            // Hapus foto jika ada
             if ($kost->foto) {
                 foreach ($kost->foto as $foto) {
                     Storage::disk('public')->delete($foto);

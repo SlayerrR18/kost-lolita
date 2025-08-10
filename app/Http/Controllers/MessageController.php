@@ -53,7 +53,7 @@ class MessageController extends Controller
             // Get all users for new chat functionality
             $users = User::where('role', 'user')->get();
 
-            return view('admin.report.index', compact(
+            return view('admin.message.index', compact(
                 'conversations', 'messages', 'selectedUserId', 'userId', 'adminId', 'totalUnread', 'users'
             ));
         } else {
@@ -66,7 +66,7 @@ class MessageController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
-            return view('user.report.index', compact('messages', 'adminId'));
+            return view('user.message.index', compact('messages', 'adminId'));
         }
     }
 

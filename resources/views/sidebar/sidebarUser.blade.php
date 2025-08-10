@@ -48,6 +48,13 @@
                     @endif
                 </a>
             </li>
+             <li>
+                <a href="{{ route('user.reports.index') }}"
+                   class="nav-link {{ request()->routeIs('user.reports.index') ? 'active' : '' }}">
+                    <i data-feather="book"></i>
+                    <span>Report</span>
+                </a>
+            </li>
             <li>
                 <button type="button" class="nav-link w-100" data-bs-toggle="modal" data-bs-target="#logoutModal">
                     <i data-feather="log-out"></i>

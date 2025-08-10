@@ -55,7 +55,7 @@ class AccountController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create user
+
             $user = User::create([
                 'name'     => $validated['name'],
                 'email'    => $validated['email'],
@@ -63,7 +63,6 @@ class AccountController extends Controller
                 'role'     => 'user',
             ]);
 
-            // Create order record
             Order::create([
                 'user_id' => $user->id,
                 'kost_id' => $validated['kost_id'],
@@ -72,12 +71,11 @@ class AccountController extends Controller
                 'status' => 'confirmed',
                 'tanggal_masuk' => $validated['tanggal_masuk'],
                 'tanggal_keluar' => $validated['tanggal_keluar'],
-                // Calculate duration in months
+
                 'duration' => \Carbon\Carbon::parse($validated['tanggal_masuk'])
                     ->diffInMonths(\Carbon\Carbon::parse($validated['tanggal_keluar']))
             ]);
 
-            // Update kost status
             $kost = Kost::find($validated['kost_id']);
             $kost->update([
                 'status' => 'Terisi',

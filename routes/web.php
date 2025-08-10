@@ -5,14 +5,21 @@ use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Auth\UserLogoutController;
 use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\KostController;
-use App\Http\Controllers\user\DashboardController as UserDashboardController;
+use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\admin\AccountController;
 use App\Http\Controllers\admin\FinancialController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MessageController;
-use App\Http\Controllers\user\ContractController;
-use App\Http\Controllers\user\HistoryController;
+use App\Http\Controllers\User\ContractController;
+use App\Http\Controllers\User\HistoryController;
+use App\Http\Controllers\User\ReportController as UserReportController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
+
+
+
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -72,6 +79,12 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'role:admin']], func
         ->name('admin.orders.reject');
 });
 
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    Route::resource('reports', AdminReportController::class);
+});
+
+
+
 // Route untuk manajemen akun user
 Route::group(['prefix' => 'admin/account', 'middleware' => ['auth', 'role:admin']], function () {
     Route::get('/', [AccountController::class, 'index'])->name('admin.account.index');
@@ -123,6 +136,11 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/contract', [ContractController::class, 'index'])->name('user.contract');
     Route::post('/contract/extend', [ContractController::class, 'extend'])->name('user.contract.extend');
+});
+
+
+Route::prefix('user')->name('user.')->middleware('auth')->group(function () {
+    Route::resource('reports', UserReportController::class);
 });
 
 

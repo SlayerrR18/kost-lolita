@@ -75,11 +75,15 @@
             <li>
                 <a href="{{ route('messages.index') }}"
                    class="nav-link {{ request()->routeIs('admin.report') ? 'active' : '' }}">
-                    <i data-feather="file-text"></i>
+                    <i data-feather="mail"></i>
                     <span>Chat</span>
-                    @if(isset($totalUnread) && $totalUnread > 0)
-                        <span class="badge-unread">{{ $totalUnread }}</span>
-                    @endif
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.reports.index') }}"
+                   class="nav-link {{ request()->routeIs('admin.report.index') ? 'active' : '' }}">
+                    <i data-feather="book"></i>
+                    <span>Report</span>
                 </a>
             </li>
             <li>

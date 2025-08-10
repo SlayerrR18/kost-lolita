@@ -1,490 +1,211 @@
+{{-- resources/views/admin/reports/index.blade.php --}}
 @extends('layouts.main')
 
 @push('css')
+<link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" rel="stylesheet">
 <style>
-/* Chat Variables */
-:root {
-    --primary: #1a7f5a;
-    --primary-light: #16c79a;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-600: #4b5563;
-    --white: #ffffff;
-}
+    .account-container{padding:2rem;background:#f8fafc;min-height:100vh}
+    .page-header{background:linear-gradient(135deg,#1a7f5a 0%,#16c79a 100%);border-radius:24px;padding:2rem;margin-bottom:2rem;color:#fff;box-shadow:0 4px 20px rgba(26,127,90,.15)}
+    .header-content{display:flex;justify-content:space-between;align-items:center}
+    .page-title{font-size:1.75rem;font-weight:700;margin:0}
+    .page-subtitle{opacity:.9;margin-top:.5rem}
+    .content-card{background:#fff;border-radius:24px;box-shadow:0 4px 20px rgba(0,0,0,.05);overflow:hidden}
+    .table-container{padding:1.5rem}
+    .btn-add{background:linear-gradient(135deg,#1a7f5a 0%,#16c79a 100%);color:#fff;padding:.75rem 1.5rem;border-radius:12px;font-weight:500;border:none;box-shadow:0 4px 12px rgba(26,127,90,.15)}
 
-/* Enhanced Chat Container */
-.chat-container {
-    display: flex;
-    height: calc(100vh - 80px);
-    background: var(--white);
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    margin: 1rem;
-}
+    .badge{padding:.4rem .8rem;border-radius:8px;font-weight:500;font-size:.875rem}
+    .badge.open{background:#fef3c7;color:#92400e}
+    .badge.in_progress{background:#dbeafe;color:#1e40af}
+    .badge.resolved{background:#dcfce7;color:#166534}
 
-/* Improved Sidebar */
-.chat-sidebar {
-    width: 320px;
-    border-right: 1px solid var(--gray-200);
-    display: flex;
-    flex-direction: column;
-    background: var(--gray-100);
-}
-
-.chat-sidebar-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--gray-200);
-    background: var(--white);
-}
-
-.chat-sidebar-header h4 {
-    color: var(--primary);
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin: 0;
-}
-
-.chat-conversations {
-    overflow-y: auto;
-    flex: 1;
-    padding: 0.5rem;
-}
-
-/* Enhanced Conversation Items */
-.chat-conversation-item {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    margin-bottom: 0.5rem;
-    border-radius: 12px;
-    background: var(--white);
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-}
-
-.chat-conversation-item:hover {
-    background: var(--white);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    border-color: var(--primary-light);
-}
-
-.chat-conversation-item.active {
-    background: var(--primary);
-}
-
-.conversation-info {
-    margin-left: 1rem;
-}
-
-.chat-conversation-item.active h6,
-.chat-conversation-item.active small {
-    color: var(--white);
-}
-
-.conversation-info h6 {
-    margin: 0;
-    font-weight: 600;
-    color: var(--gray-600);
-}
-
-.conversation-info small {
-    color: var(--gray-600);
-    font-size: 0.85rem;
-}
-
-/* Improved Messages Area */
-.chat-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: var(--white);
-}
-
-.chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-/* Enhanced Message Bubbles */
-.message {
-    display: flex;
-    align-items: flex-end;
-    gap: 1rem;
-    max-width: 80%;
-}
-
-.message.sent {
-    margin-left: auto;
-}
-
-.message-content {
-    padding: 1rem 1.25rem;
-    border-radius: 18px;
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.message.sent .message-content {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: var(--white);
-    border-bottom-right-radius: 4px;
-}
-
-.message.received .message-content {
-    background: var(--gray-100);
-    color: var(--gray-600);
-    border-bottom-left-radius: 4px;
-}
-
-/* Enhanced Input Area */
-.chat-input {
-    padding: 1.25rem;
-    background: var(--white);
-    border-top: 1px solid var(--gray-200);
-}
-
-.message-form .input-group {
-    background: var(--gray-100);
-    border-radius: 12px;
-    padding: 0.5rem;
-    gap: 0.75rem;
-}
-
-.message-form input[type="text"] {
-    border: none;
-    background: transparent;
-    padding: 0.5rem;
-    font-size: 1rem;
-    color: var(--gray-600);
-}
-
-.message-form input[type="text"]:focus {
-    outline: none;
-}
-
-.btn-attachment, .btn-send {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-}
-
-.btn-attachment:hover, .btn-send:hover {
-    background: var(--primary-light);
-    color: var(--white);
-}
-
-/* New styles for buttons and modal */
-.btn-new-chat {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--primary);
-    color: var(--white);
-    border: none;
-    transition: all 0.2s ease;
-}
-
-.btn-new-chat:hover {
-    background: var(--primary-light);
-    transform: translateY(-2px);
-}
-
-.modal-content {
-    border-radius: 16px;
-    border: none;
-}
-
-.modal-header {
-    background: var(--primary);
-    color: var(--white);
-    border-radius: 16px 16px 0 0;
-}
-
-.btn-close {
-    filter: brightness(0) invert(1);
-}
-
-.form-select, .form-control {
-    border-radius: 8px;
-    border: 1px solid var(--gray-200);
-    padding: 0.75rem;
-}
-
-.form-select:focus, .form-control:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(26, 127, 90, 0.1);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .chat-container {
-        margin: 0;
-        border-radius: 0;
-        height: 100vh;
-    }
-
-    .chat-sidebar {
-        width: 280px;
-    }
-
-    .message {
-        max-width: 90%;
-    }
-}
-
-@media (max-width: 576px) {
-    .chat-sidebar {
-        position: fixed;
-        left: -100%;
-        top: 0;
-        bottom: 0;
-        z-index: 1000;
-        transition: all 0.3s ease;
-    }
-
-    .chat-sidebar.active {
-        left: 0;
-    }
-}
+    /* Icon buttons */
+    .btn-icon{width:36px;height:36px;border-radius:10px;border:none;display:inline-flex;align-items:center;justify-content:center;transition:all .2s}
+    .btn-icon i{pointer-events:none}
+    .btn-icon.view{background:rgba(26,127,90,.10);color:#1a7f5a}
+    .btn-icon.view:hover{background:rgba(26,127,90,.18);transform:translateY(-1px)}
+    .btn-icon.download{background:#eef2f7;color:#0f172a}
+    .btn-icon.download:hover{background:#e3e9f0;transform:translateY(-1px)}
+    .btn-icon.detail{background:rgba(59,130,246,.12);color:#1d4ed8}
+    .btn-icon.detail:hover{background:rgba(59,130,246,.18);transform:translateY(-1px)}
+    .btn-icon.delete{background:rgba(220,38,38,.10);color:#dc2626}
+    .btn-icon.delete:hover{background:rgba(220,38,38,.18);transform:translateY(-1px)}
 </style>
 @endpush
 
+@section('title','Report Penghuni')
+
 @section('content')
-<div class="chat-container">
-    <!-- Existing sidebar code with added user avatar -->
-    <div class="chat-sidebar">
-        <div class="chat-sidebar-header">
-            <div class="d-flex justify-content-between align-items-center">
-                <h4 class="d-flex align-items-center gap-2">
-                    <img src="{{ asset('img/logo.png') }}" alt="Logo" width="32" height="32" class="rounded-circle">
-                    Percakapan
-                </h4>
-                <button type="button" class="btn btn-new-chat" onclick="showNewChatModal()">
-                    <i data-feather="plus"></i>
-                </button>
+<div class="account-container">
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1 class="page-title">Report Penghuni</h1>
+                <p class="page-subtitle">Semua masukan/keluhan dari user. Akhirnya ada yang baca.</p>
             </div>
-        </div>
-        <div class="chat-conversations">
-            @foreach($conversations as $conversation)
-                <a href="{{ route('messages.index', ['user_id' => $conversation->id]) }}"
-                   class="chat-conversation-item {{ $selectedUserId == $conversation->id ? 'active' : '' }}">
-                    <div class="conversation-info">
-                        <h6>{{ $conversation->name }}</h6>
-                        <small>{{ $conversation->email }}</small>
-                    </div>
-                </a>
-            @endforeach
+            <form class="d-flex gap-2" method="get">
+                <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Cari nama/isi">
+                <select name="status" class="form-select">
+                    <option value="">Semua status</option>
+                    @foreach(['open'=>'Open','in_progress'=>'In Progress','resolved'=>'Resolved'] as $k=>$v)
+                        <option value="{{ $k }}" @selected(request('status')===$k)>{{ $v }}</option>
+                    @endforeach
+                </select>
+                <input type="date" name="from" value="{{ request('from') }}" class="form-control">
+                <input type="date" name="to" value="{{ request('to') }}" class="form-control">
+                <button class="btn btn-add">Filter</button>
+            </form>
         </div>
     </div>
 
-    <!-- Enhanced chat content -->
-    <div class="chat-content">
-        @if($selectedUserId)
-            <div class="chat-messages" id="messageContainer">
-                @foreach($messages as $message)
-                    <div class="message {{ $message->user_id === auth()->id() ? 'sent' : 'received' }}">
-                        <div class="message-content">
-                            <div class="message-text">{{ $message->content }}</div>
-                            @if($message->attachment)
-                                <div class="message-attachment">
-                                    <a href="{{ asset('storage/' . $message->attachment) }}" target="_blank">
-                                        <i data-feather="paperclip"></i> Attachment
+    <div class="content-card">
+        <div class="table-container">
+            @include('layouts.alert')
+            <div class="table-responsive">
+                <table class="table align-middle" id="reportTable">
+                    <thead>
+                        <tr>
+                            <th style="width:60px">No</th>
+                            <th>User</th>
+                            <th>Isi</th>
+                            <th>Tanggal</th>
+                            <th style="width:110px;">Foto</th>
+                            <th>Status</th>
+                            <th>Handler</th>
+                            <th style="width:120px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($reports as $r)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td class="fw-bold">{{ $r->user->name ?? '-' }}</td>
+                            <td>{{ Str::limit($r->message, 120) }}</td>
+                            <td>{{ \Carbon\Carbon::parse($r->date ?? $r->created_at)->format('d/m/Y') }}</td>
+                            <td class="text-center">
+                                @if($r->photo)
+                                    @php $img = asset('storage/'.$r->photo); @endphp
+                                    <div class="d-inline-flex gap-1">
+                                        <button type="button"
+                                                class="btn-icon view"
+                                                onclick="showImage(`{{ $img }}`)"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="Lihat foto"
+                                                aria-label="Lihat foto">
+                                            <i data-feather="eye"></i>
+                                        </button>
+                                        <a href="{{ $img }}"
+                                           class="btn-icon download"
+                                           download
+                                           data-bs-toggle="tooltip"
+                                           data-bs-title="Unduh"
+                                           aria-label="Unduh foto">
+                                            <i data-feather="download"></i>
+                                        </a>
+                                    </div>
+                                @else
+                                    <span class="badge">Tidak Ada Foto</span>
+                                @endif
+                            </td>
+                            <td><span class="badge {{ $r->status }}">{{ Str::headline($r->status) }}</span></td>
+                            <td>{{ $r->handler->name ?? '-' }}</td>
+                            <td>
+                                <div class="d-inline-flex gap-1">
+                                    <a href="{{ route('admin.reports.show', $r) }}"
+                                       class="btn-icon detail"
+                                       data-bs-toggle="tooltip"
+                                       data-bs-title="Detail"
+                                       aria-label="Detail">
+                                        <i data-feather="info"></i>
                                     </a>
+                                    <form action="{{ route('admin.reports.destroy', $r) }}" method="POST" class="d-inline"
+                                          onsubmit="return confirm('Hapus report ini?');">
+                                        @csrf @method('DELETE')
+                                        <button type="submit"
+                                                class="btn-icon delete"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="Hapus"
+                                                aria-label="Hapus">
+                                            <i data-feather="trash-2"></i>
+                                        </button>
+                                    </form>
                                 </div>
-                            @endif
-                            <div class="message-time">
-                                {{ $message->created_at->format('H:i') }}
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-
-            <!-- Enhanced input form -->
-            <div class="chat-input">
-                <form id="messageForm" class="message-form">
-                    @csrf
-                    <input type="hidden" name="user_id" value="{{ $selectedUserId }}">
-                    <div class="input-group">
-                        <button type="button" class="btn btn-attachment" onclick="document.getElementById('attachment').click()">
-                            <i data-feather="paperclip"></i>
-                        </button>
-                        <input type="file" id="attachment" name="attachment" class="d-none" accept="image/*,application/pdf">
-                        <input type="text" class="form-control" id="messageInput" placeholder="Ketik pesan..." autocomplete="off">
-                        <button type="submit" class="btn btn-send">
-                            <i data-feather="send"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        @else
-            <!-- Enhanced empty state -->
-            <div class="chat-placeholder">
-                <div class="text-center text-muted">
-                    <i data-feather="message-square" class="mb-3" style="width: 64px; height: 64px;"></i>
-                    <h5>Pilih percakapan untuk memulai chat</h5>
-                    <p class="text-sm">Pilih salah satu percakapan dari daftar di sebelah kiri</p>
-                </div>
-            </div>
-        @endif
-    </div>
-</div>
-
-<!-- Add New Chat Modal -->
-<div class="modal fade" id="newChatModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Chat Baru</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Pilih Penghuni</label>
-                    <select class="form-select" id="userSelect">
-                        <option value="">Pilih penghuni...</option>
-                        @foreach($users as $user)
-                            @if($user->role === 'user')
-                                <option value="{{ $user->id }}">{{ $user->name }}</option>
-                            @endif
+                            </td>
+                        </tr>
                         @endforeach
-                    </select>
+                    </tbody>
+                </table>
+
+                <div class="mt-3">
+                    {{ $reports->links() }}
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Pesan</label>
-                    <textarea class="form-control" id="newMessageContent" rows="3"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary" onclick="startNewChat()">Kirim</button>
             </div>
         </div>
     </div>
 </div>
+@endsection
 
 @push('js')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const messageForm = document.getElementById('messageForm');
-    const messageInput = document.getElementById('messageInput');
-    const messageContainer = document.getElementById('messageContainer');
-    const attachment = document.getElementById('attachment');
-
-    messageForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const formData = new FormData();
-        formData.append('content', messageInput.value);
-        // Use selectedUserId instead of userId
-        formData.append('recipient_id', '{{ $selectedUserId }}');
-
-        if (attachment.files[0]) {
-            formData.append('attachment', attachment.files[0]);
-        }
-
-        try {
-            const response = await fetch('{{ route("messages.store") }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                messageInput.value = '';
-                attachment.value = '';
-                appendMessage(data.message);
-                messageContainer.scrollTop = messageContainer.scrollHeight;
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    });
-
-    function appendMessage(message) {
-        const div = document.createElement('div');
-        div.className = `message ${message.user_id === {{ Auth::id() }} ? 'sent' : 'received'}`;
-        div.innerHTML = `
-            <div class="message-content">
-                <div class="message-text">${message.content}</div>
-                ${message.attachment ? `
-                    <div class="message-attachment">
-                        <a href="/storage/${message.attachment}" target="_blank">
-                            <i data-feather="paperclip"></i> Attachment
-                        </a>
-                    </div>
-                ` : ''}
-                <div class="message-time">${new Date(message.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-            </div>
-        `;
-        messageContainer.appendChild(div);
-        feather.replace();
+    function initIcons(){
+        if(window.feather){ feather.replace({ 'stroke-width':1.5, width:16, height:16 }); }
+    }
+    function initTooltips(){
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+    }
+    function renumber(table){
+        table.column(0, {search:'applied', order:'applied'}).nodes().each(function (cell, i) {
+            cell.innerHTML = i + 1;
+        });
     }
 
-    // Auto-scroll to bottom on load
-    if (messageContainer) {
-        messageContainer.scrollTop = messageContainer.scrollHeight;
-    }
-});
-
-function showNewChatModal() {
-    const modal = new bootstrap.Modal(document.getElementById('newChatModal'));
-    modal.show();
-}
-
-async function startNewChat() {
-    const userId = document.getElementById('userSelect').value;
-    const content = document.getElementById('newMessageContent').value;
-
-    if (!userId || !content) {
-        alert('Silakan pilih penghuni dan isi pesan');
-        return;
-    }
-
-    try {
-        const response = await fetch('{{ route("messages.store") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+    $(function(){
+        var t = $('#reportTable').DataTable({
+            columnDefs:[{searchable:false,orderable:false,targets:0}],
+            pageLength:10, order:[],
+            language:{
+                search:"Cari:", lengthMenu:"Tampilkan _MENU_ data",
+                info:"Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                infoEmpty:"Tidak ada data", infoFiltered:"(difilter dari _MAX_ total data)",
+                zeroRecords:"Tidak ada data yang cocok",
+                paginate:{first:"Pertama",last:"Terakhir",next:"Selanjutnya",previous:"Sebelumnya"}
             },
-            body: JSON.stringify({
-                recipient_id: userId,
-                content: content
-            })
+            drawCallback:function(){ initIcons(); initTooltips(); renumber(this.api()); },
+            initComplete:function(){ initIcons(); initTooltips(); renumber(this.api()); }
         });
 
-        const data = await response.json();
+        // jaga-jaga untuk event lain
+        $('#reportTable').on('page.dt length.dt search.dt order.dt', function(){
+            setTimeout(function(){ initIcons(); initTooltips(); renumber(t); }, 80);
+        });
 
-        if (data.success) {
-            // Perbaiki URL redirect
-            window.location.href = '{{ route("messages.index") }}?user_id=' + userId;
-        } else {
-            alert('Gagal mengirim pesan: ' + data.message);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan saat mengirim pesan');
+        initIcons(); initTooltips();
+    });
+
+    // Modal preview image: hapus modal lama agar tidak numpuk
+    function showImage(url) {
+        const old = document.getElementById('imageModal');
+        if (old) old.remove();
+
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'imageModal';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Lihat Foto</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img id="previewImage" src="${url}" alt="Image" class="img-fluid rounded" />
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        new bootstrap.Modal(modal).show();
     }
-}
 </script>
 @endpush
-@endsection
