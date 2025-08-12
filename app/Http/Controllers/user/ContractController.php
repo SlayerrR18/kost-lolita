@@ -27,7 +27,8 @@ class ContractController extends Controller
     }
 
     // Ajukan perpanjangan
-  public function extend(Request $request)
+  // app/Http/Controllers/User/ContractController.php (extend)
+    public function extend(Request $request)
     {
         $validated = $request->validate([
             'duration'         => 'required|integer|min:1|max:12',
@@ -40,13 +41,10 @@ class ContractController extends Controller
             ->latest('tanggal_keluar')
             ->firstOrFail();
 
-        $start = ($contract->tanggal_keluar instanceof \Carbon\Carbon
-                ? $contract->tanggal_keluar->copy()
-                : \Carbon\Carbon::parse($contract->tanggal_keluar))->addDay();
+        $start = $contract->tanggal_keluar->copy()->addDay();
+        $end   = $start->copy()->addMonthsNoOverflow((int)$validated['duration']);
 
-        $end = $start->copy()->addMonthsNoOverflow((int) $validated['duration']);
-
-        $bukti = $request->file('bukti_pembayaran')->store('payments', 'public');
+        $bukti = $request->file('bukti_pembayaran')->store('payments','public');
 
         $order = Order::create([
             'user_id'          => auth()->id(),
@@ -55,7 +53,7 @@ class ContractController extends Controller
             'email'            => $contract->email,
             'phone'            => $contract->phone,
             'alamat'           => $contract->alamat,
-            'duration'         => (int) $validated['duration'],
+            'duration'         => (int)$validated['duration'],
             'tanggal_masuk'    => $start,
             'tanggal_keluar'   => $end,
             'status'           => 'pending',
@@ -64,8 +62,7 @@ class ContractController extends Controller
             'parent_order_id'  => $contract->id,
         ]);
 
-        return redirect()->route('user.contract')
-            ->with('success', 'Permohonan perpanjangan dikirim.');
+        return back()->with('success','Permohonan perpanjangan dikirim.');
     }
 
 }

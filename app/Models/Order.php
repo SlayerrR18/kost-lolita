@@ -6,28 +6,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class Order extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'kost_id',
-        'name',
-        'email',
-        'phone',
-        'alamat',
-        'duration',
-        'tanggal_masuk',
-        'tanggal_keluar',
-        'status',
-        'ktp_image',
-        'bukti_pembayaran',
+    // ------------- Konstanta biar gak magic string -------------
+    public const STATUS_PENDING   = 'pending';
+    public const STATUS_CONFIRMED = 'confirmed';
+    public const STATUS_REJECTED  = 'rejected';
 
-        'type',
-        'parent_order_id',
-        'confirmed_at',
+    public const TYPE_NEW        = 'new';
+    public const TYPE_EXTENSION  = 'extension';
+
+    protected $fillable = [
+        'user_id','kost_id','name','email','phone','alamat',
+        'duration','tanggal_masuk','tanggal_keluar','status',
+        'ktp_image','bukti_pembayaran','type','parent_order_id','confirmed_at',
     ];
 
     protected $casts = [
@@ -36,53 +32,86 @@ class Order extends Model
         'confirmed_at'   => 'datetime',
     ];
 
+    // Kalau sering butuh harga/nomor_kamar, ini membantu menghindari N+1
+    protected $with = ['kost'];
 
-    protected $appends = ['ktp_image_url', 'bukti_pembayaran_url', 'is_extension'];
+    protected $appends = [
+        'ktp_image_url',
+        'bukti_pembayaran_url',
+        'is_extension',
+        // Tambahan berguna:
+        'period_text',
+        'status_label',
+        'type_label',
+    ];
 
-    public function kost()   { return $this->belongsTo(Kost::class); }
-    public function user()   { return $this->belongsTo(User::class); }
-    public function parent() { return $this->belongsTo(self::class, 'parent_order_id'); }
+    // ------------------- Relations -------------------
+    public function kost()    { return $this->belongsTo(Kost::class); }
+    public function user()    { return $this->belongsTo(User::class); }
+    public function parent()  { return $this->belongsTo(self::class, 'parent_order_id'); }
     public function children(){ return $this->hasMany(self::class, 'parent_order_id'); }
 
-
-    public function scopePending(Builder $q)   { return $q->where('status', 'pending'); }
-    public function scopeConfirmed(Builder $q) { return $q->where('status', 'confirmed'); }
-    public function scopeExtension(Builder $q) { return $q->where('type', 'extension'); }
+    // ------------------- Scopes -------------------
+    public function scopePending(Builder $q)   { return $q->where('status', self::STATUS_PENDING); }
+    public function scopeConfirmed(Builder $q) { return $q->where('status', self::STATUS_CONFIRMED); }
+    public function scopeExtension(Builder $q) { return $q->where('type', self::TYPE_EXTENSION); }
     public function scopeForUser(Builder $q, $userId) { return $q->where('user_id', $userId); }
 
+    // Kontrak aktif pada tanggal tertentu (default: hari ini)
+    public function scopeActiveOn(Builder $q, $date = null)
+    {
+        $date = $date ?: now()->toDateString();
+        return $q->where('status', self::STATUS_CONFIRMED)
+                 ->where('tanggal_masuk', '<=', $date)
+                 ->where('tanggal_keluar', '>=', $date);
+    }
 
-    public function isPending(): bool   { return $this->status === 'pending'; }
-    public function isConfirmed(): bool { return $this->status === 'confirmed'; }
-    public function isRejected(): bool  { return $this->status === 'rejected'; }
+    // Cek overlap periode (berguna juga di controller admin)
+    public function scopeOverlaps(Builder $q, $kostId, $start, $end)
+    {
+        return $q->where('kost_id', $kostId)
+                 ->where('status', self::STATUS_CONFIRMED)
+                 ->where(function ($qq) use ($start, $end) {
+                     $qq->whereBetween('tanggal_masuk',  [$start, $end])
+                        ->orWhereBetween('tanggal_keluar', [$start, $end])
+                        ->orWhere(function ($q2) use ($start, $end) {
+                            $q2->where('tanggal_masuk', '<=', $start)
+                               ->where('tanggal_keluar', '>=', $end);
+                        });
+                 });
+    }
 
+    // ------------------- Helpers -------------------
+    public function isPending(): bool   { return $this->status === self::STATUS_PENDING; }
+    public function isConfirmed(): bool { return $this->status === self::STATUS_CONFIRMED; }
+    public function isRejected(): bool  { return $this->status === self::STATUS_REJECTED; }
 
     public function getIsExtensionAttribute(): bool
     {
-        return ($this->type ?? null) === 'extension' || !is_null($this->parent_order_id);
+        return ($this->type ?? null) === self::TYPE_EXTENSION || !is_null($this->parent_order_id);
     }
-
 
     public function totalAmount(): int
     {
         $harga = (int) optional($this->kost)->harga;
         return $harga * (int) $this->duration;
     }
-public function getKtpImageUrlAttribute(): ?string
+
+    // Lebih ringan: jangan cek exists() karena itu I/O tambahan.
+    // Anggap storage:link sudah benar; biarkan <img> handle fallback via onerror.
+    public function getKtpImageUrlAttribute(): ?string
     {
-        // Jika order ini punya KTP, pakai itu
-        if ($this->ktp_image && Storage::disk('public')->exists($this->ktp_image)) {
-            return Storage::url($this->ktp_image);
+        if ($this->ktp_image) {
+            return Storage::disk('public')->url($this->ktp_image);
         }
 
-        // Fallback (opsional): cari KTP pertama user ini
-        if ($this->user_id) {
-            $fallback = static::where('user_id', $this->user_id)
-                ->whereNotNull('ktp_image')
-                ->orderBy('id')      // ambil pertama kali upload
-                ->value('ktp_image');
-
-            if ($fallback && Storage::disk('public')->exists($fallback)) {
-                return Storage::url($fallback);
+        // Fallback HANYA jika relasi user->orders sudah di-load,
+        // sehingga kita tidak memicu query tambahan.
+        if ($this->user_id && $this->relationLoaded('user') && $this->user->relationLoaded('orders')) {
+            $firstWithKtp = $this->user->orders
+                ->firstWhere(fn ($o) => !empty($o->ktp_image));
+            if ($firstWithKtp) {
+                return Storage::disk('public')->url($firstWithKtp->ktp_image);
             }
         }
 
@@ -91,9 +120,39 @@ public function getKtpImageUrlAttribute(): ?string
 
     public function getBuktiPembayaranUrlAttribute(): ?string
     {
-        return ($this->bukti_pembayaran && Storage::disk('public')->exists($this->bukti_pembayaran))
-            ? Storage::url($this->bukti_pembayaran)
+        return $this->bukti_pembayaran
+            ? Storage::disk('public')->url($this->bukti_pembayaran)
             : null;
     }
 
+    // Tambahan aksesori presentasi yang sering dipakai di UI
+    public function getPeriodTextAttribute(): string
+    {
+        if (!$this->tanggal_masuk || !$this->tanggal_keluar) return '-';
+        return $this->tanggal_masuk->format('d M Y') . ' — ' . $this->tanggal_keluar->format('d M Y');
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match ($this->status) {
+            self::STATUS_CONFIRMED => 'Confirmed',
+            self::STATUS_REJECTED  => 'Rejected',
+            default                => 'Pending',
+        };
+    }
+
+    public function getTypeLabelAttribute(): string
+    {
+        return $this->is_extension ? 'Perpanjangan' : 'Baru';
+    }
+
+    // ------------------- Defaults di layer model -------------------
+    protected static function booted()
+    {
+        static::creating(function (self $order) {
+            // default aman biarpun DB sudah punya default
+            $order->status ??= self::STATUS_PENDING;
+            $order->type   ??= self::TYPE_NEW;
+        });
+    }
 }

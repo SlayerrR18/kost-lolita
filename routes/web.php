@@ -51,13 +51,17 @@ Route::post('admin/logout', [AdminLoginController::class, 'logout'])->name('admi
 
 /*
 |--------------------------------------------------------------------------
-| Admin area (rapi & konsisten)
+| Admin
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    //Badge
+
+      Route::get('/badges', [BadgeController::class, 'index'])->name('badges');
 
     // Kost (pakai route terpisah sesuai filemu)
     Route::get('kost', [KostController::class, 'index'])->name('kost.index');
@@ -104,11 +108,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin'])->group
      */
     Route::post('/orders/{order}/confirm', [FinancialController::class, 'confirmOrder'])->name('orders.confirm');
     Route::post('/orders/{order}/reject',  [FinancialController::class, 'rejectOrder'])->name('orders.reject');
+
 });
 
 /*
 |--------------------------------------------------------------------------
-| User area
+| User
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth','role:user'])->group(function () {

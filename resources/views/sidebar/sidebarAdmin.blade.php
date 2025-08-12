@@ -33,7 +33,7 @@
                     <span> Penghuni Kost</span>
                 </a>
             </li>
-            <!-- Replace existing Daftar Pesanan menu item with this -->
+
             <li class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#financialDropdown">
                     <i data-feather="dollar-sign"></i>
@@ -302,12 +302,6 @@
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
 }
 
-/* Main Content Adjustment */
-.main-content {
-    margin-left: 320px !important;
-    padding: 20px !important;
-}
-
 /* Logout Button */
 .nav-link.logout-btn {
     background: rgba(220, 38, 38, 0.1);
@@ -365,10 +359,6 @@
 
     .nav-link i {
         margin-right: 0;
-    }
-
-    .main-content {
-        margin-left: 120px !important;
     }
 
     .badge-unread {

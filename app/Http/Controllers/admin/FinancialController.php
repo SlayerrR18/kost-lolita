@@ -180,61 +180,61 @@ class FinancialController extends Controller
 {
     abort_if($order->status !== 'pending', 400, 'Order bukan pending.');
 
-    DB::beginTransaction();
+    \DB::beginTransaction();
     try {
-        // Cegah tabrakan periode kontrak
+        // Cegah overlap
         if ($this->hasOverlap($order)) {
             throw new \RuntimeException('Periode bertabrakan dengan kontrak lain.');
         }
 
-        // Cari / buat user
-        $user = $order->user ?: User::where('email', $order->email)->first();
-        $createdNewUser = false;
-        $plainPassword  = null;
+        $isExtension   = $order->is_extension;
+        $createdNew    = false;
+        $plainPassword = null;
 
+        // Ambil / buat user
+        $user = $order->user ?: User::where('email',$order->email)->first();
         if (!$user) {
-            // Order baru, user belum ada -> buat user
-            $createdNewUser = true;
-            $plainPassword  = Str::random(10);
+            // hanya order BARU yang berpotensi bikin user
+            $plainPassword = \Illuminate\Support\Str::random(10);
             $user = User::create([
                 'name'     => $order->name,
                 'email'    => $order->email,
-                'password' => Hash::make($plainPassword),
+                'password' => \Illuminate\Support\Facades\Hash::make($plainPassword),
                 'role'     => 'user',
             ]);
+            $createdNew = true;
         }
 
-        // SYNC: Selalu tautkan order ke user + update profil user dari order
+        // Tautkan order ke user + sinkron profil
         $order->user_id = $user->id;
-        $user->fill([
-            'phone'   => $order->phone,   // pastikan kolom di users: phone
-            'address' => $order->alamat,  // pastikan kolom di users: address
-            'kost_id' => $order->kost_id,
-        ])->save();
-
-        // Konfirmasi order
-        $order->status       = 'confirmed';
+        $order->status  = 'confirmed';
         $order->confirmed_at = now();
         $order->save();
 
-        // Tentukan apakah ini perpanjangan
-        $isExtension = $order->is_extension;
+        // update profil user (phone, address, kost)
+        $user->fill([
+            'phone'   => $order->phone,
+            'address' => $order->alamat,
+            'kost_id' => $order->kost_id,
+        ])->save();
 
-        // Untuk order BARU, tandai kamar terisi dan set penghuni
+        // Kamar: hanya order BARU yang mengubah penghuni/status
         if (!$isExtension) {
             optional($order->kost)->update([
                 'status'   => 'Terisi',
                 'penghuni' => $user->id,
+                // opsional: simpan tanggal terakhir kontrak aktif
+                'last_checkin'  => $order->tanggal_masuk,
+                'last_checkout' => $order->tanggal_keluar,
             ]);
         }
 
-        // Catat transaksi keuangan
+        // Keuangan
         Financial::create([
             'kost_id'           => $order->kost_id,
-            'nama_transaksi'    => ($isExtension ? 'Perpanjangan Kamar ' : 'Pembayaran Kamar ')
-                                   . ($order->kost->nomor_kamar ?? ''),
+            'nama_transaksi'    => ($isExtension ? 'Perpanjangan Kamar ' : 'Pembayaran Kamar ') . ($order->kost->nomor_kamar ?? ''),
             'tanggal_transaksi' => now(),
-            'total'             => (int) optional($order->kost)->harga * (int) $order->duration,
+            'total'             => (int)optional($order->kost)->harga * (int)$order->duration,
             'status'            => 'Pemasukan',
             'bukti_pembayaran'  => $order->bukti_pembayaran,
             'keterangan'        => $isExtension ? 'Konfirmasi perpanjangan' : 'Konfirmasi order baru',
@@ -242,48 +242,37 @@ class FinancialController extends Controller
             'updated_by'        => auth()->id(),
         ]);
 
-        DB::commit();
+        \DB::commit();
 
         // WhatsApp (di luar transaksi)
-        if ($isExtension) {
-            $msg = "✅ *Perpanjangan Dikonfirmasi*\n\n"
-                 . "Halo {$order->name}, perpanjangan kamar Anda sudah dikonfirmasi.\n\n"
-                 . "🏠 Kamar: {$order->kost->nomor_kamar}\n"
-                 . "📅 {$order->tanggal_masuk->format('d/m/Y')} — {$order->tanggal_keluar->format('d/m/Y')}\n"
-                 . "⏱️ Durasi: {$order->duration} bulan";
-        } else {
-            $msg = "✅ *Konfirmasi Pesanan Kost Lolita*\n\n"
-                 . "Halo {$order->name}, pesanan kamar Anda telah dikonfirmasi.\n\n"
-                 . "🏠 Kamar: {$order->kost->nomor_kamar}\n"
-                 . "📅 {$order->tanggal_masuk->format('d/m/Y')} — {$order->tanggal_keluar->format('d/m/Y')}\n"
-                 . "⏱️ Durasi: {$order->duration} bulan\n";
-            if ($createdNewUser && $plainPassword) {
-                $msg .= "*Akun Anda:*\n📧 {$user->email}\n🔑 {$plainPassword}\nHarap ganti password setelah login.";
-            }
-        }
+        $msg = $isExtension
+            ? "✅ *Perpanjangan Dikonfirmasi*\n\nHalo {$order->name}, perpanjangan kamar Anda sudah dikonfirmasi.\n\n🏠 Kamar: {$order->kost->nomor_kamar}\n📅 {$order->tanggal_masuk->format('d/m/Y')} — {$order->tanggal_keluar->format('d/m/Y')}\n⏱️ Durasi: {$order->duration} bulan"
+            : "✅ *Konfirmasi Pesanan Kost Lolita*\n\nHalo {$order->name}, pesanan kamar Anda telah dikonfirmasi.\n\n🏠 Kamar: {$order->kost->nomor_kamar}\n📅 {$order->tanggal_masuk->format('d/m/Y')} — {$order->tanggal_keluar->format('d/m/Y')}\n⏱️ Durasi: {$order->duration} bulan" . (
+                $createdNew && $plainPassword
+                ? "\n\n*Akun Anda:*\n📧 {$user->email}\n🔑 {$plainPassword}\nHarap ganti password setelah login."
+                : ''
+              );
+
         $this->trySendWhatsApp($order->phone, $msg);
 
         return response()->json([
             'success' => true,
             'message' => $isExtension ? 'Perpanjangan dikonfirmasi.' : 'Order dikonfirmasi.',
-            'data' => [
+            'data'    => [
                 'order_id'       => $order->id,
                 'type'           => $isExtension ? 'extension' : 'new',
                 'name'           => $user->name,
                 'email'          => $user->email,
-                'duration'       => (int) $order->duration,
+                'duration'       => (int)$order->duration,
                 'room_number'    => $order->kost->nomor_kamar ?? null,
                 'tanggal_masuk'  => $order->tanggal_masuk->toDateString(),
                 'tanggal_keluar' => $order->tanggal_keluar->toDateString(),
             ],
         ]);
     } catch (\Throwable $e) {
-        DB::rollBack();
+        \DB::rollBack();
         \Log::error('Confirmation failed: '.$e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal mengonfirmasi: '.$e->getMessage(),
-        ], 500);
+        return response()->json(['success'=>false,'message'=>'Gagal mengonfirmasi: '.$e->getMessage()],500);
     }
 }
 

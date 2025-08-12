@@ -11,70 +11,72 @@
     <script src="https://unpkg.com/feather-icons"></script>
     <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css" rel="stylesheet">
     <style>
-        /* Layout styles */
-        body {
-            min-height: 100vh;
-            background: #f8fafc;
-        }
+:root{
+  --sidebar-w: 280px;
+  --sidebar-gap: 40px;   /* karena sidebar pakai margin:20px */
+  --container-max: 1160px;
+  --gutter: 24px;
+}
 
-        .wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
+body{min-height:100vh;background:#f8fafc}
+.wrapper{display:flex;min-height:100vh}
 
-        /* Sidebar styles */
-        .sidebar {
-            width: 280px;
-            background: #fff;
-            box-shadow: 2px 0 20px rgba(0,0,0,0.1);
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            z-index: 1000;
-            overflow-y: auto;
-        }
+/* === Sidebar: satu-satunya definisi === */
+.sidebar{
+  width: var(--sidebar-w);
+  height: calc(100vh - 40px);
+  margin: 20px;                       /* jarak dari tepi */
+  position: fixed; left:0; top:0;
+  background: rgba(255,255,255,.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 24px;
+  display:flex; flex-direction:column;
+  box-shadow: 0 8px 32px rgba(0,0,0,.08);
+  overflow-y: auto;                    /* PENTING: cegah tumpah */
+  box-sizing: border-box;
+  z-index: 1000;
+}
 
-        /* Main content styles */
-        .main-content {
-            flex: 1;
-            margin-left: 320px;
-            padding: 20px;
-            min-height: 100vh;
-            background: #f8fafc;
-            transition: margin-left 0.3s ease;
-        }
+/* Letak konten utama */
+.main-content{
+  flex:1;
+  margin-left: calc(var(--sidebar-w) + var(--sidebar-gap));
+  padding: 32px 0;
+  background:#f8fafc;
+  min-height:100vh;
+  transition: margin-left .3s ease;
+}
 
-        /* Sidebar nav menu */
-        .nav-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+/* Lebarkan section besar agar rapi di tengah */
+.main-content > .page-header,
+.main-content > .stats-grid,
+.main-content > .card,
+.main-content > .content-card,
+.main-content > .table-responsive{
+  width: min(var(--container-max), calc(100% - (var(--gutter) * 2)));
+  margin-inline: auto;
+}
 
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            color: #475569;
-            text-decoration: none;
-            border-radius: 8px;
-            margin-bottom: 4px;
-            transition: all 0.2s;
-        }
+/* Link di sidebar */
+.sidebar .nav-link{
+  display:flex; align-items:center; gap:12px;
+  padding:12px 16px;
+  border-radius:12px;
+  color:#64748b; text-decoration:none !important;
+  transition:.3s;
+  position:relative; overflow:hidden;
+}
+.sidebar .nav-link:hover{ background:rgba(241,245,249,.7); color:#1a7f5a }
+.sidebar .nav-link.active{ background:rgba(26,127,90,.1); color:#1a7f5a }
+.sidebar .nav-link i{ width:20px;height:20px }
 
-        .nav-link:hover,
-        .nav-link.active {
-            background: #f1f5f9;
-            color: #0ea5e9;
-        }
-
-        .nav-link i {
-            width: 20px;
-            height: 20px;
-            margin-right: 12px;
-        }
-    </style>
+/* Responsive: sidebar mini */
+@media (max-width:1024px){
+  :root{ --sidebar-w: 80px; }
+  .main-content{ margin-left: calc(var(--sidebar-w) + var(--sidebar-gap)); padding:24px 0 }
+}
+</style>
     @stack('css')
 </head>
 <body>
