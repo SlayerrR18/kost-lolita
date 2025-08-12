@@ -10,65 +10,60 @@ use Illuminate\Validation\ValidationException;
 class MessageController extends Controller
 {
     public function index()
-    {
-        $user = Auth::user();
-        $adminId = User::where('role', 'admin')->first()->id;
+        {
+            $user = Auth::user();
+            $admin = User::where('role', 'admin')->first();
+            $adminId = optional($admin)->id;
 
-        if ($user->role === 'admin') {
-            // For admin view
-            $conversations = Message::with('user')
-                ->select('user_id')
-                ->distinct()
-                ->get()
-                ->map(function($message) use ($adminId) {
-                    $user = $message->user;
-                    if ($user && $user->id != $adminId) {
-                        // Hitung pesan dari user ini yang belum dibaca admin
-                        $unread = Message::where('user_id', $user->id)
-                            ->where('admin_id', $adminId)
-                            ->where('is_read', false)
-                            ->count();
-                        $user->unread_count = $unread;
-                        return $user;
-                    }
-                    return null;
-                })
-                ->filter();
+            if ($user->role === 'admin') {
+                // daftar percakapan (user unik) + unread count + last message
+                $conversations = Message::selectRaw('user_id, MAX(created_at) as last_at')
+                    ->groupBy('user_id')
+                    ->orderByDesc('last_at')
+                    ->get()
+                    ->map(function($row) use ($adminId){
+                        $u = User::find($row->user_id);
+                        if(!$u || $u->id == $adminId) return null;
+                        $u->unread_count = Message::where('user_id',$u->id)
+                            ->where('admin_id',$adminId)->where('is_read',false)->count();
+                        $u->last_message  = Message::where(function($q)use($u){
+                                $q->where('user_id',$u->id)->orWhere('admin_id',$u->id);
+                            })->latest()->first();
+                        return $u;
+                    })->filter()->values();
 
-            $messages = [];
-            $selectedUserId = request('user_id');
-            $userId = $selectedUserId; // Add this line
+                $selectedUserId = request('user_id');
+                $messages = collect();
+                if ($selectedUserId) {
+                    $messages = Message::where(function($q) use($selectedUserId){
+                        $q->where('user_id',$selectedUserId)->orWhere('admin_id',$selectedUserId);
+                    })->with(['user','admin'])->orderBy('created_at')->get();
 
-            if ($selectedUserId) {
-                $messages = Message::where(function($query) use ($selectedUserId) {
-                    $query->where('user_id', $selectedUserId)
-                          ->orWhere('admin_id', $selectedUserId);
-                })->with(['user', 'admin'])
-                  ->orderBy('created_at', 'asc')
-                  ->get();
+                    // tandai pesan user -> admin sebagai read
+                    Message::where('user_id',$selectedUserId)
+                        ->where('admin_id',$adminId)
+                        ->where('is_read',false)
+                        ->update(['is_read'=>true]);
+                }
+
+                $totalUnread = $conversations->sum('unread_count');
+                $users = User::where('role','user')->orderBy('name')->get();
+
+                return view('admin.message.index', compact(
+                    'conversations','messages','selectedUserId','adminId','totalUnread','users'
+                ));
             }
 
-            $totalUnread = $conversations->sum('unread_count');
+            // user view
+            $messages = Message::where(function($q) use ($user){
+                $q->where('user_id',$user->id)->orWhere('admin_id',$user->id);
+            })->with(['user','admin'])->orderBy('created_at')->get();
 
-            // Get all users for new chat functionality
-            $users = User::where('role', 'user')->get();
+            // tandai pesan admin -> user sebagai read
+            Message::where('user_id',$user->id)->where('admin_id',$user->id)->update(['is_read'=>true]);
 
-            return view('admin.message.index', compact(
-                'conversations', 'messages', 'selectedUserId', 'userId', 'adminId', 'totalUnread', 'users'
-            ));
-        } else {
-            // For user view
-            $messages = Message::where(function($query) use ($user) {
-                $query->where('user_id', $user->id)
-                      ->orWhere('admin_id', $user->id);
-            })
-            ->with(['user', 'admin'])
-            ->orderBy('created_at', 'asc')
-            ->get();
-
-            return view('user.message.index', compact('messages', 'adminId'));
+            return view('user.message.index', compact('messages','adminId'));
         }
-    }
 
     public function store(Request $request)
     {

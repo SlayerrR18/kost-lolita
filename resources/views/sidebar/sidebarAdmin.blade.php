@@ -126,7 +126,6 @@
 </div>
 
 <style>
-/* Modern Floating Sidebar */
 .sidebar {
     width: 280px;
     height: calc(100vh - 40px);

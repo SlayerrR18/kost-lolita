@@ -1,3 +1,4 @@
+{{-- resources/views/admin/financial/pending-orders.blade.php --}}
 @extends('layouts.main')
 
 @section('title', 'Konfirmasi Pesanan')
@@ -25,73 +26,90 @@
                 <div class="table-responsive">
                     <table class="table align-middle mb-0">
                         <thead>
-                            <tr>
-                                <th>No Kamar</th>
-                                <th>Nama Pemesan</th>
-                                <th>Kontak</th>
-                                <th class="text-center">Bukti</th>
-                                <th>Waktu</th>
-                                <th class="text-center">Aksi</th>
-                            </tr>
+                        <tr>
+                            <th>No Kamar</th>
+                            <th>Nama Pemesan</th>
+                            <th>Kontak</th>
+                            <th class="text-center">Bukti</th>
+                            <th>Tipe</th>
+                            <th>Waktu</th>
+                            <th class="text-center">Aksi</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            @foreach($pendingOrders as $order)
-                            <tr>
-                                <td>
-                                    <div class="fw-medium">Kamar {{ $order->kost->nomor_kamar }}</div>
+                        @foreach($pendingOrders as $order)
+                        <tr data-row="{{ $order->id }}">
+                            {{-- NO KAMAR --}}
+                            <td>
+                                <div class="fw-medium">Kamar {{ $order->kost->nomor_kamar ?? '-' }}</div>
+                                @if($order->kost)
                                     <div class="small text-muted">
                                         Rp {{ number_format($order->kost->harga, 0, ',', '.') }}/bulan
                                     </div>
-                                </td>
-                                <td>
-                                    <div class="fw-medium">{{ $order->name }}</div>
-                                    <div class="small text-muted">{{ $order->alamat }}</div>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2 mb-1">
-                                        <i data-feather="mail" class="text-muted" style="width:14px"></i>
-                                        <span>{{ $order->email }}</span>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i data-feather="phone" class="text-muted" style="width:14px"></i>
-                                        <span>{{ $order->phone }}</span>
-                                    </div>
-                                </td>
-                                <td class="text-center">
-                                    @if($order->bukti_pembayaran)
-                                        <button type="button"
-                                                class="btn btn-sm btn-light btn-action"
-                                                onclick="showImage('{{ asset('storage/' . $order->bukti_pembayaran) }}')">
-                                            <i data-feather="file-text"></i>
-                                            Lihat
-                                        </button>
-                                    @else
-                                        <span class="badge bg-warning">Belum Ada</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <div class="fw-medium">{{ $order->created_at->format('d M Y') }}</div>
-                                    <div class="small text-muted">{{ $order->created_at->format('H:i') }}</div>
-                                    <div class="small text-muted">{{ $order->created_at->diffForHumans() }}</div>
-                                </td>
-                                <td>
-                                    <div class="d-flex gap-2 justify-content-center">
-                                        <button type="button"
-                                                class="btn btn-sm btn-success btn-action"
-                                                onclick="showConfirmModal('{{ $order->id }}')">
-                                            <i data-feather="check"></i>
-                                            Terima
-                                        </button>
-                                        <button type="button"
-                                                class="btn btn-sm btn-danger btn-action"
-                                                onclick="rejectOrder('{{ $order->id }}')">
-                                            <i data-feather="x"></i>
-                                            Tolak
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
+                                @endif
+                            </td>
+
+                            {{-- NAMA PEMESAN --}}
+                            <td>
+                                <div class="fw-medium">{{ $order->name }}</div>
+                                <div class="small text-muted">{{ $order->alamat }}</div>
+                            </td>
+
+                            {{-- KONTAK --}}
+                            <td>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i data-feather="mail" class="text-muted" style="width:14px"></i>
+                                    <span>{{ $order->email }}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i data-feather="phone" class="text-muted" style="width:14px"></i>
+                                    <span>{{ $order->phone }}</span>
+                                </div>
+                            </td>
+
+                            {{-- BUKTI --}}
+                            <td class="text-center">
+                                @if($order->bukti_pembayaran_url)
+                                    <button type="button" class="btn btn-sm btn-light btn-action"
+                                            onclick="showImage({{ json_encode($order->bukti_pembayaran_url) }})">
+                                        <i data-feather="file-text"></i> Lihat
+                                    </button>
+                                @else
+                                    <span class="badge bg-warning">Belum Ada</span>
+                                @endif
+                            </td>
+
+                            {{-- TIPE --}}
+                            <td>
+                                <span class="badge {{ $order->is_extension ? 'bg-warning' : 'bg-info' }}">
+                                    {{ $order->is_extension ? 'Perpanjangan' : 'Baru' }}
+                                </span>
+                            </td>
+
+                            {{-- WAKTU --}}
+                            <td>
+                                <div class="fw-medium">{{ $order->created_at->format('d M Y') }}</div>
+                                <div class="small text-muted">{{ $order->created_at->format('H:i') }}</div>
+                                <div class="small text-muted">{{ $order->created_at->diffForHumans() }}</div>
+                            </td>
+
+                            {{-- AKSI --}}
+                            <td>
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <button type="button"
+                                            class="btn btn-sm btn-success btn-action"
+                                            onclick="showConfirmModal('{{ $order->id }}','{{ $order->is_extension ? 'extension' : 'new' }}')">
+                                        <i data-feather="check"></i> Terima
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-danger btn-action"
+                                            onclick="rejectOrder('{{ $order->id }}')">
+                                        <i data-feather="x"></i> Tolak
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -115,7 +133,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0">
-                <img src="" id="previewImage" class="img-fluid w-100 rounded preview-image">
+                <img src="" id="previewImage" class="img-fluid w-100 rounded preview-image" alt="Bukti Pembayaran">
             </div>
         </div>
     </div>
@@ -261,304 +279,156 @@
         </div>
     </div>
 </div>
+@endsection
 
 @push('css')
 <style>
-    /* Modern Container */
-    .main-content {
-        padding: 2rem;
-        background: #f8fafc;
-        min-height: 100vh;
-    }
-
-    /* Enhanced Header */
-    .page-header {
-        background: linear-gradient(135deg, #1a7f5a 0%, #16c79a 100%);
-        border-radius: 24px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        color: white;
-        box-shadow: 0 4px 20px rgba(26, 127, 90, 0.15);
-    }
-
-    .page-title {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin: 0;
-    }
-
-    /* Card Styles */
-    .card {
-        border-radius: 16px;
-        overflow: hidden;
-    }
-
-    /* Table Improvements */
-    .table {
-        margin: 0;
-    }
-
-    .table th {
-        background: #f8fafc;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 1rem;
-    }
-
-    .table td {
-        padding: 1rem;
-        vertical-align: middle;
-    }
-
-    .table tbody tr {
-        transition: all 0.2s ease;
-    }
-
-    .table tbody tr:hover {
-        background: #f1f5f9;
-    }
-
-    /* Action Buttons */
-    .btn-action {
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.2s ease;
-    }
-
-    .btn-action:hover {
-        transform: translateY(-2px);
-    }
-
-    .btn-action i {
-        width: 16px;
-        height: 16px;
-    }
-
-    .btn-success {
-        background: #16a34a;
-        border-color: #16a34a;
-    }
-
-    .btn-success:hover {
-        background: #15803d;
-        border-color: #15803d;
-    }
-
-    .btn-danger {
-        background: #dc2626;
-        border-color: #dc2626;
-    }
-
-    .btn-danger:hover {
-        background: #b91c1c;
-        border-color: #b91c1c;
-    }
-
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-    }
-
-    .empty-state-icon {
-        width: 64px;
-        height: 64px;
-        color: #94a3b8;
-        margin-bottom: 1.5rem;
-    }
-
-    /* Modal Improvements */
-    .modal-content {
-        border-radius: 16px;
-        border: none;
-    }
-
-    .modal-header {
-        padding: 1.5rem;
-    }
-
-    .modal-body {
-        padding: 2rem;
-    }
-
-    .modal-footer {
-        padding: 1.5rem;
-    }
-
-    /* Preview Image */
-    .preview-image {
-        border-radius: 12px;
-        width: 100%;
-        height: auto;
-        transition: transform 0.3s ease;
-    }
-
-    .preview-image:hover {
-        transform: scale(1.02);
-    }
-
-    /* Status Badge */
-    .status-badge {
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        font-weight: 500;
-        font-size: 0.875rem;
-    }
-
-    .status-pending {
-        background: #fff7ed;
-        color: #c2410c;
-    }
-
-    /* Info Cards */
-    .info-card {
-        background: #f8fafc;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .info-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5rem 0;
-    }
-
-    .info-label {
-        color: #64748b;
-        font-size: 0.875rem;
-    }
-
-    .info-value {
-        font-weight: 600;
-        color: #1e293b;
-    }
+    .main-content{padding:2rem;background:#f8fafc;min-height:100vh}
+    .page-header{background:linear-gradient(135deg,#1a7f5a 0%,#16c79a 100%);border-radius:24px;padding:2rem;margin-bottom:2rem;color:#fff;box-shadow:0 4px 20px rgba(26,127,90,.15)}
+    .page-title{font-size:1.75rem;font-weight:700;margin:0}
+    .card{border-radius:16px;overflow:hidden}
+    .table{margin:0}
+    .table th{background:#f8fafc;font-size:.875rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;padding:1rem}
+    .table td{padding:1rem;vertical-align:middle}
+    .table tbody tr{transition:all .2s ease}
+    .table tbody tr:hover{background:#f1f5f9}
+    .btn-action{padding:.5rem 1rem;border-radius:8px;font-weight:500;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s}
+    .btn-action:hover{transform:translateY(-2px)}
+    .btn-action i{width:16px;height:16px}
+    .btn-success{background:#16a34a;border-color:#16a34a}
+    .btn-success:hover{background:#15803d;border-color:#15803d}
+    .btn-danger{background:#dc2626;border-color:#dc2626}
+    .btn-danger:hover{background:#b91c1c;border-color:#b91c1c}
+    .empty-state{text-align:center;padding:4rem 2rem}
+    .empty-state-icon{width:64px;height:64px;color:#94a3b8;margin-bottom:1.5rem}
+    .modal-content{border-radius:16px;border:none}
+    .modal-header{padding:1.5rem}
+    .modal-body{padding:2rem}
+    .modal-footer{padding:1.5rem}
+    .preview-image{border-radius:12px;width:100%;height:auto;transition:transform .3s}
+    .preview-image:hover{transform:scale(1.02)}
 </style>
 @endpush
 
 @push('js')
 <script>
-let currentOrderId = null;
+(() => {
+  let current = { id: null, type: 'new' };
 
-function showImage(url) {
-    document.getElementById('previewImage').src = url;
-    new bootstrap.Modal(document.getElementById('imagePreviewModal')).show();
-}
+  const $  = s => document.querySelector(s);
+  const csrf = () => document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
 
-function showConfirmModal(orderId) {
-    currentOrderId = orderId;
-    new bootstrap.Modal(document.getElementById('confirmModal')).show();
-}
+  const formatID = iso => {
+    if (!iso) return '-';
+    try {
+      return new Date(iso + 'T00:00:00').toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+    } catch { return iso; }
+  };
 
-function processConfirmation() {
-    if (!currentOrderId) return;
+  const setLoading = (btn, on, text='Memproses...') => {
+    if (!btn) return;
+    if (on) {
+      btn.dataset._inner = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>${text}`;
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = btn.dataset._inner || btn.innerHTML;
+    }
+  };
 
-    // Show loading state
-    const confirmBtn = document.querySelector('#confirmModal .btn-primary');
-    const originalContent = confirmBtn.innerHTML;
-    confirmBtn.disabled = true;
-    confirmBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Memproses...`;
+  // Preview bukti pembayaran
+  window.showImage = url => {
+    $('#previewImage').src = url;
+    new bootstrap.Modal($('#imagePreviewModal')).show();
+  };
 
-    fetch(`/admin/financial/orders/${currentOrderId}/confirm`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if(data.success) {
-            // Format dates properly
-            const tanggalMasuk = new Date(data.data.tanggal_masuk);
-            const tanggalKeluar = new Date(data.data.tanggal_keluar);
+  // Buka modal konfirmasi, set judul/teks sesuai tipe
+  window.showConfirmModal = (orderId, type = 'new') => {
+    current.id = orderId;
+    current.type = type;
 
-            const options = {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-                timeZone: 'Asia/Jakarta'
-            };
+    const title = $('#confirmModal .modal-title');
+    const body  = $('#confirmModal .modal-body p');
 
-            // Update success modal content
-            document.getElementById('confirmName').textContent = data.data.name;
-            document.getElementById('confirmEmail').textContent = data.data.email;
-            document.getElementById('confirmRoom').textContent = data.data.room_number;
-            document.getElementById('confirmDuration').textContent = data.data.duration;
-            document.getElementById('confirmCheckIn').textContent = tanggalMasuk.toLocaleDateString('id-ID', options);
-            document.getElementById('confirmCheckOut').textContent = tanggalKeluar.toLocaleDateString('id-ID', options);
-
-            // Hide confirm modal and show success modal
-            bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
-            new bootstrap.Modal(document.getElementById('successModal')).show();
-        } else {
-            alert('Gagal mengkonfirmasi pesanan: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan saat mengkonfirmasi pesanan');
-    })
-    .finally(() => {
-        // Reset button state
-        confirmBtn.disabled = false;
-        confirmBtn.innerHTML = originalContent;
-    });
-}
-
-function rejectOrder(orderId) {
-    currentOrderId = orderId;
-    new bootstrap.Modal(document.getElementById('rejectModal')).show();
-}
-
-document.getElementById('confirmReject').addEventListener('click', function() {
-    if (!currentOrderId) return;
-
-    // Show loading state
-    const rejectBtn = document.querySelector('#rejectModal .btn-danger');
-    const originalContent = rejectBtn.innerHTML;
-    rejectBtn.disabled = true;
-    rejectBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Memproses...`;
-
-    fetch(`/admin/financial/orders/${currentOrderId}/reject`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if(data.success) {
-            window.location.reload();
-        } else {
-            alert('Gagal menolak pesanan: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan saat menolak pesanan');
-    })
-    .finally(() => {
-        // Reset button state
-        rejectBtn.disabled = false;
-        rejectBtn.innerHTML = originalContent;
-    });
-});
-
-// Initialize Feather Icons
-document.addEventListener('DOMContentLoaded', function() {
+    if (type === 'extension') {
+      title.innerHTML = `<i data-feather="info" class="me-2"></i> Konfirmasi Perpanjangan`;
+      body.textContent = 'Konfirmasi perpanjangan kontrak? Akun pengguna tidak akan dibuat ulang.';
+    } else {
+      title.innerHTML = `<i data-feather="info" class="me-2"></i> Konfirmasi Pesanan`;
+      body.textContent = 'Konfirmasi pesanan baru? Akun pengguna akan dibuat otomatis jika belum ada.';
+    }
     feather.replace();
-});
+    new bootstrap.Modal($('#confirmModal')).show();
+  };
+
+  // Proses konfirmasi
+  window.processConfirmation = async () => {
+    if (!current.id) return;
+    const btn = $('#confirmModal .btn-primary');
+    setLoading(btn, true);
+
+    try {
+      const res  = await fetch(`/admin/financial/orders/${current.id}/confirm`, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': csrf(), 'Accept': 'application/json' }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || 'Gagal mengonfirmasi');
+
+      const d = data.data;
+      $('#confirmName').textContent     = d.name ?? '-';
+      $('#confirmEmail').textContent    = d.email ?? '-';
+      $('#confirmRoom').textContent     = d.room_number ?? '-';
+      $('#confirmDuration').textContent = d.duration ?? '-';
+      $('#confirmCheckIn').textContent  = formatID(d.tanggal_masuk);
+      $('#confirmCheckOut').textContent = formatID(d.tanggal_keluar);
+
+      bootstrap.Modal.getInstance($('#confirmModal')).hide();
+      new bootstrap.Modal($('#successModal')).show();
+
+      // Hapus baris dari tabel tanpa reload
+      const row = document.querySelector(`[data-row="${current.id}"]`);
+      if (row) row.remove();
+
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLoading(btn, false);
+    }
+  };
+
+  // Buka modal tolak
+  window.rejectOrder = orderId => {
+    current.id = orderId;
+    new bootstrap.Modal($('#rejectModal')).show();
+  };
+
+  // Proses tolak
+  $('#confirmReject')?.addEventListener('click', async function () {
+    if (!current.id) return;
+    setLoading(this, true);
+
+    try {
+      const res  = await fetch(`/admin/financial/orders/${current.id}/reject`, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': csrf(), 'Accept': 'application/json' }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || 'Gagal menolak pesanan');
+
+      const row = document.querySelector(`[data-row="${current.id}"]`);
+      if (row) row.remove();
+      bootstrap.Modal.getInstance($('#rejectModal')).hide();
+
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLoading(this, false);
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => feather.replace());
+})();
 </script>
 @endpush

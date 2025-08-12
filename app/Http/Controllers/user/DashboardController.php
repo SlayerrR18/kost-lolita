@@ -1,36 +1,45 @@
 <?php
 
-namespace App\Http\Controllers\user;
 
-use Illuminate\Http\Request;
+namespace App\Http\Controllers\User;
+
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 use App\Models\Order;
-
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('role:user');
     }
 
     public function index()
     {
-
-        $user = Auth::user();
-        $order = Order::where('user_id', $user->id)
+        // Ambil kontrak aktif terbaru user (yang sudah dikonfirmasi)
+        $contract = Order::with('kost')
+            ->where('user_id', Auth::id())
             ->where('status', 'confirmed')
+            ->latest('tanggal_keluar')
             ->first();
-        $remainingContract = 0;
-        if ($order) {
-            $remainingContract = $order->tanggal_keluar->diffInDays(now());
+
+        $today = now()->timezone('Asia/Jakarta')->startOfDay();
+
+        $remainingDays = null;
+        $shouldExtend  = false;
+
+        if ($contract) {
+            $end  = $contract->tanggal_keluar->copy()->endOfDay();
+            $diff = $today->diffInDays($end, false); // bisa negatif bila lewat
+            $remainingDays = max(0, $diff);
+            $shouldExtend  = $diff <= 30; // munculkan tombol/alert perpanjang
         }
-        if ($remainingContract < 0) {
-            $remainingContract = 0;
-        }
-        return view('user.dashboard', compact('user', 'remainingContract'));
+
+        return view('user.dashboard', [
+            'contract'      => $contract,
+            'remainingDays' => $remainingDays,
+            'shouldExtend'  => $shouldExtend,
+        ]);
     }
 }
+

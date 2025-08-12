@@ -52,7 +52,7 @@
                 <a href="{{ route('user.reports.index') }}"
                    class="nav-link {{ request()->routeIs('user.reports.index') ? 'active' : '' }}">
                     <i data-feather="book"></i>
-                    <span>Report</span>
+                    <span>Keluahan / Laporan</span>
                 </a>
             </li>
             <li>

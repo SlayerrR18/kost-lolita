@@ -1,221 +1,125 @@
 @extends('layouts.user')
 
-@section('content')
-<div class="chat-wrapper">
-    <div class="chat-content">
-        <div class="chat-header">
-            <h1>Masukan Laporan Anda</h1>
-        </div>
-
-        <div class="chat-messages" id="messageContainer">
-            @foreach($messages as $message)
-                <div class="message {{ $message->user_id === auth()->id() ? 'sent' : 'received' }}">
-                    <div class="message-content">
-                        <div class="message-text">{{ $message->content }}</div>
-                        @if($message->attachment)
-                            <div class="message-attachment">
-                                <a href="{{ asset('storage/' . $message->attachment) }}" target="_blank">
-                                    <i data-feather="paperclip"></i> Attachment
-                                </a>
-                            </div>
-                        @endif
-                        <div class="message-time">
-                            {{ $message->created_at->format('H:i') }}
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-
-        <div class="chat-input">
-            <form id="messageForm" class="message-form">
-                @csrf
-                <div class="input-group">
-                    <button type="button" class="btn btn-attachment" onclick="document.getElementById('attachment').click()">
-                        <i data-feather="paperclip"></i>
-                    </button>
-                    <input type="file" id="attachment" name="attachment" class="d-none">
-                    <input type="text" class="form-control" id="messageInput" name="content" placeholder="Tulis pesan...">
-                    <button type="submit" class="btn btn-send">
-                        <i data-feather="send"></i>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 @push('css')
 <style>
-.chat-wrapper {
-    width: 100%;
-    height: calc(100vh - 100px);
-    display: flex;
-    background: #f6f8fa;
-}
-.chat-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-    margin: 24px;
-    overflow: hidden;
-}
-.chat-header {
-    padding: 1rem 2rem;
-    border-bottom: 1px solid #e5e7eb;
-    background: #fff;
-}
-.chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 2rem;
-    background: #f6f8fa;
-}
-.message {
-    margin-bottom: 1rem;
-    display: flex;
-}
-.message.sent {
-    justify-content: flex-end;
-}
-.message-content {
-    max-width: 60%;
-    padding: 0.75rem 1rem;
-    border-radius: 16px;
-    position: relative;
-}
-.message.sent .message-content {
-    background: #1a7f5a;
-    color: white;
-    border-bottom-right-radius: 4px;
-}
-.message.received .message-content {
-    background: #f3f4f6;
-    color: #1f2937;
-    border-bottom-left-radius: 4px;
-}
-.message-time {
-    font-size: 0.75rem;
-    opacity: 0.7;
-    margin-top: 0.25rem;
-}
-.chat-input {
-    padding: 1rem 2rem;
-    border-top: 1px solid #e5e7eb;
-    background: #fff;
-}
-.message-form {
-    display: flex;
-}
-.input-group {
-    width: 100%;
-    display: flex;
-    gap: 0.5rem;
-}
-.btn-attachment, .btn-send {
-    background: none;
-    border: none;
-    color: #1a7f5a;
-    padding: 0.5rem;
-}
-.btn-attachment:hover, .btn-send:hover {
-    color: #156c4a;
-}
+:root{ --brand:#1a7f5a; --brand2:#16c79a; --bg:#f8fafc; --ink:#0f172a; --muted:#64748b; --line:#e5e7eb; }
+.chat-user{ min-height:calc(100vh - 80px); background:var(--bg); padding:16px; }
+.wrap{ height:100%; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 6px 16px rgba(0,0,0,.06); display:flex; flex-direction:column; }
+.top{ padding:14px 16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;}
+.stream{ flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:10px; background:linear-gradient(180deg,#fafafa, #fff); }
+.separator{ align-self:center; font-size:.75rem; color:#6b7280; background:#eef2f7; border-radius:999px; padding:4px 10px; margin:10px 0; }
+.row{ display:flex; gap:10px; }
+.row.me{ justify-content:flex-end; }
+.bubble{ max-width:min(640px,80%); padding:10px 14px; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,.05); }
+.me .bubble{ background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; border-bottom-right-radius:6px; }
+.you .bubble{ background:#f3f4f6; color:#0f172a; border-bottom-left-radius:6px; }
+.time{ font-size:.72rem; opacity:.8; margin-top:4px; text-align:right; }
+.composer{ padding:12px; border-top:1px solid var(--line); background:#fff; }
+.inputbar{ background:#f3f4f6; border-radius:12px; padding:8px; display:flex; gap:8px; align-items:center; }
+.inputbar input{ border:none; background:transparent; outline:0; flex:1; font-size:1rem; }
+.iconbtn{ width:40px; height:40px; border-radius:10px; display:grid; place-items:center; background:transparent; border:none; color:var(--brand); }
+.iconbtn:hover{ background:#e8f5ef; }
+.preview{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+.preview .chip{ background:#eef2f7; padding:6px 8px; border-radius:8px; font-size:.8rem; display:flex; gap:6px; align-items:center; }
 </style>
 @endpush
 
+@section('content')
+<div class="chat-user">
+  <div class="wrap">
+    <div class="top"><div class="left"><strong>Masukan / Laporan</strong></div></div>
+
+    <div class="stream" id="messageContainer">
+      @php $lastDate = null; @endphp
+      @foreach($messages as $m)
+        @php $d = $m->created_at->toDateString(); @endphp
+        @if($lastDate !== $d)
+          <div class="separator">{{ \Carbon\Carbon::parse($d)->translatedFormat('d F Y') }}</div>
+          @php $lastDate = $d; @endphp
+        @endif
+        <div class="row {{ $m->user_id === auth()->id() ? 'me' : 'you' }}">
+          <div class="bubble">
+            <div class="text">{{ $m->content }}</div>
+            @if($m->attachment)
+              <div class="attach"><a href="{{ asset('storage/'.$m->attachment) }}" target="_blank"><i data-feather="paperclip"></i> Lampiran</a></div>
+            @endif
+            <div class="time">{{ $m->created_at->format('H:i') }}</div>
+          </div>
+        </div>
+      @endforeach
+    </div>
+
+    <div class="composer">
+      <form id="messageForm">
+        @csrf
+        <div class="inputbar">
+          <button type="button" class="iconbtn" onclick="document.getElementById('attachment').click()"><i data-feather="paperclip"></i></button>
+          <input type="file" id="attachment" name="attachment" class="d-none" accept="image/*,application/pdf">
+          <input type="text" id="messageInput" placeholder="Tulis pesan..." autocomplete="off">
+          <button class="iconbtn" id="sendBtn"><i data-feather="send"></i></button>
+        </div>
+        <div class="preview" id="filePreview" hidden></div>
+      </form>
+    </div>
+  </div>
+</div>
+@endsection
+
 @push('js')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const messageForm = document.getElementById('messageForm');
-    const messageInput = document.getElementById('messageInput');
-    const messageContainer = document.getElementById('messageContainer');
-    const attachment = document.getElementById('attachment');
+(function(){
+  feather.replace();
+  const container = document.getElementById('messageContainer');
+  container.scrollTop = container.scrollHeight;
 
-    messageForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+  const form = document.getElementById('messageForm');
+  const input = document.getElementById('messageInput');
+  const file = document.getElementById('attachment');
+  const chipBox = document.getElementById('filePreview');
+  const btn = document.getElementById('sendBtn');
 
-        if (!messageInput.value.trim()) {
-            return;
-        }
+  file.addEventListener('change', ()=>{
+    chipBox.innerHTML='';
+    if (file.files[0]){ chipBox.hidden=false;
+      chipBox.innerHTML=`<div class="chip"><i data-feather="paperclip"></i> ${file.files[0].name}
+      <a style="margin-left:6px;cursor:pointer" onclick="document.getElementById('attachment').value='';document.getElementById('filePreview').hidden=true;document.getElementById('filePreview').innerHTML=''">×</a></div>`;
+      feather.replace();
+    } else { chipBox.hidden=true; }
+  });
 
-        const submitBtn = this.querySelector('.btn-send');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i data-feather="loader"></i>';
-        feather.replace();
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    if (!input.value.trim() && !(file && file.files[0])) return;
 
-        const formData = new FormData();
-        formData.append('content', messageInput.value.trim());
-        formData.append('recipient_id', '{{ $adminId }}');
+    btn.disabled = true;
+    const fd = new FormData();
+    fd.append('content', input.value.trim() || '(lampiran)');
+    fd.append('recipient_id', '{{ $adminId }}');
+    if (file && file.files[0]) fd.append('attachment', file.files[0]);
 
-        if (attachment.files[0]) {
-            formData.append('attachment', attachment.files[0]);
-        }
-
-        try {
-            const response = await fetch('{{ route("messages.store") }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                messageInput.value = '';
-                if (attachment) {
-                    attachment.value = '';
-                }
-                appendMessage(data.message);
-                messageContainer.scrollTop = messageContainer.scrollHeight;
-            } else {
-                alert(data.message);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat mengirim pesan');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i data-feather="send"></i>';
-            feather.replace();
-        }
+    const res = await fetch('{{ route("messages.store") }}', {
+      method:'POST', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}, body: fd
     });
+    const data = await res.json();
+    if (data.success){ input.value=''; file.value=''; chipBox.hidden=true; chipBox.innerHTML=''; appendMessage(data.message); container.scrollTop = container.scrollHeight; }
+    else alert(data.message || 'Gagal mengirim pesan');
+    btn.disabled = false;
+  });
 
-    function appendMessage(message) {
-        const div = document.createElement('div');
-        const isCurrentUser = message.user_id === {{ Auth::id() }};
-        div.className = `message ${isCurrentUser ? 'sent' : 'received'}`;
-
-        const time = new Date(message.created_at).toLocaleTimeString('id-ID', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-
-        div.innerHTML = `
-            <div class="message-content">
-                <div class="message-text">${message.content}</div>
-                ${message.attachment ? `
-                    <div class="message-attachment">
-                        <a href="/storage/${message.attachment}" target="_blank">
-                            <i data-feather="paperclip"></i> Attachment
-                        </a>
-                    </div>
-                ` : ''}
-                <div class="message-time">${time}</div>
-            </div>
-        `;
-        messageContainer.appendChild(div);
-        feather.replace();
-    }
-
-    // Auto-scroll to bottom on load
-    messageContainer.scrollTop = messageContainer.scrollHeight;
-});
+  function appendMessage(m){
+    const date = new Date(m.created_at);
+    const row = document.createElement('div');
+    row.className = `row ${m.user_id === {{ auth()->id() }} ? 'me':'you'}`;
+    row.innerHTML = `
+      <div class="bubble">
+        <div class="text">${escapeHtml(m.content)}</div>
+        ${m.attachment? `<div class="attach"><a href="/storage/${m.attachment}" target="_blank"><i data-feather='paperclip'></i> Lampiran</a></div>`:''}
+        <div class="time">${date.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`;
+    container.appendChild(row);
+    feather.replace();
+  }
+  function escapeHtml(s){ return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+})();
 </script>
 @endpush
-@endsection

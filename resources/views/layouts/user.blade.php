@@ -29,6 +29,9 @@
                 margin-left: 100px;
             }
         }
+        .content { padding-left: 20px; padding-right: 20px; }
+        @media (min-width:1280px){ .content{ padding-left:28px; padding-right:28px; } }
+        
     </style>
     @stack('css')
 </head>

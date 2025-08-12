@@ -2,489 +2,326 @@
 
 @push('css')
 <style>
-/* Chat Variables */
-:root {
-    --primary: #1a7f5a;
-    --primary-light: #16c79a;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-600: #4b5563;
-    --white: #ffffff;
+:root{
+  --brand:#1a7f5a; --brand2:#16c79a; --bg:#f8fafc; --ink:#0f172a; --muted:#64748b; --line:#e5e7eb; --card:#ffffff;
+}
+.chat{
+  height:calc(100vh - 80px); background:var(--bg); padding:16px;
+}
+.shell{
+  height:100%; display:grid; grid-template-columns: 320px 1fr; gap:16px;
+}
+.aside{
+  background:var(--card); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 6px 16px rgba(0,0,0,.06);
+}
+.head{
+  padding:14px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:8px; justify-content:space-between;
+}
+.search{
+  display:flex; gap:8px; background:#f3f4f6; border-radius:10px; padding:6px 10px;
+}
+.search input{ border:none; background:transparent; outline:0; width:100%; font-size:.95rem; color:var(--ink); }
+.list{ overflow-y:auto; padding:10px; }
+.item{
+  display:flex; gap:12px; padding:12px; border:1px solid transparent; border-radius:12px; align-items:center; background:#fff; cursor:pointer;
+}
+.item:hover{ border-color:#dbe5de; box-shadow:0 4px 12px rgba(0,0,0,.04); transform:translateY(-1px); }
+.item.active{ background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; }
+.avatar{ width:38px; height:38px; border-radius:50%; background:#e2e8f0; display:grid; place-items:center; font-weight:700; }
+.meta{ flex:1; min-width:0; }
+.meta h6{ margin:0; font-size:.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.meta p{ margin:0; color:var(--muted); font-size:.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.badge{ background:#ef4444; color:#fff; border-radius:10px; padding:2px 8px; font-size:.75rem; font-weight:700; }
+
+.main{
+  background:var(--card); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 6px 16px rgba(0,0,0,.06);
+}
+.top{
+  padding:14px 16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;
+}
+.top .who{ display:flex; align-items:center; gap:10px; }
+.top .who .name{ font-weight:700; }
+.top .who .status{ font-size:.8rem; color:var(--muted); }
+
+.stream{
+  flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:10px; background:linear-gradient(180deg,#fafafa, #fff);
+}
+.separator{
+  align-self:center; font-size:.75rem; color:#6b7280; background:#eef2f7; border-radius:999px; padding:4px 10px; margin:10px 0;
 }
 
-/* Enhanced Chat Container */
-.chat-container {
-    display: flex;
-    height: calc(100vh - 80px);
-    background: var(--white);
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    margin: 1rem;
+.row{ display:flex; gap:10px; }
+.row.me{ justify-content:flex-end; }
+.bubble{
+  max-width:min(680px,80%); padding:10px 14px; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,.05); position:relative; font-size:.95rem;
 }
+.me .bubble{ background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; border-bottom-right-radius:6px; }
+.you .bubble{ background:#f3f4f6; color:#0f172a; border-bottom-left-radius:6px; }
+.time{ font-size:.72rem; opacity:.8; margin-top:4px; text-align:right; }
+.attach a{ font-size:.85rem; display:inline-flex; gap:6px; align-items:center; margin-top:6px; }
 
-/* Improved Sidebar */
-.chat-sidebar {
-    width: 320px;
-    border-right: 1px solid var(--gray-200);
-    display: flex;
-    flex-direction: column;
-    background: var(--gray-100);
+.composer{
+  padding:12px; border-top:1px solid var(--line); background:#fff;
 }
-
-.chat-sidebar-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--gray-200);
-    background: var(--white);
+.inputbar{
+  background:#f3f4f6; border-radius:12px; padding:8px; display:flex; gap:8px; align-items:center;
 }
-
-.chat-sidebar-header h4 {
-    color: var(--primary);
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin: 0;
+.inputbar input{ border:none; background:transparent; outline:0; flex:1; font-size:1rem; }
+.iconbtn{
+  width:40px; height:40px; border-radius:10px; display:grid; place-items:center; background:transparent; border:none; color:var(--brand);
 }
-
-.chat-conversations {
-    overflow-y: auto;
-    flex: 1;
-    padding: 0.5rem;
+.iconbtn:hover{ background:#e8f5ef; }
+.preview{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.preview .chip{
+  background:#eef2f7; padding:6px 8px; border-radius:8px; font-size:.8rem; display:flex; gap:6px; align-items:center;
 }
-
-/* Enhanced Conversation Items */
-.chat-conversation-item {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    margin-bottom: 0.5rem;
-    border-radius: 12px;
-    background: var(--white);
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-}
-
-.chat-conversation-item:hover {
-    background: var(--white);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    border-color: var(--primary-light);
-}
-
-.chat-conversation-item.active {
-    background: var(--primary);
-}
-
-.conversation-info {
-    margin-left: 1rem;
-}
-
-.chat-conversation-item.active h6,
-.chat-conversation-item.active small {
-    color: var(--white);
-}
-
-.conversation-info h6 {
-    margin: 0;
-    font-weight: 600;
-    color: var(--gray-600);
-}
-
-.conversation-info small {
-    color: var(--gray-600);
-    font-size: 0.85rem;
-}
-
-/* Improved Messages Area */
-.chat-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: var(--white);
-}
-
-.chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-/* Enhanced Message Bubbles */
-.message {
-    display: flex;
-    align-items: flex-end;
-    gap: 1rem;
-    max-width: 80%;
-}
-
-.message.sent {
-    margin-left: auto;
-}
-
-.message-content {
-    padding: 1rem 1.25rem;
-    border-radius: 18px;
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.message.sent .message-content {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: var(--white);
-    border-bottom-right-radius: 4px;
-}
-
-.message.received .message-content {
-    background: var(--gray-100);
-    color: var(--gray-600);
-    border-bottom-left-radius: 4px;
-}
-
-/* Enhanced Input Area */
-.chat-input {
-    padding: 1.25rem;
-    background: var(--white);
-    border-top: 1px solid var(--gray-200);
-}
-
-.message-form .input-group {
-    background: var(--gray-100);
-    border-radius: 12px;
-    padding: 0.5rem;
-    gap: 0.75rem;
-}
-
-.message-form input[type="text"] {
-    border: none;
-    background: transparent;
-    padding: 0.5rem;
-    font-size: 1rem;
-    color: var(--gray-600);
-}
-
-.message-form input[type="text"]:focus {
-    outline: none;
-}
-
-.btn-attachment, .btn-send {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-}
-
-.btn-attachment:hover, .btn-send:hover {
-    background: var(--primary-light);
-    color: var(--white);
-}
-
-/* New styles for buttons and modal */
-.btn-new-chat {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--primary);
-    color: var(--white);
-    border: none;
-    transition: all 0.2s ease;
-}
-
-.btn-new-chat:hover {
-    background: var(--primary-light);
-    transform: translateY(-2px);
-}
-
-.modal-content {
-    border-radius: 16px;
-    border: none;
-}
-
-.modal-header {
-    background: var(--primary);
-    color: var(--white);
-    border-radius: 16px 16px 0 0;
-}
-
-.btn-close {
-    filter: brightness(0) invert(1);
-}
-
-.form-select, .form-control {
-    border-radius: 8px;
-    border: 1px solid var(--gray-200);
-    padding: 0.75rem;
-}
-
-.form-select:focus, .form-control:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(26, 127, 90, 0.1);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .chat-container {
-        margin: 0;
-        border-radius: 0;
-        height: 100vh;
-    }
-
-    .chat-sidebar {
-        width: 280px;
-    }
-
-    .message {
-        max-width: 90%;
-    }
-}
-
-@media (max-width: 576px) {
-    .chat-sidebar {
-        position: fixed;
-        left: -100%;
-        top: 0;
-        bottom: 0;
-        z-index: 1000;
-        transition: all 0.3s ease;
-    }
-
-    .chat-sidebar.active {
-        left: 0;
-    }
+@media (max-width: 992px){
+  .shell{ grid-template-columns: 1fr; }
+  .aside{ order:2; }
+  .main{ order:1; }
 }
 </style>
 @endpush
 
 @section('content')
-<div class="chat-container">
-    <!-- Existing sidebar code with added user avatar -->
-    <div class="chat-sidebar">
-        <div class="chat-sidebar-header">
-            <div class="d-flex justify-content-between align-items-center">
-                <h4 class="d-flex align-items-center gap-2">
-                    <img src="{{ asset('img/logo.png') }}" alt="Logo" width="32" height="32" class="rounded-circle">
-                    Percakapan
-                </h4>
-                <button type="button" class="btn btn-new-chat" onclick="showNewChatModal()">
-                    <i data-feather="plus"></i>
-                </button>
-            </div>
+<div class="chat">
+  <div class="shell">
+    {{-- Sidebar --}}
+    <aside class="aside">
+      <div class="head">
+        <div class="search" style="flex:1">
+          <i data-feather="search"></i>
+          <input type="text" id="convSearch" placeholder="Cari penghuni...">
         </div>
-        <div class="chat-conversations">
-            @foreach($conversations as $conversation)
-                <a href="{{ route('messages.index', ['user_id' => $conversation->id]) }}"
-                   class="chat-conversation-item {{ $selectedUserId == $conversation->id ? 'active' : '' }}">
-                    <div class="conversation-info">
-                        <h6>{{ $conversation->name }}</h6>
-                        <small>{{ $conversation->email }}</small>
-                    </div>
-                </a>
-            @endforeach
+        <button class="iconbtn" title="Chat baru" onclick="showNewChatModal()"><i data-feather="plus"></i></button>
+      </div>
+      <div class="list" id="convList">
+        @foreach($conversations as $u)
+          @php
+            $active = (string)$selectedUserId === (string)$u->id;
+            $initial = strtoupper(mb_substr($u->name,0,1));
+            $snippet = $u->last_message?->content ?? '';
+          @endphp
+          <a class="item {{ $active?'active':'' }}" href="{{ route('messages.index',['user_id'=>$u->id]) }}">
+            <div class="avatar">{{ $initial }}</div>
+            <div class="meta">
+              <h6>{{ $u->name }}</h6>
+              <p>{{ $snippet }}</p>
+            </div>
+            @if($u->unread_count>0 && !$active)
+              <span class="badge">{{ $u->unread_count }}</span>
+            @endif
+          </a>
+        @endforeach
+      </div>
+    </aside>
+
+    {{-- Main --}}
+    <section class="main">
+      @if($selectedUserId)
+        <div class="top">
+          <div class="who">
+            <div class="avatar" style="width:34px;height:34px">{{ strtoupper(mb_substr($messages->first()?->user?->name ?? 'U',0,1)) }}</div>
+            <div>
+              <div class="name">{{ $messages->first()?->user?->name ?? 'Penghuni' }}</div>
+              <div class="status">Percakapan pribadi</div>
+            </div>
+          </div>
+          <div class="kiri" style="color:#6b7280">{{ $messages->last()?->created_at?->diffForHumans() }}</div>
         </div>
-    </div>
 
-    <!-- Enhanced chat content -->
-    <div class="chat-content">
-        @if($selectedUserId)
-            <div class="chat-messages" id="messageContainer">
-                @foreach($messages as $message)
-                    <div class="message {{ $message->user_id === auth()->id() ? 'sent' : 'received' }}">
-                        <div class="message-content">
-                            <div class="message-text">{{ $message->content }}</div>
-                            @if($message->attachment)
-                                <div class="message-attachment">
-                                    <a href="{{ asset('storage/' . $message->attachment) }}" target="_blank">
-                                        <i data-feather="paperclip"></i> Attachment
-                                    </a>
-                                </div>
-                            @endif
-                            <div class="message-time">
-                                {{ $message->created_at->format('H:i') }}
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
+        <div id="messageContainer" class="stream">
+          @php $lastDate = null; @endphp
+          @foreach($messages as $m)
+            @php
+              $d = $m->created_at->toDateString();
+            @endphp
+            @if($lastDate !== $d)
+              <div class="separator">{{ \Carbon\Carbon::parse($d)->translatedFormat('d F Y') }}</div>
+              @php $lastDate = $d; @endphp
+            @endif
+            <div class="row {{ $m->user_id === auth()->id() ? 'me':'you' }}">
+              <div class="bubble">
+                <div class="text">{{ $m->content }}</div>
+                @if($m->attachment)
+                  <div class="attach">
+                    <a href="{{ asset('storage/'.$m->attachment) }}" target="_blank"><i data-feather="paperclip"></i> Lampiran</a>
+                  </div>
+                @endif
+                <div class="time">{{ $m->created_at->format('H:i') }}</div>
+              </div>
             </div>
+          @endforeach
+        </div>
 
-            <!-- Enhanced input form -->
-            <div class="chat-input">
-                <form id="messageForm" class="message-form">
-                    @csrf
-                    <input type="hidden" name="user_id" value="{{ $selectedUserId }}">
-                    <div class="input-group">
-                        <button type="button" class="btn btn-attachment" onclick="document.getElementById('attachment').click()">
-                            <i data-feather="paperclip"></i>
-                        </button>
-                        <input type="file" id="attachment" name="attachment" class="d-none" accept="image/*,application/pdf">
-                        <input type="text" class="form-control" id="messageInput" placeholder="Ketik pesan..." autocomplete="off">
-                        <button type="submit" class="btn btn-send">
-                            <i data-feather="send"></i>
-                        </button>
-                    </div>
-                </form>
+        <div class="composer">
+          <form id="messageForm">
+            @csrf
+            <div class="inputbar">
+              <button type="button" class="iconbtn" onclick="document.getElementById('attachment').click()"><i data-feather="paperclip"></i></button>
+              <input type="file" id="attachment" name="attachment" class="d-none" accept="image/*,application/pdf">
+              <input type="text" id="messageInput" placeholder="Tulis pesan..." autocomplete="off">
+              <button class="iconbtn" id="sendBtn" title="Kirim"><i data-feather="send"></i></button>
             </div>
-        @else
-            <!-- Enhanced empty state -->
-            <div class="chat-placeholder">
-                <div class="text-center text-muted">
-                    <i data-feather="message-square" class="mb-3" style="width: 64px; height: 64px;"></i>
-                    <h5>Pilih percakapan untuk memulai chat</h5>
-                    <p class="text-sm">Pilih salah satu percakapan dari daftar di sebelah kiri</p>
-                </div>
-            </div>
-        @endif
-    </div>
+            <div class="preview" id="filePreview" hidden></div>
+          </form>
+        </div>
+      @else
+        <div class="top"><div class="who"><div class="name">Pilih percakapan di kiri</div></div></div>
+        <div class="stream" style="justify-content:center;align-items:center;color:#94a3b8">
+          <i data-feather="message-square" style="width:56px;height:56px;margin-bottom:8px"></i>
+          <div>Belum ada percakapan yang dipilih</div>
+        </div>
+      @endif
+    </section>
+  </div>
 </div>
 
-<!-- Add New Chat Modal -->
+{{-- Modal chat baru --}}
 <div class="modal fade" id="newChatModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Chat Baru</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Pilih Penghuni</label>
-                    <select class="form-select" id="userSelect">
-                        <option value="">Pilih penghuni...</option>
-                        @foreach($users as $user)
-                            @if($user->role === 'user')
-                                <option value="{{ $user->id }}">{{ $user->name }}</option>
-                            @endif
-                        @endforeach
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Pesan</label>
-                    <textarea class="form-control" id="newMessageContent" rows="3"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary" onclick="startNewChat()">Kirim</button>
-            </div>
-        </div>
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">Chat Baru</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <div class="mb-3">
+        <label class="form-label">Pilih Penghuni</label>
+        <select class="form-select" id="userSelect">
+          <option value="">Pilih...</option>
+          @foreach($users as $u)
+            <option value="{{ $u->id }}">{{ $u->name }} — {{ $u->email }}</option>
+          @endforeach
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Pesan</label>
+        <textarea class="form-control" id="newMessageContent" rows="3" placeholder="Halo..."></textarea>
+      </div>
     </div>
+    <div class="modal-footer">
+      <button class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+      <button class="btn btn-success" onclick="startNewChat()">Kirim</button>
+    </div>
+  </div></div>
 </div>
+@endsection
 
 @push('js')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const messageForm = document.getElementById('messageForm');
-    const messageInput = document.getElementById('messageInput');
-    const messageContainer = document.getElementById('messageContainer');
-    const attachment = document.getElementById('attachment');
+(function(){
+  feather.replace();
 
-    messageForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+  const container = document.getElementById('messageContainer');
+  if (container) container.scrollTop = container.scrollHeight;
 
-        const formData = new FormData();
-        formData.append('content', messageInput.value);
-        // Use selectedUserId instead of userId
-        formData.append('recipient_id', '{{ $selectedUserId }}');
-
-        if (attachment.files[0]) {
-            formData.append('attachment', attachment.files[0]);
-        }
-
-        try {
-            const response = await fetch('{{ route("messages.store") }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                messageInput.value = '';
-                attachment.value = '';
-                appendMessage(data.message);
-                messageContainer.scrollTop = messageContainer.scrollHeight;
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
+  // search on sidebar
+  const search = document.getElementById('convSearch');
+  const list = document.getElementById('convList');
+  if (search && list){
+    search.addEventListener('input', ()=>{
+      const q = search.value.toLowerCase();
+      list.querySelectorAll('.item').forEach(el=>{
+        const name = el.querySelector('.meta h6')?.textContent.toLowerCase() || '';
+        const mail = el.querySelector('.meta p')?.textContent.toLowerCase() || '';
+        el.style.display = (name.includes(q) || mail.includes(q)) ? '' : 'none';
+      });
     });
+  }
 
-    function appendMessage(message) {
-        const div = document.createElement('div');
-        div.className = `message ${message.user_id === {{ Auth::id() }} ? 'sent' : 'received'}`;
-        div.innerHTML = `
-            <div class="message-content">
-                <div class="message-text">${message.content}</div>
-                ${message.attachment ? `
-                    <div class="message-attachment">
-                        <a href="/storage/${message.attachment}" target="_blank">
-                            <i data-feather="paperclip"></i> Attachment
-                        </a>
-                    </div>
-                ` : ''}
-                <div class="message-time">${new Date(message.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-            </div>
-        `;
-        messageContainer.appendChild(div);
+  // attachment preview chip
+  const file = document.getElementById('attachment');
+  const chipBox = document.getElementById('filePreview');
+  if (file && chipBox){
+    file.addEventListener('change', ()=>{
+      chipBox.innerHTML = '';
+      if (file.files[0]){
+        chipBox.hidden = false;
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        chip.innerHTML = `<i data-feather="paperclip"></i> ${file.files[0].name}
+                          <a style="margin-left:6px;cursor:pointer" onclick="clearAttachment()">×</a>`;
+        chipBox.appendChild(chip);
         feather.replace();
-    }
+      }else{
+        chipBox.hidden = true;
+      }
+    });
+  }
+  window.clearAttachment = function(){
+    file.value = ''; chipBox.hidden = true; chipBox.innerHTML = '';
+  }
 
-    // Auto-scroll to bottom on load
-    if (messageContainer) {
-        messageContainer.scrollTop = messageContainer.scrollHeight;
-    }
-});
+  // send
+  const form = document.getElementById('messageForm');
+  const input = document.getElementById('messageInput');
+  const btn = document.getElementById('sendBtn');
+  if (form){
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      if (!input.value.trim() && !(file && file.files[0])) return;
 
-function showNewChatModal() {
-    const modal = new bootstrap.Modal(document.getElementById('newChatModal'));
-    modal.show();
-}
+      btn.disabled = true;
+      const fd = new FormData();
+      fd.append('content', input.value.trim() || '(lampiran)');
+      fd.append('recipient_id', '{{ $selectedUserId }}');
+      if (file && file.files[0]) fd.append('attachment', file.files[0]);
 
-async function startNewChat() {
-    const userId = document.getElementById('userSelect').value;
-    const content = document.getElementById('newMessageContent').value;
+      const res = await fetch('{{ route("messages.store") }}', {
+        method:'POST',
+        headers:{'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+        body: fd
+      });
+      const data = await res.json();
 
-    if (!userId || !content) {
-        alert('Silakan pilih penghuni dan isi pesan');
-        return;
-    }
+      if (data.success){
+        input.value = ''; clearAttachment();
+        appendMessage(data.message);
+        container.scrollTop = container.scrollHeight;
+      } else {
+        alert(data.message || 'Gagal mengirim pesan');
+      }
+      btn.disabled = false;
+    });
+  }
 
-    try {
-        const response = await fetch('{{ route("messages.store") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                recipient_id: userId,
-                content: content
-            })
-        });
+  function appendMessage(m){
+    const date = new Date(m.created_at);
+    const row = document.createElement('div');
+    row.className = `row ${m.user_id === {{ auth()->id() }} ? 'me':'you'}`;
+    row.innerHTML = `
+      <div class="bubble">
+        <div class="text">${escapeHtml(m.content)}</div>
+        ${m.attachment? `<div class="attach"><a href="/storage/${m.attachment}" target="_blank">
+          <i data-feather='paperclip'></i> Lampiran</a></div>`:''}
+        <div class="time">${date.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`;
+    container.appendChild(row);
+    feather.replace();
+  }
 
-        const data = await response.json();
+  // simple polling setiap 10s (bisa ganti ke Pusher kalau mau)
+  @if($selectedUserId)
+  setInterval(async ()=>{
+    const res = await fetch(`{{ route('messages.index') }}?user_id={{ $selectedUserId }}`, {headers:{'X-Requested-With':'XMLHttpRequest'}});
+    // kalau mau, implementasikan route khusus JSON untuk efisiensi.
+  }, 10000);
+  @endif
 
-        if (data.success) {
-            // Perbaiki URL redirect
-            window.location.href = '{{ route("messages.index") }}?user_id=' + userId;
-        } else {
-            alert('Gagal mengirim pesan: ' + data.message);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan saat mengirim pesan');
-    }
+  function escapeHtml(s){ return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+})();
+function showNewChatModal(){ new bootstrap.Modal(document.getElementById('newChatModal')).show(); }
+async function startNewChat(){
+  const uid = document.getElementById('userSelect').value;
+  const text = document.getElementById('newMessageContent').value.trim();
+  if(!uid || !text){ alert('Pilih penghuni & isi pesan'); return; }
+  const res = await fetch('{{ route("messages.store") }}', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
+    body: JSON.stringify({ recipient_id: uid, content: text })
+  });
+  const data = await res.json();
+  if (data.success){
+    window.location = '{{ route("messages.index") }}?user_id='+uid;
+  } else alert(data.message || 'Gagal');
 }
 </script>
 @endpush
-@endsection

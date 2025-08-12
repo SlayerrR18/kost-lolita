@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
@@ -157,17 +157,18 @@ class FinancialController extends Controller
         }
     }
 
-    public static function recordIncome($user, $kost)
+  public static function recordIncome($user, $kost)
     {
         return Financial::create([
-            'kost_id' => $kost->id,
-            'nama_transaksi' => 'Pembayaran Kost - ' . $user->name,
+            'kost_id'           => $kost->id,
+            'nama_transaksi'    => 'Pembayaran Kost - '.$user->name,
             'tanggal_transaksi' => now(),
-            'total' => $kost->harga,
-            'status' => 'Pemasukan',
-            'bukti_transaksi' => null
+            'total'             => $kost->harga,
+            'status'            => 'Pemasukan',
+            'bukti_pembayaran'  => null,
         ]);
     }
+
 
     public static function getTotalIncome()
     {
@@ -175,189 +176,223 @@ class FinancialController extends Controller
                        ->sum('total');
     }
 
-    public function confirmOrder(Order $order)
-    {
-        try {
-            DB::beginTransaction();
+   public function confirmOrder(Order $order)
+{
+    abort_if($order->status !== 'pending', 400, 'Order bukan pending.');
 
-            // Generate password yang aman
-            $password = Str::random(8);
-
-            // Create user account
-            $user = User::create([
-                'name' => $order->name,
-                'email' => $order->email,
-                'password' => Hash::make($password),
-                'role' => 'user',
-                'phone' => $order->phone,
-                'address' => $order->alamat,
-                'kost_id' => $order->kost_id
-            ]);
-
-            // Prepare WhatsApp message
-            $message = "✅ *Konfirmasi Pesanan Kost Lolita*\n\n"
-                    . "Halo {$order->name},\n"
-                    . "Pesanan kamar kost Anda telah dikonfirmasi.\n\n"
-                    . "*Detail Kamar:*\n"
-                    . "🏠 Nomor Kamar: {$order->kost->nomor_kamar}\n"
-                    . "📅 Tanggal Masuk: " . $order->tanggal_masuk->format('d/m/Y') . "\n"
-                    . "📅 Tanggal Keluar: " . $order->tanggal_keluar->format('d/m/Y') . "\n"
-                    . "⏱️ Durasi: {$order->duration} bulan\n\n"
-                    . "*Kredensial Akun:*\n"
-                    . "📧 Email: {$user->email}\n"
-                    . "🔑 Password: {$password}\n\n"
-                    . "Silakan login menggunakan kredensial di atas.\n"
-                    . "Untuk keamanan, harap segera ganti password Anda setelah login.\n\n"
-                    . "Terima kasih telah memilih Kost Lolita! 🙏";
-
-            // Send WhatsApp message
-            $messageSent = $this->whatsappService->sendMessage($order->phone, $message);
-
-            // Create financial record
-            Financial::create([
-                'kost_id' => $order->kost_id,
-                'nama_transaksi' => 'Pembayaran Kamar ' . $order->kost->nomor_kamar,
-                'tanggal_transaksi' => now(),
-                'total' => $order->kost->harga * $order->duration,
-                'status' => 'Pemasukan',
-                'bukti_pembayaran' => $order->bukti_pembayaran
-            ]);
-
-            // Update order status
-            $order->update([
-                'status' => 'confirmed',
-                'user_id' => $user->id
-            ]);
-
-            // Update kost status
-            $order->kost->update([
-                'status' => 'Terisi',
-                'penghuni' => $user->id
-            ]);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Pesanan berhasil dikonfirmasi',
-                'whatsapp_sent' => $messageSent,
-                'data' => [
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'room_number' => $order->kost->nomor_kamar,
-                    'duration' => $order->duration,
-                    // Format dates properly
-                    'tanggal_masuk' => $order->tanggal_masuk->format('Y-m-d'),
-                    'tanggal_keluar' => $order->tanggal_keluar->format('Y-m-d')
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            \Log::channel('whatsapp')->error('Confirmation failed', [
-                'error' => $e->getMessage()
-            ]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengkonfirmasi pesanan: ' . $e->getMessage()
-            ], 500);
+    DB::beginTransaction();
+    try {
+        // Cegah tabrakan periode kontrak
+        if ($this->hasOverlap($order)) {
+            throw new \RuntimeException('Periode bertabrakan dengan kontrak lain.');
         }
+
+        // Cari / buat user
+        $user = $order->user ?: User::where('email', $order->email)->first();
+        $createdNewUser = false;
+        $plainPassword  = null;
+
+        if (!$user) {
+            // Order baru, user belum ada -> buat user
+            $createdNewUser = true;
+            $plainPassword  = Str::random(10);
+            $user = User::create([
+                'name'     => $order->name,
+                'email'    => $order->email,
+                'password' => Hash::make($plainPassword),
+                'role'     => 'user',
+            ]);
+        }
+
+        // SYNC: Selalu tautkan order ke user + update profil user dari order
+        $order->user_id = $user->id;
+        $user->fill([
+            'phone'   => $order->phone,   // pastikan kolom di users: phone
+            'address' => $order->alamat,  // pastikan kolom di users: address
+            'kost_id' => $order->kost_id,
+        ])->save();
+
+        // Konfirmasi order
+        $order->status       = 'confirmed';
+        $order->confirmed_at = now();
+        $order->save();
+
+        // Tentukan apakah ini perpanjangan
+        $isExtension = $order->is_extension;
+
+        // Untuk order BARU, tandai kamar terisi dan set penghuni
+        if (!$isExtension) {
+            optional($order->kost)->update([
+                'status'   => 'Terisi',
+                'penghuni' => $user->id,
+            ]);
+        }
+
+        // Catat transaksi keuangan
+        Financial::create([
+            'kost_id'           => $order->kost_id,
+            'nama_transaksi'    => ($isExtension ? 'Perpanjangan Kamar ' : 'Pembayaran Kamar ')
+                                   . ($order->kost->nomor_kamar ?? ''),
+            'tanggal_transaksi' => now(),
+            'total'             => (int) optional($order->kost)->harga * (int) $order->duration,
+            'status'            => 'Pemasukan',
+            'bukti_pembayaran'  => $order->bukti_pembayaran,
+            'keterangan'        => $isExtension ? 'Konfirmasi perpanjangan' : 'Konfirmasi order baru',
+            'created_by'        => auth()->id(),
+            'updated_by'        => auth()->id(),
+        ]);
+
+        DB::commit();
+
+        // WhatsApp (di luar transaksi)
+        if ($isExtension) {
+            $msg = "✅ *Perpanjangan Dikonfirmasi*\n\n"
+                 . "Halo {$order->name}, perpanjangan kamar Anda sudah dikonfirmasi.\n\n"
+                 . "🏠 Kamar: {$order->kost->nomor_kamar}\n"
+                 . "📅 {$order->tanggal_masuk->format('d/m/Y')} — {$order->tanggal_keluar->format('d/m/Y')}\n"
+                 . "⏱️ Durasi: {$order->duration} bulan";
+        } else {
+            $msg = "✅ *Konfirmasi Pesanan Kost Lolita*\n\n"
+                 . "Halo {$order->name}, pesanan kamar Anda telah dikonfirmasi.\n\n"
+                 . "🏠 Kamar: {$order->kost->nomor_kamar}\n"
+                 . "📅 {$order->tanggal_masuk->format('d/m/Y')} — {$order->tanggal_keluar->format('d/m/Y')}\n"
+                 . "⏱️ Durasi: {$order->duration} bulan\n";
+            if ($createdNewUser && $plainPassword) {
+                $msg .= "*Akun Anda:*\n📧 {$user->email}\n🔑 {$plainPassword}\nHarap ganti password setelah login.";
+            }
+        }
+        $this->trySendWhatsApp($order->phone, $msg);
+
+        return response()->json([
+            'success' => true,
+            'message' => $isExtension ? 'Perpanjangan dikonfirmasi.' : 'Order dikonfirmasi.',
+            'data' => [
+                'order_id'       => $order->id,
+                'type'           => $isExtension ? 'extension' : 'new',
+                'name'           => $user->name,
+                'email'          => $user->email,
+                'duration'       => (int) $order->duration,
+                'room_number'    => $order->kost->nomor_kamar ?? null,
+                'tanggal_masuk'  => $order->tanggal_masuk->toDateString(),
+                'tanggal_keluar' => $order->tanggal_keluar->toDateString(),
+            ],
+        ]);
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        \Log::error('Confirmation failed: '.$e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengonfirmasi: '.$e->getMessage(),
+        ], 500);
     }
+}
+
 
     public function pendingOrders()
     {
-        $pendingOrders = Order::where('status', 'pending')
-            ->with('kost')
+        $pendingOrders = Order::with(['kost','user','parent'])
+            ->where('status', 'pending')
             ->latest()
             ->get();
 
         return view('admin.financial.pending-orders', compact('pendingOrders'));
     }
 
+
     public function rejectOrder(Order $order)
     {
-        try {
-            DB::beginTransaction();
+        abort_if($order->status !== 'pending', 400, 'Order bukan pending.');
 
-            // Update order status
+        DB::beginTransaction();
+        try {
             $order->update(['status' => 'rejected']);
 
-            // Send WhatsApp notification
-            try {
-                $message = "Halo {$order->name},\n\n"
-                        . "Mohon maaf, pesanan kamar kost Anda tidak dapat kami konfirmasi.\n"
-                        . "Pembayaran Anda akan kami kembalikan sesuai dengan prosedur yang berlaku.\n\n"
-                        . "Jika ada pertanyaan, silakan hubungi admin kami.\n\n"
-                        . "Terima kasih.";
-
-                app(WhatsAppService::class)->sendMessage($order->phone, $message);
-            } catch (\Exception $e) {
-                \Log::error('WhatsApp notification failed: ' . $e->getMessage());
-            }
+            $msg = "❌ *Pesanan Ditolak*\n\n"
+                . "Halo {$order->name}, pesanan kamar Anda tidak dapat kami konfirmasi.\n"
+                . "Silakan hubungi admin untuk informasi lebih lanjut.";
+            $this->trySendWhatsApp($order->phone, $msg);
 
             DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Pesanan berhasil ditolak'
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            \Log::error('Order rejection failed: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menolak pesanan: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['success' => true, 'message' => 'Pesanan berhasil ditolak']);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            \Log::error('Order rejection failed: '.$e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal menolak pesanan: '.$e->getMessage()], 500);
         }
     }
 
-    public function getFinancialSummary()
+        public function getFinancialSummary()
+        {
+            try {
+                $currentMonth = now()->format('m');
+                $currentYear = now()->format('Y');
+
+                $summary = [
+                    'total_income' => Financial::where('status', 'Pemasukan')
+                        ->whereMonth('tanggal_transaksi', $currentMonth)
+                        ->whereYear('tanggal_transaksi', $currentYear)
+                        ->sum('total'),
+
+                    'total_expense' => Financial::where('status', 'Pengeluaran')
+                        ->whereMonth('tanggal_transaksi', $currentMonth)
+                        ->whereYear('tanggal_transaksi', $currentYear)
+                        ->sum('total'),
+
+                    'latest_transactions' => Financial::with('kost')
+                        ->latest('tanggal_transaksi')
+                        ->take(5)
+                        ->get(),
+
+                    'monthly_stats' => Financial::selectRaw('
+                        YEAR(tanggal_transaksi) as year,
+                        MONTH(tanggal_transaksi) as month,
+                        status,
+                        SUM(total) as total
+                    ')
+                    ->whereYear('tanggal_transaksi', $currentYear)
+                    ->groupBy('year', 'month', 'status')
+                    ->get()
+                ];
+
+                $summary['profit'] = $summary['total_income'] - $summary['total_expense'];
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $summary
+                ]);
+
+            } catch (\Exception $e) {
+                \Log::error('Failed to get financial summary: ' . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengambil ringkasan keuangan'
+                ], 500);
+            }
+        }
+    protected function hasOverlap(Order $order): bool
+    {
+        return Order::where('kost_id', $order->kost_id)
+            ->where('status', 'confirmed')
+            ->where('id', '!=', $order->id)
+            ->where(function ($q) use ($order) {
+                $q->whereBetween('tanggal_masuk',  [$order->tanggal_masuk, $order->tanggal_keluar])
+                ->orWhereBetween('tanggal_keluar',[$order->tanggal_masuk, $order->tanggal_keluar])
+                ->orWhere(function ($q2) use ($order) {
+                    $q2->where('tanggal_masuk', '<=', $order->tanggal_masuk)
+                        ->where('tanggal_keluar', '>=', $order->tanggal_keluar);
+                });
+            })
+            ->exists();
+    }
+
+    /** Kirim WA tapi jangan bikin transaksi gagal kalau error */
+    protected function trySendWhatsApp(string $to, string $message): bool
     {
         try {
-            $currentMonth = now()->format('m');
-            $currentYear = now()->format('Y');
-
-            $summary = [
-                'total_income' => Financial::where('status', 'Pemasukan')
-                    ->whereMonth('tanggal_transaksi', $currentMonth)
-                    ->whereYear('tanggal_transaksi', $currentYear)
-                    ->sum('total'),
-
-                'total_expense' => Financial::where('status', 'Pengeluaran')
-                    ->whereMonth('tanggal_transaksi', $currentMonth)
-                    ->whereYear('tanggal_transaksi', $currentYear)
-                    ->sum('total'),
-
-                'latest_transactions' => Financial::with('kost')
-                    ->latest('tanggal_transaksi')
-                    ->take(5)
-                    ->get(),
-
-                'monthly_stats' => Financial::selectRaw('
-                    YEAR(tanggal_transaksi) as year,
-                    MONTH(tanggal_transaksi) as month,
-                    status,
-                    SUM(total) as total
-                ')
-                ->whereYear('tanggal_transaksi', $currentYear)
-                ->groupBy('year', 'month', 'status')
-                ->get()
-            ];
-
-            $summary['profit'] = $summary['total_income'] - $summary['total_expense'];
-
-            return response()->json([
-                'success' => true,
-                'data' => $summary
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Failed to get financial summary: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengambil ringkasan keuangan'
-            ], 500);
+            return $this->whatsappService->sendMessage($to, $message);
+        } catch (\Throwable $e) {
+            \Log::warning('WhatsApp failed: '.$e->getMessage());
+            return false;
         }
     }
 }

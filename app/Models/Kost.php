@@ -33,7 +33,6 @@ class Kost extends Model
         return $this->status === 'Kosong';
     }
 
-    // Accessor untuk memastikan fasilitas selalu array
     public function getFasilitasAttribute($value)
     {
         if (is_string($value)) {
@@ -42,7 +41,6 @@ class Kost extends Model
         return $value ?? [];
     }
 
-    // Mutator untuk memastikan fasilitas disimpan sebagai JSON string
     public function setFasilitasAttribute($value)
     {
         $this->attributes['fasilitas'] = is_array($value) ? json_encode($value) : $value;
