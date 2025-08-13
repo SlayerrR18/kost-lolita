@@ -1,4 +1,9 @@
 {{-- filepath: d:\Kampus\Web\kost-lolita\resources\views\sidebar\sidebarAdmin.blade.php --}}
+
+@php
+    $financeOpen = request()->routeIs('admin.financial.*');
+@endphp
+
 <div class="sidebar">
     <div class="sidebar-header">
         <span class="brand">
@@ -15,54 +20,70 @@
             <li>
                 <a href="{{ route('admin.dashboard') }}"
                    class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <i data-feather="bookmark"></i>
+                    {{-- ganti: bookmark -> layout --}}
+                    <i data-feather="layout"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.kost.index') }}"
-                   class="nav-link {{ request()->routeIs('admin.kost') ? 'active' : '' }}">
+                   class="nav-link {{ request()->routeIs('admin.kost*') ? 'active' : '' }}">
+                    {{-- tetap: home --}}
                     <i data-feather="home"></i>
                     <span>Manajemen Kamar</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.account.index') }}"
-                   class="nav-link {{ request()->routeIs('admin.account') ? 'active' : '' }}">
+                   class="nav-link {{ request()->routeIs('admin.account*') ? 'active' : '' }}">
+                    {{-- tetap: users --}}
                     <i data-feather="users"></i>
                     <span> Penghuni Kost</span>
                 </a>
             </li>
 
-            <li class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#financialDropdown">
-                    <i data-feather="dollar-sign"></i>
-                    <span>Riwayat Keuangan</span>
-                    <i data-feather="chevron-down" class="dropdown-icon"></i>
+            {{-- DROPDOWN KEUANGAN --}}
+            <li class="nav-item">
+              <a
+                href="#financialDropdown"
+                class="nav-link dropdown-toggle"
+                data-bs-toggle="collapse"
+                role="button"
+                aria-expanded="{{ $financeOpen ? 'true' : 'false' }}"
+                aria-controls="financialDropdown"
+                >
+                {{-- was: wallet (tidak ada di Feather) --}}
+                <i data-feather="credit-card"></i>
+                <span>Riwayat Keuangan</span>
+                <i data-feather="chevron-down" class="dropdown-icon"></i>
                 </a>
-                <div class="collapse" id="financialDropdown">
+
+                <div class="collapse {{ $financeOpen ? 'show' : '' }}" id="financialDropdown">
                     <ul class="nav-submenu">
                         <li>
                             <a href="{{ route('admin.financial.income') }}"
                                class="nav-link {{ request()->routeIs('admin.financial.income') ? 'active' : '' }}">
-                                <i data-feather="arrow-up-circle"></i>
+                                <i data-feather="trending-up"></i>
                                 <span>Pemasukan</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ route('admin.financial.expense') }}"
                                class="nav-link {{ request()->routeIs('admin.financial.expense') ? 'active' : '' }}">
-                                <i data-feather="arrow-down-circle"></i>
+                                {{-- ganti: arrow-down-circle -> trending-down --}}
+                                <i data-feather="trending-down"></i>
                                 <span>Pengeluaran</span>
                             </a>
                         </li>
                     </ul>
                 </div>
             </li>
+
             <li>
                 <a href="{{ route('admin.financial.pending-orders') }}"
                    class="nav-link {{ request()->routeIs('admin.financial.pending-orders') ? 'active' : '' }}">
-                    <i data-feather="shopping-cart"></i>
+                    {{-- ganti: shopping-cart -> shopping-bag (ikon “pesanan” lebih tepat) --}}
+                    <i data-feather="shopping-bag"></i>
                     <span>Konfirmasi Pesanan</span>
                 </a>
             </li>
@@ -74,20 +95,23 @@
         <ul class="nav-menu">
             <li>
                 <a href="{{ route('messages.index') }}"
-                   class="nav-link {{ request()->routeIs('admin.report') ? 'active' : '' }}">
-                    <i data-feather="mail"></i>
+                   class="nav-link {{ request()->routeIs('messages.*') ? 'active' : '' }}">
+                    {{-- ganti: mail -> message-square (lebih “chat”) --}}
+                    <i data-feather="message-square"></i>
                     <span>Chat</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.reports.index') }}"
-                   class="nav-link {{ request()->routeIs('admin.report.index') ? 'active' : '' }}">
-                    <i data-feather="book"></i>
+                   class="nav-link {{ request()->routeIs('admin.reports*') ? 'active' : '' }}">
+                    {{-- ganti: book -> file-text (lebih “laporan”) --}}
+                    <i data-feather="file-text"></i>
                     <span>Report</span>
                 </a>
             </li>
             <li>
                 <button type="button" class="nav-link w-100" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                    {{-- tetap: log-out --}}
                     <i data-feather="log-out"></i>
                     <span>Logout</span>
                 </button>
@@ -102,6 +126,7 @@
         <div class="modal-content">
             <div class="modal-body text-center p-4">
                 <div class="text-warning mb-4">
+                    {{-- tetap: alert-circle --}}
                     <i data-feather="alert-circle" style="width: 64px; height: 64px;"></i>
                 </div>
                 <h5 class="modal-title mb-3" id="logoutModalLabel">Konfirmasi Logout</h5>
@@ -259,6 +284,20 @@
     padding-right: 2.5rem;
 }
 
+/* Hilangkan bullet & whitespace pada daftar utama sidebar */
+.sidebar .nav-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Jaga-jaga bila ada reset yang membangkang di level <li> */
+.sidebar .nav-menu > li,
+.sidebar .nav-submenu > li {
+  list-style: none;
+}
+
+
 .dropdown-icon {
     position: absolute;
     right: 16px;
@@ -373,19 +412,36 @@
         align-items: center;
         justify-content: center;
     }
+
+    .sidebar .nav-menu,
+  .sidebar .nav-submenu { list-style: none; margin: 0; padding: 0; }
+  .sidebar .nav-menu > li,
+  .sidebar .nav-submenu > li { list-style: none; }
+
+  /* Rotasi chevron saat aria-expanded true (Bootstrap akan toggle attribute ini) */
+  .dropdown-toggle[aria-expanded="true"] .dropdown-icon {
+      transform: translateY(-50%) rotate(180deg);
+  }
 }
 </style>
 <script src="https://unpkg.com/feather-icons"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    // Initialize feather icons
-    feather.replace();
+document.addEventListener('DOMContentLoaded', function() {
+  // Inisialisasi ikon
+  feather.replace();
 
-    // Reinitialize feather icons when modal opens
-    const logoutModal = document.getElementById('logoutModal');
-    logoutModal.addEventListener('shown.bs.modal', function() {
-        feather.replace();
-    });
+  // Pastikan ikon tetap benar ketika collapse dibuka/tutup via JS
+  const financial = document.getElementById('financialDropdown');
+  if (financial) {
+    financial.addEventListener('shown.bs.collapse', () => feather.replace());
+    financial.addEventListener('hidden.bs.collapse', () => feather.replace());
+  }
+
+  // Modal logout juga re-render ikon saat dibuka
+  const logoutModal = document.getElementById('logoutModal');
+  if (logoutModal) {
+    logoutModal.addEventListener('shown.bs.modal', () => feather.replace());
+  }
 });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
