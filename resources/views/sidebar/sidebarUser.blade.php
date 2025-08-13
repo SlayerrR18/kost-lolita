@@ -15,19 +15,23 @@
             <li>
                 <a href="{{ route('user.dashboard') }}"
                    class="nav-link {{ request()->routeIs('user.dashboard') ? 'active' : '' }}">
-                    <i data-feather="bookmark"></i>
-                    <span>Dashboard</span>                </a>
+                    {{-- bookmark → layout --}}
+                    <i data-feather="layout"></i>
+                    <span>Dashboard</span>
+                </a>
             </li>
             <li>
                 <a href="{{ route('user.contract') }}"
-                   class="nav-link {{ request()->routeIs('user.contract') ? 'active' : '' }}">
+                   class="nav-link {{ request()->routeIs('user.contract*') ? 'active' : '' }}">
+                    {{-- home tetap relevan --}}
                     <i data-feather="home"></i>
                     <span>Kontrak</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('user.history.index') }}"
-                   class="nav-link {{ request()->routeIs('user.history.index') ? 'active' : '' }}">
+                   class="nav-link {{ request()->routeIs('user.history*') ? 'active' : '' }}">
+                    {{-- credit-card tetap, karena cocok untuk transaksi --}}
                     <i data-feather="credit-card"></i>
                     <span>Riwayat Transaksi</span>
                 </a>
@@ -40,19 +44,21 @@
         <ul class="nav-menu">
             <li>
                 <a href="{{ route('messages.index') }}"
-                   class="nav-link {{ request()->routeIs('messages.index') ? 'active' : '' }}">
-                    <i data-feather="file-text"></i>
+                   class="nav-link {{ request()->routeIs('messages.*') ? 'active' : '' }}">
+                    {{-- file-text → message-square untuk chat --}}
+                    <i data-feather="message-square"></i>
                     <span>Chat</span>
                     @if(isset($admin) && $admin->unread_count > 0)
                         <span class="badge-unread">{{ $admin->unread_count }}</span>
                     @endif
                 </a>
             </li>
-             <li>
+            <li>
                 <a href="{{ route('user.reports.index') }}"
-                   class="nav-link {{ request()->routeIs('user.reports.index') ? 'active' : '' }}">
-                    <i data-feather="book"></i>
-                    <span>Keluahan / Laporan</span>
+                   class="nav-link {{ request()->routeIs('user.reports*') ? 'active' : '' }}">
+                    {{-- book → file-text agar seragam dengan “laporan” --}}
+                    <i data-feather="file-text"></i>
+                    <span>Keluhan / Laporan</span>
                 </a>
             </li>
             <li>
@@ -62,6 +68,35 @@
                 </button>
             </li>
         </ul>
+    </div>
+</div>
+
+<!-- Logout Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div class="text-warning mb-4">
+                    <i data-feather="alert-circle" style="width: 64px; height: 64px;"></i>
+                </div>
+                <h5 class="modal-title mb-3" id="logoutModalLabel">Konfirmasi Logout</h5>
+                <p>Apakah Anda yakin ingin keluar dari sistem?</p>
+
+                <div class="mt-4 d-flex justify-content-center gap-3">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i data-feather="x"></i>
+                        Batal
+                    </button>
+                    <form action="{{ route('user.logout') }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-danger">
+                            <i data-feather="log-out"></i>
+                            Ya, Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -266,6 +301,10 @@
     transform: translateY(-2px);
 }
 
+.sidebar .nav-menu { list-style: none; margin: 0; padding: 0; }
+.sidebar .nav-menu > li { list-style: none; }
+/* sisanya pakai style lama kamu */
+
 /* Responsive */
 @media (max-width: 1024px) {
     .sidebar {
@@ -304,15 +343,13 @@
 </style>
 <script src="https://unpkg.com/feather-icons"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    // Initialize feather icons
+document.addEventListener('DOMContentLoaded', function() {
     feather.replace();
 
-    // Reinitialize feather icons when modal opens
     const logoutModal = document.getElementById('logoutModal');
-    logoutModal.addEventListener('shown.bs.modal', function() {
-        feather.replace();
-    });
+    if (logoutModal) {
+        logoutModal.addEventListener('shown.bs.modal', () => feather.replace());
+    }
 });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
