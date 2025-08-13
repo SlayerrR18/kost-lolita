@@ -42,14 +42,12 @@
 
                     <div class="mb-3">
                         <label class="form-label required">Bukti Transaksi</label>
-                        <input type="file" name="bukti_pembayaran" class="form-control"
-                               accept="image/*" required>
+                        <input type="file" name="bukti_pembayaran" class="form-control" accept="image/*" required
+                                onchange="previewSlip(this)">
                         <div class="form-text">Format: JPG, PNG, JPEG (Max. 5MB)</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Keterangan</label>
-                        <textarea name="keterangan" class="form-control" rows="3"></textarea>
+                        <div id="slipPreview" class="mt-2" style="display:none">
+                            <img src="" class="img-fluid rounded" alt="Preview" style="max-height:220px;border:1px solid #e5e7eb">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

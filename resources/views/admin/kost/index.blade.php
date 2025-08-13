@@ -4,618 +4,259 @@
 
 @push('css')
 <style>
-    /* Base Styles */
-    :root {
-        --primary: #1a7f5a;
-        --primary-light: #16c79a;
-        --danger: #dc2626;
-        --warning: #92400e;
-        --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb;
-        --gray-600: #4b5563;
-    }
+  :root{
+    --primary:#1a7f5a; --primary2:#16c79a;
+    --danger:#dc2626;  --muted:#64748b; --bg:#f8fafc;
+  }
 
-    /* Container & Layout */
-    .kost-container {
-        padding: 2rem;
-        background: var(--gray-100);
-        min-height: 100vh;
-    }
+  .kost-wrap{min-height:100vh;background:var(--bg);padding:2rem}
 
-    /* Enhanced Header Section */
-    .page-header {
-        background: white;
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
+  /* Header */
+  .page-header{
+    background:linear-gradient(135deg,var(--primary) 0%,var(--primary2) 100%);
+    border-radius:24px;color:#fff;padding:1.6rem 1.8rem;margin-bottom:1.25rem;
+    display:flex;justify-content:space-between;align-items:center;gap:1rem;
+    box-shadow:0 4px 20px rgba(26,127,90,.12)
+  }
+  .page-title{margin:0;font-weight:800;font-size:1.6rem}
+  .btn-add{
+    background:rgba(255,255,255,.15); color:#fff; border:2px solid rgba(255,255,255,.25);
+    border-radius:12px; padding:.7rem 1.2rem; font-weight:600; display:inline-flex; gap:.5rem; align-items:center
+  }
+  .btn-add:hover{background:rgba(255,255,255,.22); transform:translateY(-1px)}
 
-    .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
+  /* Stats */
+  .stats{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); margin-bottom:1rem}
+  .stat{
+    background:#fff;border-radius:16px;padding:1rem 1.2rem; box-shadow:0 4px 12px rgba(0,0,0,.05);
+  }
+  .stat .k{color:#94a3b8;font-weight:700;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
+  .stat .v{color:#0f172a;font-weight:800;font-size:1.6rem;margin-top:.15rem}
 
-    .search-filter-container {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
+  /* Filter bar */
+  .filters{display:flex; gap:.6rem; margin-bottom:1rem; flex-wrap:wrap}
+  .filters .form-control, .filters .form-select{
+    border:2px solid #e2e8f0; background:#fff; border-radius:10px; padding:.55rem .9rem
+  }
+  .filters .form-control:focus, .filters .form-select:focus{
+    border-color:var(--primary); box-shadow:0 0 0 3px rgba(26,127,90,.12)
+  }
 
-    .search-box {
-        flex: 1;
-        position: relative;
-    }
+  /* Table Card */
+  .card{
+    background:#fff;border-radius:20px; box-shadow:0 6px 18px rgba(0,0,0,.06); overflow:hidden
+  }
+  table thead th{
+    background:#f8fafc; color:#64748b; text-transform:uppercase; letter-spacing:.04em;
+    font-size:.8rem; padding:1rem
+  }
+  table td{padding:1rem; vertical-align:middle}
 
-    .search-box i {
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--gray-600);
-    }
+  .room-img{width:96px;height:96px;border-radius:12px;object-fit:cover; cursor:pointer; transition:transform .2s}
+  .room-img:hover{transform:scale(1.04)}
 
-    .search-input {
-        width: 100%;
-        padding: 0.75rem 1rem 0.75rem 2.5rem;
-        border: 1px solid var(--gray-200);
-        border-radius: 8px;
-        font-size: 0.95rem;
-        background: #f8fafc;
-        border: 2px solid #e2e8f0;
-        transition: all 0.3s ease;
-    }
+  .badge-status{
+    display:inline-flex;align-items:center;gap:.45rem;border-radius:10px;padding:.4rem .75rem;font-weight:700
+  }
+  .is-terisi{background:#dcfce7;color:#166534}
+  .is-kosong{background:#fee2e2;color:#991b1b}
 
-    .search-input:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(26,127,90,0.1);
-    }
+  .tags{display:flex;gap:.4rem;flex-wrap:wrap;max-width:420px}
+  .tag{background:#f1f5f9; color:#0f766e; border-radius:8px; padding:.28rem .6rem; font-size:.85rem; display:inline-flex; align-items:center; gap:.35rem}
 
-    .filter-box {
-        display: flex;
-        gap: 0.5rem;
-    }
+  /* Ghost action buttons */
+  .btn-ghost{width:36px;height:36px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;border:none;transition:.15s}
+  .btn-ghost:hover{transform:translateY(-1px)}
+  .btn-ghost-primary{background:rgba(26,127,90,.10); color:var(--primary)}
+  .btn-ghost-primary:hover{background:rgba(26,127,90,.18)}
+  .btn-ghost-danger{background:rgba(239,68,68,.10); color:#dc2626}
+  .btn-ghost-danger:hover{background:rgba(239,68,68,.18)}
+  .btn-ghost i{width:18px;height:18px}
 
-    .filter-select {
-        padding: 0.75rem 1rem;
-        border: 1px solid var(--gray-200);
-        border-radius: 8px;
-        min-width: 150px;
-        background: #f8fafc;
-        border: 2px solid #e2e8f0;
-        transition: all 0.3s ease;
-    }
+  /* Row fade-in */
+  tbody tr{opacity:0; animation:fadeInUp .35s ease forwards}
+  @keyframes fadeInUp{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
 
-    .filter-select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(26,127,90,0.1);
-    }
-
-    /* Enhanced Table */
-    .kost-card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        overflow: hidden;
-    }
-
-    .table {
-        margin: 0;
-    }
-
-    .table th {
-        background: #f8fafc;
-        padding: 1rem;
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .table td {
-        padding: 1rem;
-        vertical-align: middle;
-    }
-
-    .room-image {
-        width: 100px;
-        height: 100px;
-        object-fit: cover;
-        border-radius: 12px;
-        transition: transform 0.2s;
-        cursor: pointer;
-    }
-
-    .room-image:hover {
-        transform: scale(1.05);
-    }
-
-    /* Enhanced Status Badges */
-    .status-badge {
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .status-terisi {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .status-kosong {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    /* Improved Action Buttons */
-    .action-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-        border: none;
-        cursor: pointer;
-    }
-
-    .action-btn:hover {
-        transform: translateY(-2px);
-    }
-
-    /* Enhanced Modal */
-    .delete-modal-icon {
-        width: 80px;
-        height: 80px;
-        color: var(--danger);
-        margin-bottom: 1rem;
-    }
-
-    /* Modal Styles */
-    .modal-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 1040;
-    }
-
-    .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 1050;
-        overflow-x: hidden;
-        overflow-y: auto;
-        display: none;
-    }
-
-    .modal.fade .modal-dialog {
-        transform: translateY(-100px);
-        transition: transform 0.3s ease-out;
-    }
-
-    .modal.show .modal-dialog {
-        transform: none;
-    }
-
-    .modal-dialog {
-        position: relative;
-        width: auto;
-        margin: 1.75rem auto;
-        max-width: 500px;
-        pointer-events: none;
-    }
-
-    .modal-content {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        pointer-events: auto;
-        background: white;
-        border: none;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        outline: 0;
-    }
-
-    .modal-body {
-        position: relative;
-        flex: 1 1 auto;
-        padding: 2.5rem;
-    }
-
-    /* Delete Modal Specific Styles */
-    .delete-modal {
-        text-align: center;
-    }
-
-    .delete-icon {
-        width: 70px;
-        height: 70px;
-        color: var(--danger);
-        margin-bottom: 1.5rem;
-        display: inline-block;
-    }
-
-    .modal-title {
-        color: var(--danger);
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-    }
-
-    .modal-text {
-        color: #64748b;
-        font-size: 1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .modal-buttons {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-    }
-
-    .btn-modal {
-        padding: 0.75rem 1.5rem;
-        border-radius: 12px;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-
-    .btn-cancel {
-        background: #f1f5f9;
-        color: #64748b;
-        border: none;
-    }
-
-    .btn-cancel:hover {
-        background: #e2e8f0;
-    }
-
-    .btn-delete-confirm {
-        background: #fee2e2;
-        color: var(--danger);
-        border: none;
-    }
-
-    .btn-delete-confirm:hover {
-        background: #fecaca;
-    }
-
-    /* Animations */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .table tr {
-        animation: fadeIn 0.3s ease-out forwards;
-    }
-
-    /* Fasilitas Tags */
-    .fasilitas-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .fasilitas-tag {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        padding: 0.3rem 0.8rem;
-        background: #f1f5f9;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        color: var(--primary);
-    }
-
-    .fasilitas-icon {
-        width: 14px;
-        height: 14px;
-    }
-
-    .page-title {
-        font-size: 1.75rem;
-        color: var(--primary);
-        font-weight: 700;
-        margin: 0;
-    }
-
-    .btn-add {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 12px;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        border: none;
-        box-shadow: 0 4px 12px rgba(26,127,90,0.15);
-    }
-
-    .btn-add:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(26,127,90,0.2);
-        color: white;
-    }
-
-    /* Animation for table rows */
-    .table tbody tr {
-        opacity: 0;
-        animation: fadeInUp 0.3s ease forwards;
-    }
-
-    .table tbody tr:nth-child(1) { animation-delay: 0.1s; }
-    .table tbody tr:nth-child(2) { animation-delay: 0.2s; }
-    .table tbody tr:nth-child(3) { animation-delay: 0.3s; }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @media (max-width: 768px) {
-    .kost-container {
-        padding: 1rem;
-    }
-
-    .page-header {
-        padding: 1rem;
-    }
-
-    .header-content {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: stretch;
-    }
-
-    .search-filter-container {
-        flex-direction: column;
-    }
-
-    .filter-box {
-        flex-wrap: wrap;
-    }
-
-    .table td {
-        white-space: nowrap;
-    }
-
-    .fasilitas-tags {
-        max-width: 200px;
-        overflow-x: auto;
-    }
-}
+  @media (max-width:768px){ .kost-wrap{padding:1rem} .page-header{border-radius:18px} }
 </style>
 @endpush
 
 @section('content')
-<div class="kost-container">
-    <div class="page-header">
-        <div class="header-content">
-            <h1 class="page-title">Manajemen Kamar</h1>
-            <a href="{{ route('admin.kost.create') }}" class="btn btn-add">
-                <i data-feather="plus-circle" class="me-2"></i>
-                Tambah Kamar
-            </a>
-        </div>
+<div class="kost-wrap">
+  {{-- Header --}}
+  <div class="page-header">
+    <h1 class="page-title">Manajemen Kamar</h1>
+    <a href="{{ route('admin.kost.create') }}" class="btn btn-add">
+      <i data-feather="plus-circle"></i> Tambah Kamar
+    </a>
+  </div>
 
-        <form method="GET" action="{{ route('admin.kost.index') }}" class="d-flex gap-2 mb-3">
-            <input type="text" name="search" class="search-input" placeholder="Cari nomor kamar..." value="{{ request('search') }}">
-            <select name="status" class="filter-select">
-                <option value="">Semua Status</option>
-                <option value="Kosong" {{ request('status') == 'Kosong' ? 'selected' : '' }}>Kosong</option>
-                <option value="Terisi" {{ request('status') == 'Terisi' ? 'selected' : '' }}>Terisi</option>
-            </select>
-            <select name="price" class="filter-select">
-                <option value="">Semua Harga</option>
-                <option value="asc" {{ request('price') == 'asc' ? 'selected' : '' }}>Harga: Rendah - Tinggi</option>
-                <option value="desc" {{ request('price') == 'desc' ? 'selected' : '' }}>Harga: Tinggi - Rendah</option>
-            </select>
-            <button type="submit" class="btn btn-primary">Terapkan</button>
-        </form>
-    </div>
+  {{-- Stats --}}
+  @php
+    $total   = $kosts->count();
+    $terisi  = $kosts->where('status','Terisi')->count();
+    $kosong  = $kosts->where('status','Kosong')->count();
+  @endphp
+  <div class="stats">
+    <div class="stat"><div class="k">Total Kamar</div><div class="v">{{ $total }}</div></div>
+    <div class="stat"><div class="k">Kamar Terisi</div><div class="v">{{ $terisi }}</div></div>
+    <div class="stat"><div class="k">Kamar Kosong</div><div class="v">{{ $kosong }}</div></div>
+  </div>
 
-    <div class="kost-card">
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Nomor Kamar</th>
-                        <th>Fasilitas</th>
-                        <th>Foto</th>
-                        <th>Harga</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($kosts as $kost)
-                    <tr>
-                        <td class="fw-bold">{{ $kost->nomor_kamar }}</td>
-                        <!-- Bagian TD Fasilitas -->
-                        <td>
-                            @php
-                                $fasilitas = is_string($kost->fasilitas) ? json_decode($kost->fasilitas, true) : $kost->fasilitas;
-                                $fasilitas = is_array($fasilitas) ? $fasilitas : [];
-                            @endphp
-                            <div class="fasilitas-tags">
-                                @foreach($fasilitas as $item)
-                                    <span class="fasilitas-tag">
-                                        <i data-feather="check-circle" class="fasilitas-icon"></i>
-                                        {{ $item }}
-                                    </span>
-                                @endforeach
-                            </div>
-                        </td>
-                        <td>
-                           @if(is_array($kost->foto) && count($kost->foto) > 0)
-                                <img src="{{ asset('storage/' . $kost->foto[0]) }}" alt="Foto Kamar" class="room-image">
-                            @elseif(is_string($kost->foto) && !empty($kost->foto))
-                                <img src="{{ asset('storage/' . $kost->foto) }}" alt="Foto Kamar" class="room-image">
-                            @else
-                                <span class="text-muted">Tidak ada foto</span>
-                            @endif
-                        </td>
-                        <td class="fw-bold">Rp {{ number_format($kost->harga, 0, ',', '.') }}</td>
-                        <td>
-                            <span class="status-badge {{ $kost->status == 'Terisi' ? 'status-terisi' : 'status-kosong' }}">
-                                {{ $kost->status }}
-                            </span>
-                        </td>
-                        <td>
-                            <a href="{{ route('admin.kost.edit', $kost->id) }}"
-                               class="action-btn btn-edit"
-                               title="Edit">
-                                <i data-feather="edit-2"></i>
-                            </a>
-                            <button type="button"
-                                    class="action-btn btn-delete"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#deleteModal{{ $kost->id }}"
-                                    title="Hapus">
-                                <i data-feather="trash-2"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
+  {{-- Filter bar --}}
+  <form method="GET" action="{{ route('admin.kost.index') }}" class="filters">
+    <input type="text" name="search" class="form-control" placeholder="Cari nomor kamar…" value="{{ request('search') }}">
+    <select name="status" class="form-select">
+      <option value="">Semua Status</option>
+      <option value="Kosong" {{ request('status')=='Kosong'?'selected':'' }}>Kosong</option>
+      <option value="Terisi" {{ request('status')=='Terisi'?'selected':'' }}>Terisi</option>
+    </select>
+    <select name="price" class="form-select">
+      <option value="">Semua Harga</option>
+      <option value="asc"  {{ request('price')=='asc'?'selected':'' }}>Harga: Rendah → Tinggi</option>
+      <option value="desc" {{ request('price')=='desc'?'selected':'' }}>Harga: Tinggi → Rendah</option>
+    </select>
+    <button class="btn btn-primary">Terapkan</button>
+  </form>
 
-    <!-- Image Preview Modal -->
-    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header border-0">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  {{-- Table --}}
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Nomor Kamar</th>
+            <th>Fasilitas</th>
+            <th>Foto</th>
+            <th>Harga</th>
+            <th>Status</th>
+            <th style="width:110px">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+        @forelse($kosts as $i => $kost)
+          <tr style="animation-delay: {{ $i * 60 }}ms">
+            <td class="fw-bold">#{{ $kost->nomor_kamar }}</td>
+
+            <td>
+              @php
+                $fasilitas = is_string($kost->fasilitas) ? json_decode($kost->fasilitas, true) : $kost->fasilitas;
+                $fasilitas = is_array($fasilitas) ? $fasilitas : [];
+                $show = array_slice($fasilitas, 0, 4);
+                $more = max(count($fasilitas) - 4, 0);
+              @endphp
+              <div class="tags">
+                @foreach($show as $f)
+                  <span class="tag"><i data-feather="check-circle" style="width:14px;height:14px"></i>{{ $f }}</span>
+                @endforeach
+                @if($more > 0)
+                  <span class="tag" title="{{ implode(', ', $fasilitas) }}">+{{ $more }} lagi</span>
+                @endif
+              </div>
+            </td>
+
+            <td>
+              @php
+                $src = null;
+                if (is_array($kost->foto) && count($kost->foto))     $src = asset('storage/'.$kost->foto[0]);
+                elseif (is_string($kost->foto) && trim($kost->foto)) $src = asset('storage/'.$kost->foto);
+              @endphp
+              @if($src)
+                <img src="{{ $src }}" class="room-img" alt="Kamar {{ $kost->nomor_kamar }}" data-preview="{{ $src }}">
+              @else
+                <span class="text-muted">Tidak ada foto</span>
+              @endif
+            </td>
+
+            <td class="fw-bold">Rp {{ number_format($kost->harga,0,',','.') }}</td>
+
+            <td>
+              <span class="badge-status {{ $kost->status=='Terisi' ? 'is-terisi' : 'is-kosong' }}">
+                <i data-feather="{{ $kost->status=='Terisi' ? 'user-check' : 'home' }}"></i>
+                {{ $kost->status }}
+              </span>
+            </td>
+
+            <td>
+              <div class="d-flex gap-1">
+                <a href="{{ route('admin.kost.edit', $kost->id) }}" class="btn-ghost btn-ghost-primary" data-bs-toggle="tooltip" title="Edit kamar">
+                  <i data-feather="edit-2"></i>
+                </a>
+                <button type="button" class="btn-ghost btn-ghost-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $kost->id }}" title="Hapus kamar">
+                  <i data-feather="x-octagon"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          {{-- Delete modal per item --}}
+          <div class="modal fade" id="deleteModal{{ $kost->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-body text-center p-4">
+                  <div class="text-danger mb-3"><i data-feather="x-octagon" style="width:64px;height:64px"></i></div>
+                  <h5 class="mb-2 text-danger">Hapus Kamar</h5>
+                  <p class="text-muted mb-3">Yakin hapus kamar #{{ $kost->nomor_kamar }}? Tindakan ini tidak dapat dibatalkan.</p>
+                  <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                      <i data-feather="x" class="me-1"></i>Batal
+                    </button>
+                    <form action="{{ route('admin.kost.destroy', $kost->id) }}" method="POST">
+                      @csrf @method('DELETE')
+                      <button type="submit" class="btn btn-danger">
+                        <i data-feather="x-octagon" class="me-1"></i> Hapus
+                      </button>
+                    </form>
+                  </div>
                 </div>
-                <div class="modal-body text-center p-0">
-                    <img id="previewImage" src="" alt="Preview" class="img-fluid rounded">
-                </div>
+              </div>
             </div>
-        </div>
+          </div>
+        @empty
+          <tr><td colspan="6" class="text-center text-muted py-5">
+            <i data-feather="inbox"></i> Belum ada data kamar
+          </td></tr>
+        @endforelse
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    @foreach($kosts as $kost)
-    <!-- Delete Modal -->
-    <div class="modal fade" id="deleteModal{{ $kost->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $kost->id }}" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-body delete-modal">
-                    <i data-feather="alert-circle" class="delete-icon"></i>
-                    <h4 class="modal-title">Hapus Kamar</h4>
-                    <p class="modal-text">Apakah Anda yakin ingin menghapus kamar nomor {{ $kost->nomor_kamar }}?</p>
-                    <div class="modal-buttons">
-                        <button type="button" class="btn-modal btn-cancel" data-bs-dismiss="modal">
-                            <i data-feather="x"></i>
-                            Batal
-                        </button>
-                        <form action="{{ route('admin.kost.destroy', $kost->id) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn-modal btn-delete-confirm">
-                                <i data-feather="trash-2"></i>
-                                Hapus
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+  {{-- Preview image modal (satu saja) --}}
+  <div class="modal fade" id="imgPreview" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <button type="button" class="btn-close ms-auto m-2" data-bs-dismiss="modal"></button>
+        <img id="imgPreviewSrc" class="img-fluid rounded-bottom" alt="Preview">
+      </div>
     </div>
-    @endforeach
+  </div>
 </div>
 @endsection
 
 @push('js')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Feather Icons
-    feather.replace();
+document.addEventListener('DOMContentLoaded', function () {
+  if (window.feather) feather.replace();
 
-    // Image Preview Modal
-    const imagePreviewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+  // tooltip
+  [...document.querySelectorAll('[data-bs-toggle="tooltip"]')]
+    .forEach(el => new bootstrap.Tooltip(el));
 
-    document.querySelectorAll('.room-image').forEach(img => {
-        img.addEventListener('click', function() {
-            const previewImage = document.getElementById('previewImage');
-            previewImage.src = this.src;
-            imagePreviewModal.show();
-        });
+  // preview
+  const modal = new bootstrap.Modal('#imgPreview');
+  const img  = document.getElementById('imgPreviewSrc');
+  document.querySelectorAll('.room-img').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      img.src = el.dataset.preview || el.src;
+      modal.show();
     });
+  });
 
-    // Live Search & Filter
-    const searchInput = document.querySelector('input[name="search"]');
-    const statusFilter = document.querySelector('select[name="status"]');
-    const priceFilter = document.querySelector('select[name="price"]');
-
-    [searchInput, statusFilter, priceFilter].forEach(element => {
-        element.addEventListener('change', function() {
-            this.closest('form').submit();
-        });
-    });
-
-    // Animate rows on load
-    const tableRows = document.querySelectorAll('tbody tr');
-    tableRows.forEach((row, index) => {
-        row.style.animationDelay = `${index * 0.1}s`;
-    });
-
-    // Modal handling
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-        modal.addEventListener('show.bs.modal', function() {
-            document.body.style.overflow = 'hidden';
-        });
-
-        modal.addEventListener('shown.bs.modal', function() {
-            feather.replace();
-        });
-
-        modal.addEventListener('hidden.bs.modal', function() {
-            document.body.style.overflow = '';
-        });
-    });
-
-    // Ensure modals can be closed with escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            modals.forEach(modal => {
-                const bsModal = bootstrap.Modal.getInstance(modal);
-                if (bsModal) bsModal.hide();
-            });
-        }
-    });
+  // animate rows delay already inline; just re-run icons after modal show
+  document.querySelectorAll('.modal').forEach(m=>{
+    m.addEventListener('shown.bs.modal', ()=> feather.replace());
+  });
 });
 </script>
 @endpush

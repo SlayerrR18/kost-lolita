@@ -7,18 +7,18 @@ use Illuminate\Support\Facades\Storage;
 
 class Financial extends Model
 {
-    protected $casts = [
-        'tanggal_transaksi' => 'date',
-        'total' => 'float'
-    ];
-
     protected $fillable = [
         'kost_id',
         'nama_transaksi',
         'tanggal_transaksi',
         'total',
         'status',
-        'bukti_pembayaran'
+        'bukti_pembayaran',
+    ];
+
+    protected $casts = [
+        'tanggal_transaksi' => 'date',
+        'total' => 'decimal:2',
     ];
 
     public function kost()
@@ -26,12 +26,10 @@ class Financial extends Model
         return $this->belongsTo(Kost::class);
     }
 
-    // Add accessor for image URL
-    public function getBuktiPembayaranUrlAttribute()
+    public function getBuktiPembayaranUrlAttribute(): ?string
     {
-        if ($this->bukti_pembayaran) {
-            return Storage::url($this->bukti_pembayaran);
-        }
-        return null;
+        return $this->bukti_pembayaran
+            ? Storage::disk('public')->url($this->bukti_pembayaran)
+            : null;
     }
 }

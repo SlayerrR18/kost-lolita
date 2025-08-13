@@ -75,34 +75,27 @@ class FinancialController extends Controller
     {
         try {
             $validated = $request->validate([
-                'kost_id' => 'required|exists:kosts,id',
-                'nama_transaksi' => 'required|string|max:255',
+                'kost_id'           => 'required|exists:kosts,id',
+                'nama_transaksi'    => 'required|string|max:255',
                 'tanggal_transaksi' => 'required|date|before_or_equal:today',
-                'total' => 'required|numeric|min:0',
-                'status' => 'required|in:Pemasukan,Pengeluaran',
-                'bukti_pembayaran' => 'required|image|mimes:jpeg,png,jpg|max:5120',
-                'keterangan' => 'nullable|string|max:1000'
+                'total'             => 'required|numeric|min:0',
+                'status'            => 'required|in:Pemasukan,Pengeluaran',
+                'bukti_pembayaran'  => 'required|image|mimes:jpeg,png,jpg|max:5120',
             ]);
 
             DB::beginTransaction();
 
             if ($request->hasFile('bukti_pembayaran')) {
-                $file = $request->file('bukti_pembayaran');
-                $fileName = time() . '_' . Str::slug($file->getClientOriginalName()) . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('bukti-pembayaran', $fileName, 'public');
-                $validated['bukti_pembayaran'] = $path;
+                $file      = $request->file('bukti_pembayaran');
+                $nameOnly  = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $fileName  = time().'_'.\Str::slug($nameOnly).'.'.$file->getClientOriginalExtension();
+                $validated['bukti_pembayaran'] = $file->storeAs('bukti-pembayaran', $fileName, 'public');
             }
-
-            // Add additional fields
-            $validated['created_by'] = auth()->id();
-            $validated['updated_by'] = auth()->id();
 
             $transaction = Financial::create($validated);
 
-            // Update kost status if needed
             if ($validated['status'] === 'Pemasukan') {
-                $kost = Kost::find($validated['kost_id']);
-                if ($kost) {
+                if ($kost = \App\Models\Kost::find($validated['kost_id'])) {
                     $kost->last_payment_date = $validated['tanggal_transaksi'];
                     $kost->save();
                 }
@@ -110,28 +103,21 @@ class FinancialController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Transaksi berhasil ditambahkan',
-                'data' => $transaction->load('kost')
-            ]);
+            return $request->expectsJson()
+                ? response()->json(['success'=>true,'message'=>'Transaksi berhasil ditambahkan','data'=>$transaction->load('kost')])
+                : back()->with('success','Transaksi berhasil ditambahkan');
 
-        } catch (ValidationException $e) {
-            DB::rollback();
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $e->errors()
-            ], 422);
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            \Log::error('Transaction creation failed: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return $request->expectsJson()
+                ? response()->json(['success'=>false,'message'=>'Validasi gagal','errors'=>$e->errors()],422)
+                : back()->withErrors($e->errors())->withInput();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            \Log::error('Transaction creation failed: '.$e->getMessage());
+            return $request->expectsJson()
+                ? response()->json(['success'=>false,'message'=>$e->getMessage()],500)
+                : back()->with('error','Terjadi kesalahan: '.$e->getMessage())->withInput();
         }
     }
 
