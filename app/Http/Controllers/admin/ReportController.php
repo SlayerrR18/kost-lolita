@@ -53,7 +53,7 @@ class ReportController extends Controller
         }
         $report->save();
 
-        return back()->with('success', 'Report diperbarui.');
+        return redirect()->route('admin.reports.index');
     }
 
     public function destroy(Report $report)

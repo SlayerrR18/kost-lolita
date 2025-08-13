@@ -9,13 +9,13 @@
 
         <div class="navbar-center">
             <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Home</a>
-            <a href="{{ route('about') }}" class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}">About</a>
+            <a href="{{ route('about') }}" class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}">Tentang Kami</a>
             <a href="{{ route('kamar') }}" class="nav-link {{ request()->routeIs('kamar') ? 'active' : '' }}">Kamar</a>
         </div>
 
         <div class="navbar-right">
             <a href="{{ route('login') }}" class="nav-contact">
-                <i class="fas fa-user"></i> Login   
+                <i class="fas fa-user"></i> Login
             </a>
         </div>
     </div>

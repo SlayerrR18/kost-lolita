@@ -4,73 +4,131 @@
 
 @push('css')
 <style>
-  :root{ --brand:#1a7f5a; --brand2:#16c79a; --ink:#1e293b; --muted:#64748b; --bg:#f8fafc; }
-  .page{min-height:100vh;background:var(--bg);padding:28px 20px;}
-  .container-narrow{max-width:1200px;margin:0 auto;}
-  .hero{
-    background:linear-gradient(135deg,var(--brand) 0%,var(--brand2) 100%);
-    color:#fff;border-radius:20px;padding:20px 24px;margin-bottom:20px;
-    display:flex;align-items:center;justify-content:space-between;gap:16px;
-    box-shadow:0 6px 24px rgba(0,0,0,.08);
+  :root{
+    --primary:#1a7f5a; --primary-2:#16c79a;
+    --bg:#f8fafc; --ink:#1e293b; --muted:#64748b; --ring:#e2e8f0;
+    /* skala padding/spacing responsif */
+    --xpad: clamp(0.75rem, 2vw, 1.75rem);
+    --ypad: clamp(0.75rem, 2.5vw, 2rem);
+    --gap: clamp(0.75rem, 2vw, 1rem);
+    --radius: 24px;
   }
-  .hero h1{font-size:1.25rem;margin:0}
-  .hero .sub{opacity:.9;font-size:.9rem}
-  .hero .badge{background:#fff;color:var(--brand);border-radius:999px;padding:.4rem .75rem;font-weight:600}
 
-  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-  .card{background:#fff;border-radius:16px;padding:18px 18px;box-shadow:0 4px 14px rgba(0,0,0,.06)}
-  .card h4{font-size:.9rem;color:var(--muted);margin:0 0 .4rem}
-  .value{font-size:1.5rem;color:var(--ink);font-weight:700}
-  .hint{color:var(--muted);font-size:.85rem}
+  /* Bungkus halaman */
+  .report-container{
+    min-height:100vh;
+    background:var(--bg);
+    padding: var(--ypad) var(--xpad);
+  }
 
-  /* blok data panjang */
-  .row-2{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));margin-top:16px}
-  .kicker{display:flex;align-items:center;gap:.5rem;color:var(--muted)}
+  /* Kontainer fluid: lebar mengikuti layar tapi tetap ada max agar tetap enak dibaca */
+  .container-narrow{
+    width:100%;
+    max-width: clamp(1024px, 92vw, 1440px); /* naik dari 1200 -> 1440 dan fleksibel */
+    margin-inline:auto;
+    /* jangan kasih padding tetap di sini; pakai padding dari .report-container */
+  }
+
+  /* Header gradient konsisten, padding adaptif */
+  .page-header{
+    background:linear-gradient(135deg,var(--primary) 0%,var(--primary-2) 100%);
+    color:#fff;border-radius:var(--radius);
+    padding: clamp(1rem, 3vw, 2rem);
+    margin-bottom: clamp(1rem, 3vw, 2rem);
+    box-shadow:0 6px 24px rgba(26,127,90,.15);
+  }
+  .header-content{
+    display:flex;align-items:center;justify-content:space-between;gap:var(--gap);flex-wrap:wrap
+  }
+  .page-title{font-size:clamp(1.25rem, 2.2vw, 1.75rem);font-weight:700;margin:0}
+  .page-subtitle{opacity:.9;margin-top:.4rem;font-size:clamp(.85rem,1.6vw,.95rem)}
+
+  /* Kartu */
+  .card{
+    background:#fff;border-radius:var(--radius);
+    box-shadow:0 4px 20px rgba(0,0,0,.06);
+    padding: clamp(1rem, 2.2vw, 1.25rem);
+  }
+  .kicker{display:flex;align-items:center;gap:.5rem;color:var(--muted);font-size:clamp(.85rem,1.6vw,.95rem)}
   .kicker i{width:16px;height:16px}
+  .value{font-size:clamp(1.25rem, 3vw, 1.6rem);color:var(--ink);font-weight:700}
+  .hint{color:var(--muted);font-size:clamp(.8rem,1.5vw,.9rem)}
 
-  .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:16px}
-  .btn{border:none;border-radius:10px;padding:.7rem 1rem;font-weight:600;display:inline-flex;align-items:center;gap:.5rem}
-  .btn-primary{background:var(--brand);color:#fff}
-  .btn-outline{background:#eef2f7;color:#0f172a}
+  /* Grid yang lebih elastis */
+  .grid{
+    display:grid;gap:var(--gap);
+    /* auto-fill + min kolom lebih kecil & fleksibel agar nggak cepat “jatuh” saat zoom */
+    grid-template-columns: repeat(auto-fill, minmax(clamp(220px, 26vw, 360px), 1fr));
+  }
 
-  /* responsive safe padding supaya nggak “nempel” ke kiri/atas */
-  @media (min-width: 1280px){
-    .page{padding:32px 28px}
+  .row-2{
+    display:grid;gap:var(--gap);margin-top:var(--gap);
+    grid-template-columns: repeat(auto-fill, minmax(clamp(280px, 32vw, 520px), 1fr));
+  }
+
+  /* Tombol konsisten */
+  .btn-add{
+    background:linear-gradient(135deg,var(--primary) 0%,var(--primary-2) 100%);
+    color:#fff;padding:.75rem 1.5rem;border-radius:12px;font-weight:600;
+    display:inline-flex;align-items:center;gap:.5rem;border:none;
+    box-shadow:0 4px 12px rgba(26,127,90,.15);transition:all .3s
+  }
+  .btn-add:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(26,127,90,.2);color:#fff}
+
+  .btn-secondary{
+    background:#f1f5f9;color:#0f172a;padding:.75rem 1.25rem;border-radius:12px;
+    display:inline-flex;align-items:center;gap:.5rem;border:none;transition:all .25s
+  }
+  .btn-secondary:hover{background:#e7eef6;transform:translateY(-2px)}
+
+  .badge{background:#fff;color:var(--primary);border-radius:999px;padding:.4rem .75rem;font-weight:700}
+
+  /* Micro-tuning untuk layar super lebar: longgarkan max-width dikit */
+  @media (min-width: 1600px){
+    .container-narrow{max-width: min(1600px, 92vw);}
   }
 </style>
 @endpush
 
+
 @section('content')
 @php
-  $contract = $contract ?? ($latestContract ?? null); // kalau controller sudah kirim $contract, pakai itu
+  $contract = $contract ?? ($latestContract ?? null);
 @endphp
-<div class="page">
+
+<div class="report-container">
   <div class="container-narrow">
-    <div class="hero">
-      <div>
-        <h1>Dashboard</h1>
-        <div class="sub">Hai, {{ auth()->user()->name }} — {{ now()->translatedFormat('d M Y') }}</div>
+    {{-- Header konsisten --}}
+    <div class="page-header">
+      <div class="header-content">
+        <div>
+          <h1 class="page-title">Dashboard</h1>
+          <div class="page-subtitle">Hai, {{ auth()->user()->name }} — {{ now()->translatedFormat('d M Y') }}</div>
+        </div>
+        @if(session('success'))
+          <span class="badge" aria-live="polite">{{ session('success') }}</span>
+        @endif
       </div>
-      @if(session('success')) <span class="badge">{{ session('success') }}</span> @endif
     </div>
 
     {{-- Kartu ringkas --}}
     <div class="grid">
       <div class="card">
-        <h4>Sisa Kontrak</h4>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">
+          <h4 class="kicker"><i data-feather="clock"></i> Sisa Kontrak</h4>
+          @if($contract && $contract->tanggal_keluar->diffInDays(now()) <= 30)
+            <span class="badge">Segera berakhir</span>
+          @endif
+        </div>
         <div class="value" id="remainText"
              @if($contract) data-end="{{ $contract->tanggal_keluar?->copy()->endOfDay()->toIso8601String() }}" @endif>
-          @if($contract)
-            {{ $contract->tanggal_keluar->diffInDays(now()) }} Hari
-          @else
-            -
-          @endif
+          @if($contract) {{ $contract->tanggal_keluar->diffInDays(now()) }} Hari @else - @endif
         </div>
         <div class="hint" id="remainSub"></div>
       </div>
 
       <div class="card">
-        <h4>Nomor Kamar</h4>
+        <h4 class="kicker"><i data-feather="home"></i> Nomor Kamar</h4>
         <div class="value">
           {{ $contract?->kost?->nomor_kamar ? 'Kamar '.$contract->kost->nomor_kamar : '-' }}
         </div>
@@ -78,7 +136,7 @@
       </div>
 
       <div class="card">
-        <h4>Periode</h4>
+        <h4 class="kicker"><i data-feather="calendar"></i> Periode</h4>
         <div class="value">
           {{ $contract?->tanggal_masuk?->translatedFormat('d M Y') ?? '-' }}
           — {{ $contract?->tanggal_keluar?->translatedFormat('d M Y') ?? '-' }}
@@ -87,7 +145,7 @@
       </div>
 
       <div class="card">
-        <h4>Kontak Tersimpan</h4>
+        <h4 class="kicker"><i data-feather="book-open"></i> Kontak Tersimpan</h4>
         <div class="kicker"><i data-feather="phone"></i> {{ $contract?->phone ?? '-' }}</div>
         <div class="kicker"><i data-feather="mail"></i> {{ $contract?->email ?? '-' }}</div>
       </div>
@@ -96,28 +154,28 @@
     {{-- Detail tambahan --}}
     <div class="row-2">
       <div class="card">
-        <h4>Alamat</h4>
+        <h4 class="kicker"><i data-feather="map-pin"></i> Alamat</h4>
         <div class="value" style="font-size:1rem;font-weight:600">{{ $contract?->alamat ?? '-' }}</div>
       </div>
       <div class="card">
-        <h4>Status</h4>
+        <h4 class="kicker"><i data-feather="activity"></i> Status</h4>
         <div class="value" style="text-transform:capitalize">{{ $contract?->status ?? '-' }}</div>
         <div class="hint">Terakhir diperbarui: {{ $contract?->updated_at?->diffForHumans() ?? '-' }}</div>
       </div>
       <div class="card">
-        <h4>Tanggal Masuk</h4>
+        <h4 class="kicker"><i data-feather="log-in"></i> Tanggal Masuk</h4>
         <div class="value">{{ $contract?->tanggal_masuk?->translatedFormat('d F Y') ?? '-' }}</div>
       </div>
       <div class="card">
-        <h4>Tanggal Keluar</h4>
+        <h4 class="kicker"><i data-feather="log-out"></i> Tanggal Keluar</h4>
         <div class="value">{{ $contract?->tanggal_keluar?->translatedFormat('d F Y') ?? '-' }}</div>
       </div>
     </div>
 
-    <div class="actions">
-      <a href="{{ route('user.contract') }}" class="btn btn-outline"><i data-feather="file-text"></i> Detail Kontrak</a>
-      @if($contract && $contract->tanggal_keluar->diffInDays(now()) <= 120)
-        <a href="{{ route('user.contract') }}#extendModal" class="btn btn-primary">
+    <div class="actions" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:16px">
+      <a href="{{ route('user.contract') }}" class="btn-secondary"><i data-feather="file-text"></i> Detail Kontrak</a>
+      @if($contract && $contract->tanggal_keluar->diffInDays(now()) <= 30)
+        <a href="{{ route('user.contract') }}#extendModal" class="btn-add">
           <i data-feather="refresh-ccw"></i> Perpanjang Kontrak
         </a>
       @endif
@@ -128,27 +186,19 @@
 
 @push('js')
 <script>
-  // icon
-  document.addEventListener('DOMContentLoaded', ()=> window.feather && feather.replace());
-
-  // live countdown sisa kontrak
-  (function(){
-    const el = document.getElementById('remainText');
-    const sub = document.getElementById('remainSub');
-    if(!el || !el.dataset.end) return;
-    const end = new Date(el.dataset.end);
-
-    const tick = () => {
-      const now = new Date();
-      let diff = Math.max(0, end - now); // ms
-      const days = Math.floor(diff / 86400000); diff -= days*86400000;
-      const hrs  = Math.floor(diff / 3600000);  diff -= hrs*3600000;
-      const min  = Math.floor(diff / 60000);
-      el.textContent = `${days} Hari`;
-      sub.textContent = `${hrs}j ${min}m sisa`;
-    };
-    tick();
-    setInterval(tick, 60000); // tiap menit
-  })();
+function initIcons(){
+  if(!window.feather) return;
+  // JANGAN hapus .feather! Itu adalah SVG yang sudah jadi (termasuk di sidebar).
+  // Cukup replace semua placeholder <i data-feather> yang masih ada di halaman saat ini.
+  document.querySelectorAll('[data-feather]').forEach(el=>{
+    const name = el.getAttribute('data-feather');
+    if (name && window.feather.icons[name]) {
+      el.outerHTML = window.feather.icons[name].toSvg({
+        'stroke-width': 1.5, width: 16, height: 16, class: 'feather-16'
+      });
+    }
+  });
+}
+document.addEventListener('DOMContentLoaded', initIcons);
 </script>
 @endpush

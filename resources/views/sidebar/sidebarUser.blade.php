@@ -22,7 +22,7 @@
             </li>
             <li>
                 <a href="{{ route('user.contract') }}"
-                   class="nav-link {{ request()->routeIs('user.contract*') ? 'active' : '' }}">
+                   class="nav-link {{ request()->routeIs('user.contract') ? 'active' : '' }}">
                     {{-- home tetap relevan --}}
                     <i data-feather="home"></i>
                     <span>Kontrak</span>
@@ -30,8 +30,7 @@
             </li>
             <li>
                 <a href="{{ route('user.history.index') }}"
-                   class="nav-link {{ request()->routeIs('user.history*') ? 'active' : '' }}">
-                    {{-- credit-card tetap, karena cocok untuk transaksi --}}
+                   class="nav-link {{ request()->routeIs('user.history.index') ? 'active' : '' }}">
                     <i data-feather="credit-card"></i>
                     <span>Riwayat Transaksi</span>
                 </a>

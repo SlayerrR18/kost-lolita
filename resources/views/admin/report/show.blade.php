@@ -134,7 +134,7 @@
         </div>
 
         <div class="action-bar">
-          <a href="{{ url()->previous() }}" class="btn btn-outline-secondary">Kembali</a>
+          <a href="{{ route('admin.reports.index') }}" class="btn btn-outline-secondary">Kembali</a>
           <button class="btn btn-success" id="saveBtn">
             Simpan Perubahan
           </button>

@@ -1,166 +1,417 @@
 {{-- resources/views/user/contract/index.blade.php --}}
 @extends('layouts.user')
-@section('title','Kontrak')
+
+@section('title', 'Kontrak Saya')
 
 @push('css')
+<link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css"> {{-- optional: biar selaras dependensi --}}
 <style>
-  :root{ --brand:#1a7f5a; --brand2:#16c79a; --bg:#f8fafc; --ink:#0f172a; --muted:#64748b; }
-  .page{min-height:100vh;background:var(--bg);padding:28px 20px;}
-  .container-narrow{max-width:1200px;margin:0 auto;}
-  .hero{background:linear-gradient(135deg,var(--brand) 0%,var(--brand2) 100%);
-        color:#fff;border-radius:20px;padding:20px 24px;margin-bottom:20px;
-        display:flex;align-items:center;justify-content:space-between}
-  .hero h1{font-size:1.25rem;margin:0}
-  .grid{display:grid;gap:18px;grid-template-columns:repeat(12,1fr)}
-  .col-5{grid-column:span 5}
-  .col-7{grid-column:span 7}
-  @media (max-width:992px){ .col-5,.col-7{grid-column:span 12} }
+    /* === Palette & base (selaras dengan menu Report) === */
+    :root{
+        --primary:#1a7f5a; --primary-2:#16c79a;
+        --surface:#ffffff; --bg:#f8fafc; --ink:#1e293b;
+        --muted:#475569; --ring:#e2e8f0;
+    }
 
-  .card{background:#fff;border-radius:18px;padding:22px;box-shadow:0 4px 14px rgba(0,0,0,.06)}
-  .profile{display:flex;flex-direction:column;align-items:center;gap:14px}
-  .profile img{width:128px;height:128px;border-radius:50%;object-fit:cover;border:4px solid #fff;
-               box-shadow:0 6px 18px rgba(0,0,0,.1)}
-  .h6{font-size:1rem;color:var(--muted);margin:0 0 .4rem}
-  .val{font-size:1.15rem;color:var(--ink);font-weight:700}
-  .row{display:grid;gap:14px;grid-template-columns:repeat(2,1fr)}
-  .row .cell{background:#f8fafc;border-radius:12px;padding:14px}
-  .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:16px}
-  .btn{border:none;border-radius:10px;padding:.7rem 1rem;font-weight:600;display:inline-flex;align-items:center;gap:.5rem}
-  .btn-primary{background:var(--brand);color:#fff}
-  .btn-outline{background:#eef2f7}
+    .report-container{padding:2rem;background:var(--bg);min-height:100vh}
+    @media (max-width:768px){ .report-container{padding:1rem} }
+
+    .page-header{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-2) 100%);
+        border-radius:24px;padding:2rem;margin-bottom:2rem;color:#fff;box-shadow:0 4px 20px rgba(26,127,90,.15)}
+    .header-content{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+    .page-title{font-size:1.75rem;font-weight:700;margin:0}
+    .page-subtitle{opacity:.9;margin-top:.5rem}
+
+    .content-card{background:#fff;border-radius:24px;box-shadow:0 4px 20px rgba(0,0,0,.05);overflow:hidden}
+    .section-card{background:#fff;border-radius:24px;box-shadow:0 4px 20px rgba(0,0,0,.05);padding:1.5rem}
+
+    .btn-add{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-2) 100%);color:#fff;padding:.75rem 1.5rem;border-radius:12px;font-weight:500;display:inline-flex;align-items:center;gap:.5rem;transition:all .3s ease;border:none;box-shadow:0 4px 12px rgba(26,127,90,.15)}
+    .btn-add:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(26,127,90,.2);color:#fff}
+    .btn-secondary{background:#f1f5f9;color:#0f172a;padding:.75rem 1.25rem;border-radius:12px;border:none;display:inline-flex;align-items:center;gap:.5rem;transition:all .25s ease}
+    .btn-secondary:hover{background:#e7eef6;transform:translateY(-2px)}
+
+    .badge{padding:.4rem .8rem;border-radius:8px;font-weight:500;font-size:.875rem}
+    .badge.muted{background:#f1f5f9;color:#475569}
+    .badge.info{background:#e0f2fe;color:#075985}
+    .badge.open{background:#fef3c7;color:#92400e}
+    .badge.in_progress{background:#dbeafe;color:#1e40af}
+    .badge.resolved{background:#dcfce7;color:#166534}
+    /* tambahan untuk status kontrak */
+    .badge.active{background:#dcfce7;color:#166534}
+    .badge.pending{background:#fef3c7;color:#92400e}
+    .badge.expired{background:#fee2e2;color:#991b1b}
+
+    /* Grid dua kolom yang responsif */
+    .grid-layout{display:grid;grid-template-columns:350px 1fr;gap:1.5rem}
+    @media (max-width:1024px){ .grid-layout{grid-template-columns:1fr} }
+
+    /* Kartu profil kiri */
+    .profile-card{padding:1.5rem}
+    .profile-header{display:flex;gap:16px;align-items:center;margin-bottom:1rem}
+    .profile-image{width:72px;height:72px;border-radius:16px;object-fit:cover}
+    .profile-info h3{font-size:1.25rem;font-weight:600;color:#0f172a;margin:0 0 .25rem}
+    .profile-info .subtle{color:#64748b;font-size:.875rem}
+
+    .tags-container{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}
+    .tag{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:#f8fafc;border:1px solid #e5e7eb;border-radius:999px;font-size:.875rem;font-weight:500;color:#334155}
+    .tag i{width:16px;height:16px}
+
+    .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-top:1rem}
+    @media (max-width:576px){ .stats-grid{grid-template-columns:1fr} }
+    .stat-card{background:#f8fafc;border-radius:16px;padding:1rem;border:1px dashed #e5e7eb}
+    .stat-label{font-size:.875rem;color:#64748b;margin-bottom:.25rem}
+    .stat-value{font-size:1.125rem;font-weight:600;color:#0f172a}
+
+    /* Progress */
+    .progress-container{margin-top:1rem}
+    .progress-bar-bg{height:8px;background:#eef2f7;border-radius:999px;overflow:hidden}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--primary) 0%,var(--primary-2) 100%);transition:width .3s ease}
+    .progress-info{display:flex;justify-content:space-between;margin-top:.5rem;font-size:.875rem;color:#64748b}
+
+    /* Tabs (selaras report) */
+    .tabs-container{display:flex;gap:.5rem;margin-bottom:1rem;border-bottom:1px solid #e2e8f0;padding-bottom:.75rem;flex-wrap:wrap}
+    .tab-item{padding:.6rem 1rem;border-radius:12px;font-weight:500;color:#475569;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem;text-decoration:none}
+    .tab-item:hover{background:#f1f5f9}
+    .tab-item.active{background:rgba(26,127,90,.10);color:#166534}
+    .tab-item i{width:18px;height:18px}
+
+    /* Info grid kanan */
+    .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+    @media (max-width:768px){ .info-grid{grid-template-columns:1fr} }
+    .info-card{background:#f8fafc;border-radius:16px;padding:1.25rem}
+    .info-card-title{font-size:.875rem;color:#64748b;margin-bottom:.25rem}
+    .info-card-value{font-size:1.125rem;font-weight:600;color:#0f172a;margin-bottom:.25rem}
+    .info-card-meta{font-size:.875rem;color:#64748b}
+
+    .actions-container{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:.75rem;margin-top:1rem;padding-top:1rem;border-top:1px solid #e2e8f0}
+
+    /* Empty state */
+    .empty-card{background:#fff;border-radius:24px;box-shadow:0 4px 20px rgba(0,0,0,.05)}
 </style>
 @endpush
 
 @section('content')
-<div class="page">
-  <div class="container-narrow">
-    <div class="hero">
-      <div><h1>Kontrak</h1><div style="opacity:.9;font-size:.9rem">{{ now()->translatedFormat('d M Y') }}</div></div>
-      @if($contract && optional($contract->tanggal_keluar)->diffInDays(now()) <= 120)
-        <a class="btn btn-outline" data-bs-toggle="modal" data-bs-target="#extendModal">
-          <i data-feather="refresh-ccw"></i> Perpanjang Kontrak
-        </a>
-      @endif
+@php
+    // Samakan kelas badge status agar konsisten dengan menu Report
+    $status = $contract->status ?? null;
+    $statusClass = match(strtolower((string)$status)){
+        'active','aktif' => 'active',
+        'pending','menunggu' => 'pending',
+        'expired','selesai','berakhir' => 'expired',
+        default => 'muted'
+    };
+@endphp
+
+<div class="report-container">
+    {{-- Header --}}
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1 class="page-title">Kontrak Saya</h1>
+                <p class="page-subtitle">Ringkasan status kontrak, masa berlaku, dan tindakan cepat</p>
+            </div>
+
+            @if(isset($contract) && $contract?->tanggal_keluar?->diffInDays(now()) <= 30)
+                <button class="btn-add" data-bs-toggle="modal" data-bs-target="#extendModal">
+                    <i data-feather="refresh-ccw"></i>
+                    <span>Ajukan Perpanjangan</span>
+                </button>
+            @endif
+        </div>
     </div>
 
+    {{-- Body --}}
     @if($contract)
-      <div class="grid">
-        <div class="col-5">
-          <div class="card profile">
-            <img src="{{ $contract->ktp_image_url ?? asset('images/placeholder.jpg') }}" alt="KTP">
-            <div class="val">{{ $contract->name }}</div>
-            <div style="color:#64748b">{{ $contract->email }}</div>
-            <div style="color:#64748b">{{ $contract->phone }}</div>
-            <div style="color:#64748b;text-align:center">{{ $contract->alamat }}</div>
-          </div>
-        </div>
+        <div class="grid-layout">
+            <div class="section-card profile-card">
+                <div class="profile-header">
+                    <img src="{{ $contract->ktp_image_url ?? asset('images/placeholder.jpg') }}" alt="KTP" class="profile-image">
+                    <div class="profile-info">
+                        <h3>{{ $contract->name }}</h3>
+                        <div class="subtle">{{ $contract->email }}</div>
+                        <div class="subtle">{{ $contract->phone }}</div>
+                    </div>
+                </div>
 
-        <div class="col-7">
-          <div class="card">
-            <div class="row">
-              <div class="cell">
-                <div class="h6">Kamar</div>
-                <div class="val">Kamar {{ $contract->kost->nomor_kamar }}</div>
-                <div style="color:#64748b">Rp {{ number_format($contract->kost->harga,0,',','.') }}/bulan</div>
-              </div>
-              <div class="cell">
-                <div class="h6">Sisa Kontrak</div>
-                <div class="val">{{ $contract->tanggal_keluar->diffInDays(now()) }} Hari</div>
-              </div>
-              <div class="cell">
-                <div class="h6">Tanggal Masuk</div>
-                <div class="val">{{ $contract->tanggal_masuk->translatedFormat('d F Y') }}</div>
-              </div>
-              <div class="cell">
-                <div class="h6">Tanggal Keluar</div>
-                <div class="val">{{ $contract->tanggal_keluar->translatedFormat('d F Y') }}</div>
-              </div>
-              <div class="cell">
-                <div class="h6">Durasi</div>
-                <div class="val">{{ $contract->duration }} Bulan</div>
-              </div>
-              <div class="cell">
-                <div class="h6">Status</div>
-                <div class="val" style="text-transform:capitalize">{{ $contract->status }}</div>
-              </div>
+                <div class="tags-container">
+                    <span class="tag"><i data-feather="home"></i> Kamar {{ $contract->kost->nomor_kamar }}</span>
+                    <span class="tag"><i data-feather="credit-card"></i> Rp {{ number_format($contract->kost->harga,0,',','.') }}/bulan</span>
+                    <span class="tag"><i data-feather="calendar"></i> {{ $contract->duration }} bulan</span>
+                    <span class="tag badge {{ $statusClass }}">
+                        <i data-feather="{{ $statusClass==='active'?'check-circle':($statusClass==='pending'?'clock':'x-circle') }}"></i>
+                        {{ \Illuminate\Support\Str::headline($contract->status ?? 'Menunggu') }}
+                    </span>
+                </div>
+
+                <div class="subtle">{{ $contract->alamat }}</div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Tanggal Masuk</div>
+                        <div class="stat-value">{{ $contract->tanggal_masuk->translatedFormat('d M Y') }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Tanggal Keluar</div>
+                        <div class="stat-value">{{ $contract->tanggal_keluar->translatedFormat('d M Y') }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Hari</div>
+                        <div class="stat-value">{{ $totalDays }} hari</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Sisa Kontrak</div>
+                        <div class="stat-value">{{ $remainingDays }} hari</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="actions">
-              <a href="{{ route('user.dashboard') }}" class="btn btn-outline"><i data-feather="home"></i> Ke Dashboard</a>
-              @if($contract->tanggal_keluar->diffInDays(now()) <= 120)
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#extendModal">
-                  <i data-feather="refresh-ccw"></i> Ajukan Perpanjangan
-                </button>
-              @endif
+            {{-- Kanan: ringkasan & aksi --}}
+            <div class="section-card content-card">
+                <div class="tabs-container">
+                    <span class="tab-item active"><i data-feather="file-text"></i> Ringkasan</span>
+                    <a class="tab-item" href="{{ route('user.history.index') }}"><i data-feather="activity"></i> Riwayat Pembayaran</a>
+                    <a class="tab-item" href="{{ route('user.contract') }}"><i data-feather="clipboard"></i> Detail Kontrak</a>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-card-title">Tagihan Bulanan</div>
+                        <div class="info-card-value">Rp {{ number_format($contract->kost->harga,0,',','.') }}</div>
+                        <div class="info-card-meta">Termasuk listrik/air: <strong>{{ optional($contract->kost)->include_utility ? 'Ya' : 'Tidak' }}</strong></div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-title">Metode Pembayaran</div>
+                        <div class="info-card-value">{{ $contract->payment_method ?? 'Transfer Bank' }}</div>
+                        <div class="info-card-meta">Detail di menu Riwayat Pembayaran</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-title">Perpanjangan Mulai</div>
+                        @php $mulai = $contract->tanggal_keluar->copy()->addDay(); @endphp
+                        <div class="info-card-value">{{ $mulai->translatedFormat('d M Y') }}</div>
+                        <div class="info-card-meta">Tanggal efektif setelah kontrak berakhir</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-title">Kontak Pengelola</div>
+                        <div class="info-card-value">{{ $contract->manager_name ?? 'Admin Kost' }}</div>
+                        <div class="info-card-meta">{{ $contract->manager_phone ?? '-' }}</div>
+                    </div>
+                </div>
+
+                <div class="actions-container">
+                    <a href="{{ route('user.dashboard') }}" class="btn-secondary"><i data-feather="home"></i> Ke Dashboard</a>
+                    <a href="{{ route('user.history.index') }}" class="btn-secondary"><i data-feather="credit-card"></i> Lihat Riwayat</a>
+                    @if($contract->tanggal_keluar->diffInDays(now()) <= 30)
+                        <button class="btn-add" data-bs-toggle="modal" data-bs-target="#extendModal">
+                            <i data-feather="refresh-ccw"></i> Ajukan Perpanjangan
+                        </button>
+                    @endif
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     @else
-      <div class="card">
-        <div class="h6">Belum ada kontrak aktif</div>
-        <a class="btn btn-primary" href="{{ route('kamar') }}"><i data-feather="shopping-bag"></i> Pesan Kamar</a>
-      </div>
+        <div class="empty-card">
+            <div class="text-center p-5">
+                <i data-feather="file-text" class="mb-3" style="width:48px;height:48px;color:#94a3b8"></i>
+                <h3>Belum ada kontrak aktif</h3>
+                <p class="text-muted">Silakan hubungi pengelola untuk memulai kontrak.</p>
+                <a href="{{ route('user.dashboard') }}" class="btn-add">
+                    <i data-feather="home"></i>
+                    <span>Ke Dashboard</span>
+                </a>
+            </div>
+        </div>
     @endif
-  </div>
 </div>
+@endsection
 
-{{-- Modal Perpanjang (tetap pakai route & validasi yang sudah kamu buat) --}}
+{{-- Modal Perpanjangan --}}
 @if($contract)
+@push('modals')
 <div class="modal fade" id="extendModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" method="POST" action="{{ route('user.contract.extend') }}" enctype="multipart/form-data" id="extendForm">
+            @csrf
+            <div class="modal-header">
+                <h5 class="modal-title">Perpanjang Kontrak</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Durasi</label>
+                    <select name="duration" class="form-select" id="extDuration" required>
+                        @for($i=1;$i<=12;$i++)
+                            <option value="{{ $i }}">{{ $i }} Bulan</option>
+                        @endfor
+                    </select>
+                    <div class="form-text">Harga: Rp {{ number_format($contract->kost->harga,0,',','.') }} / bulan</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Total</label>
+                    <div class="form-control" id="extTotal" readonly>Rp {{ number_format($contract->kost->harga,0,',','.') }}</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Upload Bukti Pembayaran</label>
+                    <input type="file" name="bukti_pembayaran" class="form-control" accept="image/*" required>
+                </div>
+                @php $mulai = $contract->tanggal_keluar->copy()->addDay(); @endphp
+                <div class="alert alert-info">Perpanjangan mulai: <strong>{{ $mulai->translatedFormat('d F Y') }}</strong></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Batal</button>
+                <button class="btn-add" id="extSubmitBtn" type="submit">
+                    <i data-feather="send"></i>
+                    <span>Kirim Permohonan</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{{-- Modal Sukses (AJAX) --}}
+
+<div class="modal fade" id="successExtendModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <form class="modal-content" method="POST" action="{{ route('user.contract.extend') }}" enctype="multipart/form-data" id="extendForm">
-      @csrf
-      <div class="modal-header">
-        <h5 class="modal-title">Perpanjang Kontrak</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-content p-3">
+      <div class="modal-header border-0">
+        <h5 class="modal-title">Berhasil!</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
       </div>
       <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Durasi</label>
-          <select name="duration" class="form-select" id="extDuration" required>
-            @for($i=1;$i<=12;$i++)
-              <option value="{{ $i }}">{{ $i }} Bulan</option>
-            @endfor
-          </select>
-          <div class="form-text">Harga: Rp {{ number_format($contract->kost->harga,0,',','.') }} / bulan</div>
+        <div class="alert alert-danger d-none" id="extendErrors"></div>
+        <div class="alert alert-success mb-3" id="successExtendMsg">
+          Mohon ditunggu, perpanjangan kontrak kamu sedang diproses.
         </div>
-        <div class="mb-3">
-          <label class="form-label">Total</label>
-          <div class="form-control" id="extTotal" readonly>Rp {{ number_format($contract->kost->harga,0,',','.') }}</div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Upload Bukti Pembayaran</label>
-          <input type="file" name="bukti_pembayaran" class="form-control" accept="image/*" required>
-        </div>
-        @php $mulai = $contract->tanggal_keluar->copy()->addDay(); @endphp
-        <div class="alert alert-info">Perpanjangan mulai: <strong>{{ $mulai->translatedFormat('d F Y') }}</strong></div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between">
+            <span>Periode Baru</span>
+            <strong id="successPeriod">-</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span>Status</span>
+            <strong id="successStatus">pending</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span>ID Permohonan</span>
+            <strong id="successOrderId">-</strong>
+          </li>
+        </ul>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" data-bs-dismiss="modal">Batal</button>
-        <button class="btn btn-primary" id="extSubmitBtn">Kirim Permohonan</button>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
       </div>
-    </form>
+    </div>
   </div>
 </div>
+@endpush
 @endif
-@endsection
 
 @push('js')
 <script>
-  document.addEventListener('DOMContentLoaded', ()=> window.feather && feather.replace());
-  (function(){
-    const harga = {{ (int) ($contract->kost->harga ?? 0) }};
-    const durSel = document.getElementById('extDuration');
+  function initIcons(){
+    if(!window.feather) return;
+    document.querySelectorAll('[data-feather]').forEach(el=>{
+      const name = el.getAttribute('data-feather');
+      if(name && window.feather.icons[name]){
+        el.outerHTML = window.feather.icons[name].toSvg({ 'stroke-width': 1.5, width: 16, height: 16, class: 'feather-16' });
+      }
+    });
+  }
+  function initTooltips(){
+    const list = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    list.forEach(el => new bootstrap.Tooltip(el));
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    initIcons(); initTooltips();
+
+    const form    = document.getElementById('extendForm');
+    const btn     = document.getElementById('extSubmitBtn');
+    const durSel  = document.getElementById('extDuration');
     const totalEl = document.getElementById('extTotal');
-    function rupiah(n){ return new Intl.NumberFormat('id-ID').format(n); }
+    const errBox  = document.getElementById('extendErrors');
+    const fileEl  = form ? form.querySelector('input[name="bukti_pembayaran"]') : null;
+
+    const harga   = Number(form?.dataset.price || 0);
+    const startIso= form?.dataset.start;
+    const rupiah  = n => new Intl.NumberFormat('id-ID').format(n);
+    const tglIndo = iso => {
+      const d = new Date(iso+'T00:00:00');
+      return new Intl.DateTimeFormat('id-ID',{day:'2-digit',month:'long',year:'numeric'}).format(d);
+    };
+
+    // total dinamis
     if(durSel && totalEl){
-      const upd=()=> totalEl.textContent = 'Rp ' + rupiah(harga * parseInt(durSel.value||1));
+      const upd = ()=> totalEl.textContent = 'Rp ' + rupiah(harga * parseInt(durSel.value||1));
       upd(); durSel.addEventListener('change', upd);
     }
-    const form = document.getElementById('extendForm');
-    const btn  = document.getElementById('extSubmitBtn');
-    if(form && btn){ form.addEventListener('submit', ()=>{ btn.disabled=true; btn.textContent='Mengirim...'; }); }
-  })();
+
+    if(!form || !btn) return;
+
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      // reset errors
+      errBox?.classList.add('d-none'); errBox && (errBox.innerHTML = '');
+      fileEl?.classList.remove('is-invalid');
+      durSel?.classList.remove('is-invalid');
+
+      btn.disabled = true; btn.querySelector('span')?.textContent='Mengirim...';
+
+      try{
+        const fd = new FormData(form);
+        // Tanda request JSON agar controller balas JSON
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: fd,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+          },
+          credentials: 'same-origin'
+        });
+
+        if(res.status === 422){
+          const data = await res.json();
+          const errors = data?.errors || {};
+          let list = [];
+          if(errors.duration){ durSel?.classList.add('is-invalid'); list.push(errors.duration.join('<br>')); }
+          if(errors.bukti_pembayaran){ fileEl?.classList.add('is-invalid'); list.push(errors.bukti_pembayaran.join('<br>')); }
+          if(errBox){ errBox.innerHTML = list.join('<hr>'); errBox.classList.remove('d-none'); }
+          return;
+        }
+
+        if(!res.ok){
+          throw new Error('Gagal mengirim permohonan. ('+res.status+')');
+        }
+
+        const data = await res.json();
+        // Tutup modal form
+        const extModalEl = document.getElementById('extendModal');
+        const extModal   = extModalEl ? bootstrap.Modal.getOrCreateInstance(extModalEl) : null;
+        extModal && extModal.hide();
+
+        // Isi modal sukses
+        document.getElementById('successExtendMsg').textContent = data?.message || 'Permohonan dikirim.';
+        document.getElementById('successPeriod').textContent    = (data?.start && data?.end) ? (tglIndo(data.start)+' — '+tglIndo(data.end)) : '-';
+        document.getElementById('successStatus').textContent    = data?.status || 'pending';
+        document.getElementById('successOrderId').textContent   = data?.order_id || '-';
+
+        // Tampilkan modal sukses
+        const okModalEl = document.getElementById('successExtendModal');
+        const okModal   = okModalEl ? new bootstrap.Modal(okModalEl) : null;
+        okModal && okModal.show();
+
+        // Reset form ringan (durasi balik ke 1, kosongkan file)
+        if(durSel){ durSel.value = '1'; durSel.dispatchEvent(new Event('change')); }
+        if(fileEl){ fileEl.value = ''; }
+
+      } catch(err){
+        // fallback alert
+        if(errBox){ errBox.innerHTML = err.message || 'Terjadi kesalahan, coba lagi.'; errBox.classList.remove('d-none'); }
+      } finally {
+        btn.disabled = false; btn.querySelector('span')?.textContent='Kirim Permohonan';
+      }
+    });
+  });
 </script>
 @endpush
+
