@@ -7,6 +7,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class ContractController extends Controller
 {
@@ -24,7 +25,14 @@ class ContractController extends Controller
                        ->first();
 
         if ($contract) {
-            // Calculate dates and progress
+            // Debug KTP image path
+            \Log::info('KTP Image Debug:', [
+                'raw_path' => $contract->ktp_image,
+                'storage_path' => storage_path('app/public/' . $contract->ktp_image),
+                'exists' => Storage::disk('public')->exists($contract->ktp_image),
+                'url' => Storage::url($contract->ktp_image)
+            ]);
+
             $totalDays = $contract->tanggal_masuk->diffInDays($contract->tanggal_keluar);
             $remainingDays = now()->diffInDays($contract->tanggal_keluar, false);
             $progress = round(($totalDays - max(0, $remainingDays)) / $totalDays * 100);
@@ -61,7 +69,6 @@ class ContractController extends Controller
     // Ajukan perpanjangan
    public function extend(Request $request)
     {
-        // Jika request mengharapkan JSON (AJAX)
         if ($request->expectsJson() || $request->ajax()) {
             $validator = Validator::make($request->all(), [
                 'duration'         => 'required|integer|min:1|max:12',
@@ -111,7 +118,6 @@ class ContractController extends Controller
             ], 201);
         }
 
-        // === Jalur non-AJAX (fallback lama) ===
         $validated = $request->validate([
             'duration'         => 'required|integer|min:1|max:12',
             'bukti_pembayaran' => 'required|image|mimes:jpg,jpeg,png|max:10240',

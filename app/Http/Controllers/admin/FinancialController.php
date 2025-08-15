@@ -31,7 +31,6 @@ class FinancialController extends Controller
             ->get();
         $kosts = Kost::all();
 
-        // Debugging
         foreach($transactions as $transaction) {
             if($transaction->bukti_pembayaran) {
                 \Log::info('Bukti pembayaran path:', [
@@ -86,10 +85,19 @@ class FinancialController extends Controller
             DB::beginTransaction();
 
             if ($request->hasFile('bukti_pembayaran')) {
-                $file      = $request->file('bukti_pembayaran');
-                $nameOnly  = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-                $fileName  = time().'_'.\Str::slug($nameOnly).'.'.$file->getClientOriginalExtension();
+                $file = $request->file('bukti_pembayaran');
+                $nameOnly = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $fileName = time() . '_bukti_' . Str::slug($nameOnly) . '.' . $file->getClientOriginalExtension();
+                // Perbaiki path penyimpanan
                 $validated['bukti_pembayaran'] = $file->storeAs('bukti-pembayaran', $fileName, 'public');
+
+                // Log untuk debugging
+                \Log::info('File uploaded:', [
+                    'original_name' => $file->getClientOriginalName(),
+                    'stored_path' => $validated['bukti_pembayaran'],
+                    'full_url' => Storage::disk('public')->url($validated['bukti_pembayaran']),
+                    'exists' => Storage::disk('public')->exists($validated['bukti_pembayaran'])
+                ]);
             }
 
             $transaction = Financial::create($validated);

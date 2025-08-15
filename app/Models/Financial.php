@@ -28,8 +28,9 @@ class Financial extends Model
 
     public function getBuktiPembayaranUrlAttribute(): ?string
     {
-        return $this->bukti_pembayaran
-            ? Storage::disk('public')->url($this->bukti_pembayaran)
-            : null;
+        if (!$this->bukti_pembayaran) {
+        return null;
+        }
+        return asset('storage/' . $this->bukti_pembayaran);
     }
 }

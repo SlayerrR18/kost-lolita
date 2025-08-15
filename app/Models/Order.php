@@ -97,32 +97,33 @@ class Order extends Model
         return $harga * (int) $this->duration;
     }
 
-    // Lebih ringan: jangan cek exists() karena itu I/O tambahan.
-    // Anggap storage:link sudah benar; biarkan <img> handle fallback via onerror.
-    public function getKtpImageUrlAttribute(): ?string
+    // Tambahkan accessor untuk URL gambar
+    public function getKtpImageUrlAttribute()
     {
-        if ($this->ktp_image) {
-            return Storage::disk('public')->url($this->ktp_image);
+        if (!$this->ktp_image) {
+            return null;
         }
 
-        // Fallback HANYA jika relasi user->orders sudah di-load,
-        // sehingga kita tidak memicu query tambahan.
-        if ($this->user_id && $this->relationLoaded('user') && $this->user->relationLoaded('orders')) {
-            $firstWithKtp = $this->user->orders
-                ->firstWhere(fn ($o) => !empty($o->ktp_image));
-            if ($firstWithKtp) {
-                return Storage::disk('public')->url($firstWithKtp->ktp_image);
-            }
-        }
+        // Ensure we have a clean path without 'public/'
+        $path = str_replace('public/', '', $this->ktp_image);
 
-        return null;
+        // For debugging
+        \Log::info('KTP Image Path Check:', [
+            'original' => $this->ktp_image,
+            'cleaned' => $path,
+            'full_url' => asset('storage/' . $path),
+            'exists' => Storage::disk('public')->exists($path)
+        ]);
+
+        return asset('storage/' . $path);
     }
 
     public function getBuktiPembayaranUrlAttribute(): ?string
     {
-        return $this->bukti_pembayaran
-            ? Storage::disk('public')->url($this->bukti_pembayaran)
-            : null;
+        if (!$this->bukti_pembayaran) {
+            return null;
+        }
+        return Storage::disk('public')->url($this->bukti_pembayaran);
     }
 
     // Tambahan aksesori presentasi yang sering dipakai di UI

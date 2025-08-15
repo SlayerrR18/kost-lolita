@@ -134,9 +134,11 @@
               <td class="fw-semibold">Rp {{ number_format($t->total,0,',','.') }}</td>
               <td><span class="status-badge status-in">{{ $t->status }}</span></td>
               <td class="text-center">
-                @if($t->bukti_pembayaran_url)
-                  <img src="{{ $t->bukti_pembayaran_url }}" class="thumb"
-                       alt="Bukti" onclick="showImage('{{ $t->bukti_pembayaran_url }}')">
+                @if($t->bukti_pembayaran)
+                  <img src="{{ $t->bukti_pembayaran_url }}"
+                       alt="Bukti Pembayaran"
+                       class="img-fluid"
+                       onerror="this.onerror=null;this.src='/images/placeholder.jpg';">
                 @else
                   <span class="text-muted">-</span>
                 @endif

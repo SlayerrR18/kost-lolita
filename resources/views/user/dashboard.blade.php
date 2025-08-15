@@ -188,8 +188,6 @@
 <script>
 function initIcons(){
   if(!window.feather) return;
-  // JANGAN hapus .feather! Itu adalah SVG yang sudah jadi (termasuk di sidebar).
-  // Cukup replace semua placeholder <i data-feather> yang masih ada di halaman saat ini.
   document.querySelectorAll('[data-feather]').forEach(el=>{
     const name = el.getAttribute('data-feather');
     if (name && window.feather.icons[name]) {

@@ -68,13 +68,13 @@
 
                             {{-- BUKTI --}}
                             <td class="text-center">
-                                @if($order->bukti_pembayaran_url)
-                                    <button type="button" class="btn btn-sm btn-light btn-action"
-                                            onclick="showImage({{ json_encode($order->bukti_pembayaran_url) }})">
-                                        <i data-feather="file-text"></i> Lihat
+                                @if($order->bukti_pembayaran)
+                                    <button class="btn btn-m btn-light"
+                                            onclick="showImage('{{ asset('storage/' . $order->bukti_pembayaran) }}')">
+                                        <i data-feather="image" style="width:16px;height:16px"></i>
                                     </button>
                                 @else
-                                    <span class="badge bg-warning">Belum Ada</span>
+                                    <span class="text-muted">Belum Ada</span>
                                 @endif
                             </td>
 

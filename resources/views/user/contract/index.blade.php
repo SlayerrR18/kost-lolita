@@ -48,7 +48,20 @@
     /* Kartu profil kiri */
     .profile-card{padding:1.5rem}
     .profile-header{display:flex;gap:16px;align-items:center;margin-bottom:1rem}
-    .profile-image{width:72px;height:72px;border-radius:16px;object-fit:cover}
+    .profile-image {
+        width: 72px;
+        height: 72px;
+        border-radius: 16px;
+        object-fit: cover;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Fallback jika gambar gagal load */
+    .profile-image[src*="placeholder.jpg"] {
+        opacity: 0.5;
+    }
+
     .profile-info h3{font-size:1.25rem;font-weight:600;color:#0f172a;margin:0 0 .25rem}
     .profile-info .subtle{color:#64748b;font-size:.875rem}
 
@@ -87,12 +100,26 @@
 
     /* Empty state */
     .empty-card{background:#fff;border-radius:24px;box-shadow:0 4px 20px rgba(0,0,0,.05)}
+
+    /* Profile image placeholder */
+    .profile-image-placeholder {
+        width: 72px;
+        height: 72px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #94a3b8;
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
 </style>
 @endpush
 
 @section('content')
 @php
-    // Samakan kelas badge status agar konsisten dengan menu Report
     $status = $contract->status ?? null;
     $statusClass = match(strtolower((string)$status)){
         'active','aktif' => 'active',
@@ -103,7 +130,6 @@
 @endphp
 
 <div class="report-container">
-    {{-- Header --}}
     <div class="page-header">
         <div class="header-content">
             <div>
@@ -125,13 +151,31 @@
         <div class="grid-layout">
             <div class="section-card profile-card">
                 <div class="profile-header">
-                    <img src="{{ $contract->ktp_image_url ?? asset('images/placeholder.jpg') }}" alt="KTP" class="profile-image">
+                    @if($contract->ktp_image)
+                        <img src="{{ asset('storage/' . str_replace('public/', '', $contract->ktp_image)) }}"
+                             alt="KTP {{ $contract->name }}"
+                             class="profile-image"
+                             onerror="handleImageError(this)">
+                    @else
+                        <div class="profile-image-placeholder">
+                            <i data-feather="user"></i>
+                        </div>
+                    @endif
                     <div class="profile-info">
                         <h3>{{ $contract->name }}</h3>
                         <div class="subtle">{{ $contract->email }}</div>
                         <div class="subtle">{{ $contract->phone }}</div>
                     </div>
                 </div>
+
+                {{-- Add this temporarily below the profile header --}}
+                @if(config('app.debug'))
+                    <div class="d-none">
+                        <p>KTP Image Path: {{ $contract->ktp_image }}</p>
+                        <p>KTP URL: {{ $contract->ktp_image_url }}</p>
+                        <p>Storage exists: {{ Storage::disk('public')->exists($contract->ktp_image) ? 'Yes' : 'No' }}</p>
+                    </div>
+                @endif
 
                 <div class="tags-container">
                     <span class="tag"><i data-feather="home"></i> Kamar {{ $contract->kost->nomor_kamar }}</span>
@@ -193,7 +237,7 @@
                     <div class="info-card">
                         <div class="info-card-title">Kontak Pengelola</div>
                         <div class="info-card-value">{{ $contract->manager_name ?? 'Admin Kost' }}</div>
-                        <div class="info-card-meta">{{ $contract->manager_phone ?? '-' }}</div>
+                        <div class="info-card-meta">{{ $contract->manager_phone ?? '081238036180' }}</div>
                     </div>
                 </div>
 
@@ -412,6 +456,15 @@
       }
     });
   });
+
+  function handleImageError(img) {
+    console.error('Failed to load image:', img.src);
+    const placeholder = document.createElement('div');
+    placeholder.className = 'profile-image-placeholder';
+    placeholder.innerHTML = '<i data-feather="user"></i>';
+    img.parentNode.replaceChild(placeholder, img);
+    feather.replace();
+}
 </script>
 @endpush
 
