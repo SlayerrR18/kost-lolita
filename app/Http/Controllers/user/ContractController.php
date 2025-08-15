@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class ContractController extends Controller
 {
@@ -67,55 +68,84 @@ class ContractController extends Controller
     }
 
     // Ajukan perpanjangan
-   public function extend(Request $request)
+    public function extend(Request $request)
     {
         if ($request->expectsJson() || $request->ajax()) {
-            $validator = Validator::make($request->all(), [
-                'duration'         => 'required|integer|min:1|max:12',
-                'bukti_pembayaran' => 'required|image|mimes:jpg,jpeg,png|max:10240',
-            ]);
+            try {
+                $validator = Validator::make($request->all(), [
+                    'duration'         => 'required|integer|min:1|max:12',
+                    'bukti_pembayaran' => 'required|image|mimes:jpg,jpeg,png|max:10240',
+                ]);
 
-            if ($validator->fails()) {
+                if ($validator->fails()) {
+                    return response()->json([
+                        'message' => 'Validasi gagal',
+                        'errors'  => $validator->errors(),
+                    ], 422);
+                }
+
+                DB::beginTransaction();
+
+                // Ambil kontrak aktif
+                $contract = Order::with('kost')
+                    ->where('user_id', auth()->id())
+                    ->where('status', 'confirmed')
+                    ->latest('tanggal_keluar')
+                    ->firstOrFail();
+
+                $start = $contract->tanggal_keluar->copy()->addDay();
+                $end   = $start->copy()->addMonthsNoOverflow((int)$request->input('duration'));
+
+                // Upload bukti pembayaran baru
+                if (!$request->hasFile('bukti_pembayaran')) {
+                    throw new \Exception('Bukti pembayaran wajib diunggah');
+                }
+
+                $bukti = $request->file('bukti_pembayaran')->store('payments', 'public');
+
+                // Buat order perpanjangan dengan data lengkap
+                $order = Order::create([
+                    'user_id'          => auth()->id(),
+                    'kost_id'          => $contract->kost_id,
+                    'name'             => $contract->name,
+                    'email'            => $contract->email,
+                    'phone'            => $contract->phone,
+                    'alamat'           => $contract->alamat,
+                    'duration'         => (int)$request->input('duration'),
+                    'tanggal_masuk'    => $start,
+                    'tanggal_keluar'   => $end,
+                    'status'           => 'pending',
+                    'bukti_pembayaran' => $bukti,
+                    'type'             => 'extension',
+                    'parent_order_id'  => $contract->id,
+                    // Pastikan ktp_image disalin dengan benar
+                    'ktp_image'        => $contract->getRawOriginal('ktp_image') // Ambil nilai asli dari database
+                ]);
+
+                DB::commit();
+
                 return response()->json([
-                    'message' => 'Validasi gagal',
-                    'errors'  => $validator->errors(),
-                ], 422);
+                    'message'  => 'Mohon ditunggu, perpanjangan kontrak kamu sedang diproses.',
+                    'order_id' => $order->id,
+                    'start'    => $start->toDateString(),
+                    'end'      => $end->toDateString(),
+                    'status'   => $order->status,
+                ], 201);
+
+            } catch (\Exception $e) {
+                DB::rollback();
+
+                // Log error untuk debugging
+                \Log::error('Contract extension failed:', [
+                    'error' => $e->getMessage(),
+                    'user_id' => auth()->id()
+                ]);
+
+                return response()->json([
+                    'message' => 'Terjadi kesalahan saat memproses perpanjangan',
+                    'errors' => ['system' => [$e->getMessage()]]
+                ], 500);
             }
-
-            $contract = Order::with('kost')
-                ->where('user_id', auth()->id())
-                ->where('status', 'confirmed')
-                ->latest('tanggal_keluar')
-                ->firstOrFail();
-
-            $start = $contract->tanggal_keluar->copy()->addDay();
-            $end   = $start->copy()->addMonthsNoOverflow((int)$request->input('duration'));
-
-            $bukti = $request->file('bukti_pembayaran')->store('payments','public');
-
-            $order = Order::create([
-                'user_id'          => auth()->id(),
-                'kost_id'          => $contract->kost_id,
-                'name'             => $contract->name,
-                'email'            => $contract->email,
-                'phone'            => $contract->phone,
-                'alamat'           => $contract->alamat,
-                'duration'         => (int)$request->input('duration'),
-                'tanggal_masuk'    => $start,
-                'tanggal_keluar'   => $end,
-                'status'           => 'pending',
-                'bukti_pembayaran' => $bukti,
-                'type'             => 'extension',
-                'parent_order_id'  => $contract->id,
-            ]);
-
-            return response()->json([
-                'message'  => 'Mohon ditunggu, perpanjangan kontrak kamu sedang diproses.',
-                'order_id' => $order->id,
-                'start'    => $start->toDateString(),
-                'end'      => $end->toDateString(),
-                'status'   => $order->status,
-            ], 201);
         }
 
         $validated = $request->validate([
@@ -148,10 +178,10 @@ class ContractController extends Controller
             'bukti_pembayaran' => $bukti,
             'type'             => 'extension',
             'parent_order_id'  => $contract->id,
+            'ktp_image'        => $contract->ktp_image,
         ]);
 
-        return back()->with('success','Permohonan perpanjangan dikirim.');
+        return redirect()->route('user.contract')->with('success', 'Perpanjangan kontrak berhasil diajukan, tunggu konfirmasi selanjutnya.');
     }
-
 }
 

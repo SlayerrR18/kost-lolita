@@ -4,7 +4,7 @@
 @section('title', 'Kontrak Saya')
 
 @push('css')
-<link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css"> {{-- optional: biar selaras dependensi --}}
+<link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css">
 <style>
     /* === Palette & base (selaras dengan menu Report) === */
     :root{
@@ -151,11 +151,8 @@
         <div class="grid-layout">
             <div class="section-card profile-card">
                 <div class="profile-header">
-                    @if($contract->ktp_image)
-                        <img src="{{ asset('storage/' . str_replace('public/', '', $contract->ktp_image)) }}"
-                             alt="KTP {{ $contract->name }}"
-                             class="profile-image"
-                             onerror="handleImageError(this)">
+                    @if($contract && $contract->ktp_image_url)
+                        <img src="{{ $contract->ktp_image_url }}" alt="KTP {{ $contract->name }}" class="profile-image" onerror="handleImageError(this)">
                     @else
                         <div class="profile-image-placeholder">
                             <i data-feather="user"></i>
@@ -269,30 +266,36 @@
 @endsection
 
 {{-- Modal Perpanjangan --}}
-@if($contract)
-@push('modals')
 <div class="modal fade" id="extendModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form class="modal-content" method="POST" action="{{ route('user.contract.extend') }}" enctype="multipart/form-data" id="extendForm">
+        <form class="modal-content" method="POST" action="{{ route('user.contract.extend') }}"
+              enctype="multipart/form-data" id="extendForm">
             @csrf
             <div class="modal-header">
                 <h5 class="modal-title">Perpanjang Kontrak</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                {{-- Tambahkan input hidden untuk harga --}}
+                <input type="hidden" id="roomPrice" value="{{ $contract->kost->harga }}">
+
                 <div class="mb-3">
                     <label class="form-label">Durasi</label>
-                    <select name="duration" class="form-select" id="extDuration" required>
-                        @for($i=1;$i<=12;$i++)
+                    <select name="duration" class="form-select" id="duration" required>
+                        @for($i=1; $i<=12; $i++)
                             <option value="{{ $i }}">{{ $i }} Bulan</option>
                         @endfor
                     </select>
                     <div class="form-text">Harga: Rp {{ number_format($contract->kost->harga,0,',','.') }} / bulan</div>
                 </div>
+
                 <div class="mb-3">
-                    <label class="form-label">Total</label>
-                    <div class="form-control" id="extTotal" readonly>Rp {{ number_format($contract->kost->harga,0,',','.') }}</div>
+                    <label class="form-label">Total Pembayaran</label>
+                    <div class="form-control bg-light" id="totalPayment">
+                        Rp {{ number_format($contract->kost->harga,0,',','.') }}
+                    </div>
                 </div>
+
                 <div class="mb-3">
                     <label class="form-label">Upload Bukti Pembayaran</label>
                     <input type="file" name="bukti_pembayaran" class="form-control" accept="image/*" required>
@@ -310,44 +313,37 @@
         </form>
     </div>
 </div>
-{{-- Modal Sukses (AJAX) --}}
-
+{{-- Modal Sukses --}}
 <div class="modal fade" id="successExtendModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content p-3">
-      <div class="modal-header border-0">
-        <h5 class="modal-title">Berhasil!</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-      </div>
-      <div class="modal-body">
-        <div class="alert alert-danger d-none" id="extendErrors"></div>
-        <div class="alert alert-success mb-3" id="successExtendMsg">
-          Mohon ditunggu, perpanjangan kontrak kamu sedang diproses.
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Berhasil!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-success" id="successExtendMsg"></div>
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Periode Baru</span>
+                        <strong id="successPeriod"></strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Status</span>
+                        <strong id="successStatus"></strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>ID Permohonan</span>
+                        <strong id="successOrderId"></strong>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
         </div>
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item d-flex justify-content-between">
-            <span>Periode Baru</span>
-            <strong id="successPeriod">-</strong>
-          </li>
-          <li class="list-group-item d-flex justify-content-between">
-            <span>Status</span>
-            <strong id="successStatus">pending</strong>
-          </li>
-          <li class="list-group-item d-flex justify-content-between">
-            <span>ID Permohonan</span>
-            <strong id="successOrderId">-</strong>
-          </li>
-        </ul>
-      </div>
-      <div class="modal-footer border-0">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-      </div>
     </div>
-  </div>
 </div>
-@endpush
-@endif
-
 @push('js')
 <script>
   function initIcons(){
@@ -365,27 +361,33 @@
   }
 
   document.addEventListener('DOMContentLoaded', ()=>{
-    initIcons(); initTooltips();
+    initIcons();
+    initTooltips();
 
     const form    = document.getElementById('extendForm');
     const btn     = document.getElementById('extSubmitBtn');
-    const durSel  = document.getElementById('extDuration');
-    const totalEl = document.getElementById('extTotal');
+    const durSel  = document.getElementById('duration');
+    const totalEl = document.getElementById('totalPayment');
     const errBox  = document.getElementById('extendErrors');
     const fileEl  = form ? form.querySelector('input[name="bukti_pembayaran"]') : null;
 
+    // Ambil harga dari data attribute form
     const harga   = Number(form?.dataset.price || 0);
-    const startIso= form?.dataset.start;
     const rupiah  = n => new Intl.NumberFormat('id-ID').format(n);
-    const tglIndo = iso => {
-      const d = new Date(iso+'T00:00:00');
-      return new Intl.DateTimeFormat('id-ID',{day:'2-digit',month:'long',year:'numeric'}).format(d);
-    };
 
-    // total dinamis
-    if(durSel && totalEl){
-      const upd = ()=> totalEl.textContent = 'Rp ' + rupiah(harga * parseInt(durSel.value||1));
-      upd(); durSel.addEventListener('change', upd);
+    // Update total ketika durasi berubah
+    if(durSel && totalEl && harga){
+        const updateTotal = () => {
+            const duration = parseInt(durSel.value || 1);
+            const total = harga * duration;
+            totalEl.textContent = 'Rp ' + rupiah(total);
+        };
+
+        // Update saat pertama load
+        updateTotal();
+
+        // Update saat durasi berubah
+        durSel.addEventListener('change', updateTotal);
     }
 
     if(!form || !btn) return;
@@ -464,6 +466,117 @@
     placeholder.innerHTML = '<i data-feather="user"></i>';
     img.parentNode.replaceChild(placeholder, img);
     feather.replace();
+}
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Format number to rupiah
+    const formatRupiah = (number) => {
+        return new Intl.NumberFormat('id-ID').format(number);
+    }
+
+    // Get elements
+    const durationSelect = document.getElementById('duration');
+    const totalPayment = document.getElementById('totalPayment');
+    const roomPrice = document.getElementById('roomPrice');
+
+    // Calculate total when duration changes
+    if (durationSelect && totalPayment && roomPrice) {
+        const calculateTotal = () => {
+            const duration = parseInt(durationSelect.value);
+            const price = parseInt(roomPrice.value);
+            const total = duration * price;
+            totalPayment.textContent = `Rp ${formatRupiah(total)}`;
+        }
+
+        // Initial calculation
+        calculateTotal();
+
+        // Add event listener for duration changes
+        durationSelect.addEventListener('change', calculateTotal);
+
+        // Debug
+        console.log('Initial price:', roomPrice.value);
+        console.log('Initial duration:', durationSelect.value);
+    } else {
+        console.error('Some elements not found:', {
+            durationSelect: !!durationSelect,
+            totalPayment: !!totalPayment,
+            roomPrice: !!roomPrice
+        });
+    }
+});
+</script>
+@push('js')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ...existing code...
+
+    const form = document.getElementById('extendForm');
+    const btn = document.getElementById('extSubmitBtn');
+    const successModal = new bootstrap.Modal(document.getElementById('successExtendModal'));
+
+    if(form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i data-feather="loader"></i> Mengirim...';
+
+                const formData = new FormData(this);
+
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Tutup modal form
+                    const extendModal = bootstrap.Modal.getInstance(document.getElementById('extendModal'));
+                    extendModal.hide();
+
+                    // Update konten modal sukses
+                    document.getElementById('successExtendMsg').textContent = data.message;
+                    document.getElementById('successPeriod').textContent =
+                        `${formatDate(data.start)} — ${formatDate(data.end)}`;
+                    document.getElementById('successStatus').textContent = data.status;
+                    document.getElementById('successOrderId').textContent = data.order_id;
+
+                    // Tampilkan modal sukses
+                    successModal.show();
+
+                    // Reset form
+                    form.reset();
+                } else {
+                    throw new Error(data.message || 'Terjadi kesalahan');
+                }
+
+            } catch (error) {
+                document.getElementById('extendErrors').textContent = error.message;
+                document.getElementById('extendErrors').classList.remove('d-none');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-feather="send"></i> Kirim Permohonan';
+                feather.replace();
+            }
+        });
+    }
+});
+
+// Helper function untuk format tanggal
+function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
 }
 </script>
 @endpush

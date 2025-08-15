@@ -174,7 +174,7 @@ class FinancialController extends Controller
 {
     abort_if($order->status !== 'pending', 400, 'Order bukan pending.');
 
-    \DB::beginTransaction();
+    DB::beginTransaction();
     try {
         // Cegah overlap
         if ($this->hasOverlap($order)) {
@@ -236,7 +236,19 @@ class FinancialController extends Controller
             'updated_by'        => auth()->id(),
         ]);
 
-        \DB::commit();
+        // Jika perpanjangan, pastikan data KTP tetap ada
+        if ($order->is_extension) {
+            // Pastikan KTP tersalin dari order sebelumnya
+            if (!$order->ktp_image && $order->parent_order_id) {
+                $parentOrder = Order::find($order->parent_order_id);
+                if ($parentOrder && $parentOrder->ktp_image) {
+                    $order->ktp_image = $parentOrder->ktp_image;
+                    $order->save();
+                }
+            }
+        }
+
+        DB::commit();
 
         // WhatsApp (di luar transaksi)
         $msg = $isExtension
