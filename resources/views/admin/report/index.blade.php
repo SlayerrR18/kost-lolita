@@ -41,7 +41,7 @@
         <div class="header-content">
             <div>
                 <h1 class="page-title">Report Penghuni</h1>
-                <p class="page-subtitle">Semua masukan/keluhan dari user. Akhirnya ada yang baca.</p>
+                <p class="page-subtitle">Daftar semua masukan dan keluhan dari penghuni.</p>
             </div>
             <form class="d-flex gap-2" method="get">
                 <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Cari nama/isi">

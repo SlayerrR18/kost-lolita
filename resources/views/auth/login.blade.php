@@ -95,7 +95,7 @@
         <div style="display:flex;align-items:center;gap:8px;color:#16c79a;font-weight:600;margin-bottom:6px">
           <i data-feather="shield"></i> Aman & Nyaman
         </div>
-        <h1>Holla, Welcome Back</h1>
+        <h1>Hallo, Selamat Datang <br> Di kost Lolita</h1>
         <p class="sub">Masuk untuk mengelola kontrak, pembayaran, dan notifikasi kost kamu.</p>
       </div>
 
@@ -131,7 +131,7 @@
 
         <div class="row">
           <label style="display:flex;align-items:center;gap:8px;user-select:none;cursor:pointer">
-            <input type="checkbox" name="remember" style="accent-color:#16c79a" checked> Remember me
+            <input type="checkbox" name="remember" style="accent-color:#16c79a" checked> Ingat Saya
           </label>
           @if (Route::has('password.request'))
             <a href="{{ route('password.request') }}">Lupa password?</a>
@@ -139,7 +139,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary">
-          <i data-feather="log-in"></i> Sign In
+          <i data-feather="log-in"></i> Masuk
         </button>
 
         @if($errors->any())

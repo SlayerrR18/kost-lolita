@@ -5,138 +5,132 @@
 
 @push('css')
 <style>
-    /* Base Styles */
     :root {
         --primary: #1a7f5a;
-        --primary-light: #16c79a;
-        --secondary: #64748b;
-        --success: #10B981;
-        --danger: #EF4444;
-        --warning: #F59E0B;
-        --info: #3B82F6;
+        --primary-2: #16c79a;
+        --primary-light: rgba(26,127,90,0.1);
+        --bg: #f8fafc;
+        --ink: #1e293b;
+        --muted: #64748b;
+        --ring: #e2e8f0;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --danger: #ef4444;
     }
 
-    /* Dashboard Layout */
+    /* Layout Container */
     .dashboard-container {
-        max-width: 1300px;
-        margin: 0 auto;
         padding: 2rem;
-        background: #f8fafc;
+        background: var(--bg);
+        min-height: 100vh;
     }
 
-    /* Header Section */
-    .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    .container-fluid {
+        width: 100%;
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    /* Modern Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+        border-radius: 24px;
+        padding: 2rem;
         margin-bottom: 2rem;
-        padding: 1.5rem;
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(26,127,90,.15);
     }
 
     .header-content {
         display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
     }
 
-    .dashboard-title {
+    .page-title {
         font-size: 1.75rem;
         font-weight: 700;
-        color: var(--primary);
         margin: 0;
     }
 
-    .welcome-date {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-        color: white;
-        border-radius: 8px;
-        font-size: 0.9rem;
+    .page-subtitle {
+        opacity: 0.9;
+        margin-top: 0.5rem;
     }
 
     /* Stats Grid */
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-areas:
-            "kamar penghuni"
-            "finance finance";
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 1.5rem;
         margin-bottom: 2rem;
     }
 
     .finance-grid {
-        grid-area: finance;
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 1.5rem;
     }
 
+    /* Modern Cards */
     .stat-card {
-        position: relative;
+        background: #fff;
+        border-radius: 24px;
         padding: 1.5rem;
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
     }
 
     .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     }
 
     .stat-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
         position: relative;
         z-index: 1;
     }
 
+    .stat-header {
+        margin-bottom: 1rem;
+    }
+
     .stat-title {
-        color: var(--secondary);
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin-bottom: 0.75rem;
+        color: var(--muted);
+        font-size: 0.875rem;
+        font-weight: 500;
     }
 
     .stat-value {
-        font-size: 1.8rem;
+        font-size: 1.875rem;
         font-weight: 700;
-        color: var(--primary);
-        margin-bottom: 0.5rem;
+        color: var(--ink);
+        margin: 0.5rem 0;
     }
 
-    .stat-icon {
-        position: absolute;
-        right: -10px;
-        bottom: -10px;
-        font-size: 5rem;
-        opacity: 0.1;
-        transform: rotate(-15deg);
-        transition: all 0.3s ease;
+    .stat-trend {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
     }
 
-    /* Update card specific styles */
-    .stat-card.kamar {
-        grid-area: kamar;
-    }
-
-    .stat-card.penghuni {
-        grid-area: penghuni;
-    }
-
-    /* Chart Section */
+    /* Chart Container */
     .chart-container {
-        background: white;
-        border-radius: 16px;
+        background: #fff;
+        border-radius: 24px;
         padding: 1.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         margin-top: 2rem;
     }
 
@@ -145,8 +139,18 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 1.5rem;
+        gap: 1rem;
+        flex-wrap: wrap;
     }
 
+    .chart-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 0;
+    }
+
+    /* Filter Controls */
     .filter-container {
         display: flex;
         gap: 1rem;
@@ -154,48 +158,26 @@
     }
 
     .form-select {
-        min-width: 150px;
         padding: 0.5rem 1rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        background-color: white;
-        font-size: 0.9rem;
-    }
-
-    /* Summary Cards */
-    .summary-card {
-        background: white;
+        border: 1px solid var(--ring);
         border-radius: 12px;
-        padding: 1.25rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
+        font-size: 0.875rem;
+        min-width: 150px;
     }
 
-    .summary-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Responsive Design */
+    /* Responsive Adjustments */
     @media (max-width: 768px) {
         .dashboard-container {
             padding: 1rem;
         }
 
-        .stats-grid {
-            grid-template-columns: 1fr;
-            grid-template-areas:
-                "kamar"
-                "penghuni"
-                "finance";
-        }
-
-        .finance-grid {
-            grid-template-columns: 1fr;
+        .header-content {
+            flex-direction: column;
+            align-items: flex-start;
         }
 
         .filter-container {
-            flex-direction: column;
+            width: 100%;
         }
 
         .form-select {
@@ -207,77 +189,76 @@
 
 @section('content')
 <div class="dashboard-container">
-    <!-- Dashboard Header -->
-    <div class="dashboard-header">
-        <div class="header-content">
-            <h1 class="dashboard-title">Dashboard </h1>
-            <div class="welcome-date">
-                <i data-feather="calendar"></i>
-                {{ now()->format('d F Y') }}
-            </div>
-        </div>
-        <div class="filter-container">
-            <form id="filterForm" class="d-flex gap-3">
-                <select name="year" class="form-select" onchange="this.form.submit()">
-                    @foreach($availableYears as $y)
-                        <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>
-                            Tahun {{ $y }}
-                        </option>
-                    @endforeach
-                </select>
+    <div class="container-fluid">
+        <!-- Header Section -->
+        <div class="page-header">
+            <div class="header-content">
+                <div>
+                    <h1 class="page-title">Dashboard Admin</h1>
+                    <p class="page-subtitle">{{ now()->translatedFormat('l, d F Y') }}</p>
+                </div>
+                <div class="filter-container">
+                    <form id="filterForm" class="d-flex gap-3 flex-wrap">
+                        <select name="year" class="form-select" onchange="this.form.submit()">
+                            @foreach($availableYears as $y)
+                                <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>
+                                    Tahun {{ $y }}
+                                </option>
+                            @endforeach
+                        </select>
 
-                <select name="month" class="form-select" onchange="this.form.submit()">
-                    <option value="">Semua Bulan</option>
-                    @foreach(range(1, 12) as $m)
-                        <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>
-                            {{ date('F', mktime(0, 0, 0, $m, 1)) }}
-                        </option>
-                    @endforeach
-                </select>
+                        <select name="month" class="form-select" onchange="this.form.submit()">
+                            <option value="">Semua Bulan</option>
+                            @foreach(range(1, 12) as $m)
+                                <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>
+                                    {{ date('F', mktime(0, 0, 0, $m, 1)) }}
+                                </option>
+                            @endforeach
+                        </select>
 
-                <select name="type" class="form-select" onchange="updateChartType(this.value)">
-                    <option value="all" {{ $type == 'all' ? 'selected' : '' }}>Semua Data</option>
-                    <option value="income" {{ $type == 'income' ? 'selected' : '' }}>Pemasukan</option>
-                    <option value="expense" {{ $type == 'expense' ? 'selected' : '' }}>Pengeluaran</option>
-                    <option value="profit" {{ $type == 'profit' ? 'selected' : '' }}>Profit</option>
-                </select>
-            </form>
-        </div>
-    </div>
-
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-        <!-- Kamar Kosong Card -->
-        <div class="stat-card kamar">
-            <div class="stat-content">
-                <div class="stat-title">Kamar Kosong</div>
-                <div class="stat-value">{{ $total_kamar_kosong }}</div>
-                <div class="stat-trend text-success">
-                    <i data-feather="home"></i>
-                    Total Kamar Tersedia
+                        <select name="type" class="form-select" onchange="updateChartType(this.value)">
+                            <option value="all" {{ $type == 'all' ? 'selected' : '' }}>Semua Data</option>
+                            <option value="income" {{ $type == 'income' ? 'selected' : '' }}>Pemasukan</option>
+                            <option value="expense" {{ $type == 'expense' ? 'selected' : '' }}>Pengeluaran</option>
+                            <option value="profit" {{ $type == 'profit' ? 'selected' : '' }}>Profit</option>
+                        </select>
+                    </form>
                 </div>
             </div>
-            <div class="stat-icon">
-                <i data-feather="home"></i>
-            </div>
         </div>
 
-        <!-- Penghuni Card -->
-        <div class="stat-card penghuni">
-            <div class="stat-content">
-                <div class="stat-title">Penghuni Aktif</div>
-                <div class="stat-value">{{ $total_penghuni }}</div>
-                <div class="stat-trend text-primary">
-                    <i data-feather="users"></i>
-                    Total Penghuni
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <!-- Kamar Stats -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-header">
+                        <div class="stat-title">Kamar Kosong</div>
+                        <div class="stat-value">{{ $total_kamar_kosong }}</div>
+                    </div>
+                    <div class="stat-trend text-success">
+                        <i data-feather="home"></i>
+                        <span>Total Kamar Tersedia</span>
+                    </div>
                 </div>
             </div>
-            <div class="stat-icon">
-                <i data-feather="users"></i>
+
+            <!-- Penghuni Stats -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-header">
+                        <div class="stat-title">Penghuni Aktif</div>
+                        <div class="stat-value">{{ $total_penghuni }}</div>
+                    </div>
+                    <div class="stat-trend text-primary">
+                        <i data-feather="users"></i>
+                        <span>Total Penghuni</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Finance Cards -->
+        <!-- Finance Grid -->
         <div class="finance-grid">
             <!-- Pemasukan Card -->
             <div class="stat-card">
@@ -288,9 +269,6 @@
                         <i data-feather="trending-up"></i>
                         Pendapatan
                     </div>
-                </div>
-                <div class="stat-icon">
-                    <i data-feather="arrow-up"></i>
                 </div>
             </div>
 
@@ -304,9 +282,6 @@
                         Biaya
                     </div>
                 </div>
-                <div class="stat-icon">
-                    <i data-feather="arrow-down"></i>
-                </div>
             </div>
 
             <!-- Profit Card -->
@@ -319,19 +294,16 @@
                         Keuntungan Bersih
                     </div>
                 </div>
-                <div class="stat-icon">
-                    <i data-feather="trending-up"></i>
-                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Financial Summary -->
-    <div class="chart-container">
-        <div class="chart-header">
-            <h2>Grafik Keuangan</h2>
+        <!-- Chart Section -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2 class="chart-title">Grafik Keuangan</h2>
+            </div>
+            <canvas id="monthlyChart" height="100"></canvas>
         </div>
-        <canvas id="monthlyChart" height="100"></canvas>
     </div>
 </div>
 @endsection

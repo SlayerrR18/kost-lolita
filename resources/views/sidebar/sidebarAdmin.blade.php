@@ -98,7 +98,7 @@
                    class="nav-link {{ request()->routeIs('messages.*') ? 'active' : '' }}">
                     {{-- ganti: mail -> message-square (lebih “chat”) --}}
                     <i data-feather="message-square"></i>
-                    <span>Chat</span>
+                    <span>Pesan</span>
                 </a>
             </li>
             <li>
@@ -106,7 +106,7 @@
                    class="nav-link {{ request()->routeIs('admin.reports*') ? 'active' : '' }}">
                     {{-- ganti: book -> file-text (lebih “laporan”) --}}
                     <i data-feather="file-text"></i>
-                    <span>Report</span>
+                    <span>Riwayat Laporan dan Keluhan</span>
                 </a>
             </li>
             <li>

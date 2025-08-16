@@ -57,7 +57,7 @@
                    class="nav-link {{ request()->routeIs('user.reports*') ? 'active' : '' }}">
                     {{-- book → file-text agar seragam dengan “laporan” --}}
                     <i data-feather="file-text"></i>
-                    <span>Keluhan / Laporan</span>
+                    <span>Keluhan dan Laporan</span>
                 </a>
             </li>
             <li>
