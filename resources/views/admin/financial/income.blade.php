@@ -1,3 +1,4 @@
+{{-- resources/views/admin/financial/pemasukan.blade.php --}}
 @extends('layouts.main')
 
 @section('title', 'Pemasukan')
@@ -9,24 +10,24 @@
         --primary: #1a7f5a;
         --primary-2: #16c79a;
         --secondary: #f1f5f9;
-        --accent: #0f172a;
         --surface: #ffffff;
         --bg: #f8fafc;
         --ink: #1e293b;
         --muted: #64748b;
         --ring: #e2e8f0;
-        --danger: #dc2626;
         --success: #16a34a;
-        --warning: #e0f2fe;
+        --danger: #dc2626;
+        --info: #0ea5e9;
         --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
         --radius-sm: 8px;
         --radius-md: 12px;
         --radius-lg: 24px;
+        --radius-pill: 9999px;
     }
 
     body {
         font-family: 'Poppins', sans-serif;
-        color: var(--ink);
     }
 
     /* === Layout & Containers === */
@@ -55,12 +56,7 @@
         font-weight: 700;
     }
 
-    .subtext {
-        opacity: .9;
-        margin-top: .5rem;
-    }
-
-    .btn-primary-ghost {
+    .btn-add {
         background: rgba(255, 255, 255, .15);
         color: #fff;
         border: 2px solid rgba(255, 255, 255, .25);
@@ -72,7 +68,7 @@
         transition: all .2s ease;
     }
 
-    .btn-primary-ghost:hover {
+    .btn-add:hover {
         background: rgba(255, 255, 255, .25);
         color: #fff;
         transform: translateY(-1px);
@@ -83,7 +79,7 @@
             flex-direction: column;
             align-items: flex-start;
         }
-        .btn-primary-ghost {
+        .btn-add {
             width: 100%;
             justify-content: center;
         }
@@ -102,8 +98,12 @@
         border-radius: var(--radius-lg);
         padding: 1.5rem;
         box-shadow: var(--shadow-md);
-        display: flex;
-        flex-direction: column;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
     }
 
     .stat-title {
@@ -127,26 +127,32 @@
         font-size: .85rem;
         margin-top: .75rem;
     }
-
-    .stat-foot.up { color: var(--success); }
     .stat-foot.down { color: var(--danger); }
+    .stat-foot.up { color: var(--success); }
     .stat-foot.muted { color: var(--muted); }
 
-    /* === Table Card & Toolbar === */
-    .card-base {
+
+    /* === Main Content Card & Table === */
+    .content-card {
         background: var(--surface);
         border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-md);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         overflow: hidden;
     }
 
     .table-toolbar {
         display: flex;
-        flex-wrap: wrap;
         gap: 1rem;
+        flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
         padding: 1.5rem 1.5rem 0;
+    }
+
+    .filter-inline {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
     }
 
     .filter-inline .form-control {
@@ -159,102 +165,125 @@
 
     .table-responsive {
         max-height: 64vh;
-        overflow: auto;
+        overflow-y: auto;
     }
 
     .table {
-        margin: 0;
+        margin-bottom: 0;
     }
 
-    thead th {
+    .table thead th {
         position: sticky;
         top: 0;
         background: var(--bg);
         border-bottom: 1px solid var(--ring);
         color: var(--muted);
         font-size: .75rem;
-        letter-spacing: .5px;
         text-transform: uppercase;
+        letter-spacing: .5px;
         padding: 1rem;
     }
 
-    tbody td {
+    .table tbody td {
         vertical-align: middle;
         padding: 1.25rem 1rem;
         border-bottom: 1px solid var(--ring);
     }
 
-    tbody tr:hover {
-        background: #f1f5f9;
+    .table tbody tr:hover {
+        background-color: #f1f5f9;
     }
 
-    /* === Komponen Spesifik Tabel === */
-    .status-badge {
-        padding: .4rem .8rem;
+    /* === Status Badges & Action Buttons === */
+    .badge-status {
+        padding: 0.4rem 0.8rem;
         border-radius: var(--radius-sm);
-        font-weight: 600;
-        font-size: .8rem;
+        font-weight: 500;
+        font-size: 0.875rem;
         white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
     }
 
-    .status-in {
+    .badge-status.status-out {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge-status.status-in {
         background: #dcfce7;
         color: #166534;
     }
 
-    .thumbnail-img {
-        width: 48px;
-        height: 48px;
-        object-fit: cover;
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        border: 1px solid var(--ring);
-        transition: transform .2s ease;
-    }
-
-    .thumbnail-img:hover {
-        transform: scale(1.05);
-    }
-
-    .actions .btn-icon {
+    .btn-action {
         width: 38px;
         height: 38px;
         border-radius: var(--radius-md);
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        transition: all .2s ease;
+        transition: all 0.2s;
+        border: none;
     }
 
-    .btn-ghost-danger {
-        background: rgba(239, 68, 68, .1);
+    .btn-delete {
+        background: rgba(220, 38, 38, 0.1);
         color: var(--danger);
     }
 
-    .btn-ghost-danger:hover {
-        background: rgba(239, 68, 68, .2);
+    .btn-delete:hover {
+        background: rgba(220, 38, 38, 0.2);
         transform: translateY(-2px);
     }
 
-    /* === Empty State === */
+    .btn-preview-img {
+        background: var(--secondary);
+        color: var(--muted);
+        border: 1px solid var(--ring);
+    }
+    .btn-preview-img:hover {
+        background: #e2e8f0;
+        transform: translateY(-1px);
+    }
+
+    .feather-16 {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    /* === Modal === */
+    .modal-content {
+        border-radius: var(--radius-lg);
+        border: none;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid var(--ring);
+        padding: 1.5rem;
+        background-color: var(--bg);
+    }
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .modal-body {
+        padding: 2rem;
+        text-align: center;
+    }
+
     .empty-state {
         text-align: center;
         padding: 4rem 2rem;
         color: var(--muted);
     }
 
-    .empty-state i {
-        width: 64px;
-        height: 64px;
+    .empty-state-icon {
+        width: 4rem;
+        height: 4rem;
         color: #cbd5e1;
         margin-bottom: 1.5rem;
-    }
-
-    /* === Modals === */
-    .modal-content {
-        border-radius: var(--radius-lg);
-        border: none;
-        box-shadow: var(--shadow-md);
     }
 </style>
 @endpush
@@ -267,7 +296,7 @@
             <h1 class="page-title">Pemasukan</h1>
             <p class="subtext mb-0">Kelola seluruh pemasukan kost</p>
         </div>
-        <button class="btn btn-primary-ghost" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
+        <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
             <i data-feather="plus-circle"></i> Tambah Pemasukan
         </button>
     </div>
@@ -300,18 +329,18 @@
     </div>
 
     {{-- Table --}}
-    <div class="card-base">
+    <div class="content-card">
         <div class="table-toolbar">
             <div class="filter-inline">
                 <input id="quickSearch" type="text" class="form-control" placeholder="Cari nama/kamar…">
             </div>
             <div class="text-muted small">
-                Menampilkan {{ $transactions->count() }} transaksi
+                Menampilkan <span id="transactionCount">{{ $transactions->count() }}</span> transaksi
             </div>
         </div>
 
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle" id="transactionTable">
                 <thead>
                     <tr>
                         <th style="min-width:120px">No Kamar</th>
@@ -319,45 +348,45 @@
                         <th style="width:140px">Tanggal</th>
                         <th style="width:160px">Total</th>
                         <th style="width:120px">Status</th>
-                        <th style="width:90px">Bukti</th>
+                        <th style="width:90px" class="text-center">Bukti</th>
                         <th style="width:100px" class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
                     @forelse($transactions as $t)
-                        <tr data-id="{{ $t->id }}">
-                            <td><span class="fw-semibold">Kamar {{ $t->kost->nomor_kamar ?? '-' }}</span></td>
-                            <td>{{ $t->nama_transaksi }}</td>
-                            <td>{{ optional($t->tanggal_transaksi)->format('d/m/Y') }}</td>
-                            <td class="fw-semibold">Rp {{ number_format($t->total,0,',','.') }}</td>
-                            <td><span class="status-badge status-in">{{ $t->status }}</span></td>
-                            <td class="text-center">
-                                @if($t->bukti_pembayaran)
-                                    <img src="{{ $t->bukti_pembayaran_url }}"
-                                         alt="Bukti Pembayaran"
-                                         class="thumbnail-img"
-                                         onclick="showImage('{{ $t->bukti_pembayaran_url }}')"
-                                         onerror="this.onerror=null;this.src='/images/placeholder.jpg';">
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
-                            <td class="text-center actions">
-                                <button class="btn btn-ghost-danger btn-icon" data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="Hapus" data-transaction-id="{{ $t->id }}">
-                                    <i data-feather="trash-2"></i>
+                    <tr data-id="{{ $t->id }}">
+                        <td><span class="fw-semibold">Kamar {{ $t->kost->nomor_kamar ?? '-' }}</span></td>
+                        <td>{{ $t->nama_transaksi }}</td>
+                        <td>{{ optional($t->tanggal_transaksi)->format('d/m/Y') }}</td>
+                        <td class="fw-semibold">Rp {{ number_format($t->total,0,',','.') }}</td>
+                        <td><span class="badge-status status-in">{{ $t->status }}</span></td>
+                        <td class="text-center">
+                            @if($t->bukti_pembayaran)
+                                @php $imgUrl = asset('storage/' . $t->bukti_pembayaran); @endphp
+                                <button type="button" class="btn-action btn-preview-img" onclick="showImage('{{ $imgUrl }}')">
+                                    <i data-feather="eye"></i>
                                 </button>
-                            </td>
-                        </tr>
+                            @else
+                                <span class="text-muted small">-</span>
+                            @endif
+                        </td>
+                        <td class="text-center actions">
+                            {{-- Tombol hapus ditambahkan di sini --}}
+                            <button class="btn-action btn-delete" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Hapus" data-transaction-id="{{ $t->id }}">
+                                <i data-feather="trash-2"></i>
+                            </button>
+                        </td>
+                    </tr>
                     @empty
-                        <tr>
-                            <td colspan="7">
-                                <div class="empty-state">
-                                    <i data-feather="inbox"></i>
-                                    <div class="text-muted">Belum ada data pemasukan</div>
-                                </div>
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i data-feather="inbox" class="empty-state-icon"></i>
+                                <h5>Belum ada data pemasukan</h5>
+                            </div>
+                        </td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -365,95 +394,102 @@
     </div>
 </div>
 
+{{-- Modal for Image Preview --}}
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Lihat Foto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="previewImage" src="" alt="Bukti Pembayaran" class="img-fluid rounded" />
+            </div>
+        </div>
+    </div>
+</div>
+
 @include('admin.financial.partials.add-modal')
-@include('admin.financial.partials.image-modal')
-@include('admin.financial.partials.delete-modal')
 @endsection
 
 @push('js')
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        feather.replace();
+    function initIcons(){
+        if(window.feather){ feather.replace({ 'stroke-width':1.5, width:20, height:20 }); }
+    }
 
-        // Inisialisasi Tooltip
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    function initTooltips(){
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+    }
 
-        // Quick Search
+    function showImage(url) {
+        const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+        document.getElementById('previewImage').src = url;
+        modal.show();
+    }
+
+    function deleteTransaction(id){
+        Swal.fire({
+            title:'Hapus Transaksi?', text:'Data yang dihapus tidak dapat dikembalikan.',
+            icon:'warning', showCancelButton:true, confirmButtonColor:'#dc2626', cancelButtonColor:'#6b7280',
+            confirmButtonText:'Ya, hapus', cancelButtonText:'Batal'
+        }).then(res=>{
+            if(!res.isConfirmed) return;
+            fetch(`/admin/financial/${id}`,{
+                method:'DELETE',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}
+            }).then(r=>r.json()).then(d=>{
+                if(d.success){ Swal.fire('Berhasil','Transaksi dihapus','success').then(()=>location.reload()); }
+                else{ throw new Error(d.message || 'Gagal menghapus'); }
+            }).catch(e=>Swal.fire('Error', e.message, 'error'));
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initIcons();
+        initTooltips();
+
+        // Custom search filter logic
         const quickSearchInput = document.getElementById('quickSearch');
-        if (quickSearchInput) {
-            quickSearchInput.addEventListener('input', function() {
-                const q = this.value.toLowerCase();
-                document.querySelectorAll('#tableBody tr').forEach(tr => {
-                    const rowText = tr.innerText.toLowerCase();
-                    tr.style.display = rowText.includes(q) ? '' : 'none';
+        const tableBody = document.getElementById('tableBody');
+        const transactionCountSpan = document.getElementById('transactionCount');
+
+        if (quickSearchInput && tableBody && transactionCountSpan) {
+            quickSearchInput.addEventListener('keyup', function() {
+                const query = this.value.toLowerCase();
+                let visibleCount = 0;
+
+                tableBody.querySelectorAll('tr').forEach(row => {
+                    const rowText = row.textContent.toLowerCase();
+                    if (rowText.includes(query)) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
                 });
+
+                transactionCountSpan.textContent = visibleCount;
+
+                const emptyState = tableBody.querySelector('.empty-state');
+                if (visibleCount === 0 && !emptyState) {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = `<td colspan="7"><div class="empty-state"><i data-feather="inbox" class="empty-state-icon"></i><h5 class="mt-4">Tidak ada data yang cocok</h5></div></td>`;
+                    tableBody.appendChild(emptyRow);
+                    feather.replace();
+                } else if (visibleCount > 0 && emptyState) {
+                    emptyState.parentElement.parentElement.remove();
+                }
             });
         }
 
-        // Image Preview Modal Logic
-        window.showImage = (url) => {
-            const img = document.getElementById('previewImage');
-            img.src = url;
-            new bootstrap.Modal(document.getElementById('imagePreviewModal')).show();
-        };
-
-        // Delete Transaction with Event Delegation
-        document.getElementById('tableBody')?.addEventListener('click', function(e) {
-            const deleteBtn = e.target.closest('.btn-ghost-danger');
+        // Delete button event delegation
+        document.getElementById('transactionTable')?.addEventListener('click', function(e) {
+            const deleteBtn = e.target.closest('.btn-delete');
             if (deleteBtn) {
                 const transactionId = deleteBtn.getAttribute('data-transaction-id');
-                Swal.fire({
-                    title: 'Hapus Transaksi?',
-                    text: 'Data yang dihapus tidak dapat dikembalikan.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#dc2626',
-                    cancelButtonColor: '#6b7280',
-                    confirmButtonText: 'Ya, hapus',
-                    cancelButtonText: 'Batal'
-                }).then(res => {
-                    if (res.isConfirmed) {
-                        fetch(`/admin/financial/${transactionId}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            }
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                return response.json().then(errorData => {
-                                    throw new Error(errorData.message || 'Gagal menghapus');
-                                });
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            Swal.fire('Berhasil', 'Transaksi berhasil dihapus', 'success').then(() => {
-                                location.reload();
-                            });
-                        })
-                        .catch(error => {
-                            Swal.fire('Error', error.message, 'error');
-                        });
-                    }
-                });
+                deleteTransaction(transactionId);
             }
         });
     });
-
-    // Preview image on file input change
-    window.previewSlip = (input) => {
-        const box = document.getElementById('slipPreview');
-        const img = box.querySelector('img');
-        if (input.files && input.files[0]) {
-            img.src = URL.createObjectURL(input.files[0]);
-            box.style.display = 'block';
-        } else {
-            box.style.display = 'none';
-            img.src = '';
-        }
-    };
 </script>
 @endpush

@@ -27,7 +27,7 @@
 @section('content')
 <div class="chat-user">
   <div class="wrap">
-    <div class="top"><div class="left"><strong>Masukan / Laporan</strong></div></div>
+    <div class="top"><div class="left"><strong>Pesan</strong></div></div>
 
     <div class="stream" id="messageContainer">
       @php $lastDate = null; @endphp

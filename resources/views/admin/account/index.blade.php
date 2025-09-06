@@ -2,359 +2,521 @@
 @extends('layouts.main')
 
 @push('css')
-    <link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css">
-    <link href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css">
-    <style>
-        /* Modern Dashboard Container */
-        .account-container {
-            padding: 2rem;
-            background: #f8fafc;
-            min-height: 100vh;
-        }
+<link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css">
+<link href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css">
+<style>
+    /* === Palet & Umum (diselaraskan dengan desain sebelumnya) === */
+    :root {
+        --primary: #1a7f5a;
+        --primary-2: #16c79a;
+        --secondary: #f1f5f9;
+        --surface: #ffffff;
+        --bg: #f8fafc;
+        --ink: #1e293b;
+        --muted: #64748b;
+        --ring: #e2e8f0;
+        --success: #16a34a;
+        --danger: #dc2626;
+        --info: #0ea5e9;
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 24px;
+        --radius-pill: 9999px; /* Untuk bentuk pill/chip */
+    }
 
-        /* Header Section */
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
+
+    /* === Layout & Containers === */
+    .account-container {
+        padding: 2rem;
+        background: var(--bg);
+        min-height: 100vh;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: 0 4px 20px rgba(26, 127, 90, 0.15);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start; /* Align items to top to accommodate filters */
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .header-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .page-subtitle {
+        opacity: 0.9;
+        margin-top: 0.5rem;
+    }
+
+    /* === Filter Section (NEW/IMPROVED) === */
+    .filter-section {
+        display: flex;
+        gap: 0.75rem; /* Reduced gap for more compact look */
+        flex-wrap: wrap;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.15); /* Slightly transparent background */
+        border-radius: var(--radius-pill); /* Pill shape */
+        padding: 0.5rem 1.25rem; /* Padding for the entire filter section */
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .filter-input-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .filter-input-group .form-control,
+    .filter-input-group .form-select {
+        border: none; /* Remove individual borders */
+        border-radius: var(--radius-pill); /* Pill shape for inputs */
+        padding: 0.5rem 1rem;
+        padding-left: 2.25rem; /* Space for icon */
+        font-size: 0.875rem; /* Smaller font size */
+        background: rgba(255, 255, 255, 0.9); /* Opaque white background for inputs */
+        color: var(--ink);
+        transition: all 0.2s ease;
+        height: 38px; /* Fixed height for consistency */
+        min-width: 140px; /* Min-width for inputs */
+        max-width: 180px; /* Max-width for inputs */
+    }
+
+    .filter-input-group .form-control::placeholder {
+        color: var(--muted);
+        opacity: 0.8;
+    }
+
+    .filter-input-group .form-control:focus,
+    .filter-input-group .form-select:focus {
+        box-shadow: 0 0 0 2px var(--primary-2); /* Focus ring with primary color */
+        outline: none;
+        background: var(--surface);
+    }
+
+    .filter-input-group .input-icon {
+        position: absolute;
+        left: 0.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1rem; /* Smaller icon size */
+        height: 1rem;
+        color: var(--muted);
+        pointer-events: none;
+        z-index: 2; /* Ensure icon is above input */
+    }
+
+    /* Specific style for select arrow */
+    .filter-input-group .form-select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevron-down'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.8rem center;
+        background-size: 1rem;
+        padding-right: 2.25rem; /* Space for custom arrow */
+    }
+
+    .btn-filter {
+        background: white;
+        color: var(--primary);
+        border: none;
+        border-radius: var(--radius-pill);
+        padding: 0.5rem 1.25rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+        height: 38px; /* Match input height */
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-filter:hover {
+        background: var(--secondary);
+        color: var(--primary);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* === Stats Cards === */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stat-title {
+        color: var(--muted);
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        color: var(--ink);
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    /* === Main Content Card === */
+    .content-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    /* === DataTable Customization === */
+    .dataTables_wrapper {
+        padding: 1.5rem;
+    }
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        margin-bottom: 1rem;
+        display: none; /* Hide default DataTables search/length */
+    }
+
+    /* Remove default DataTables filter styling */
+    .dataTables_wrapper .dataTables_filter label {
+        display: none;
+    }
+    .dataTables_wrapper .dataTables_filter input {
+        display: none;
+    }
+
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        font-size: 0.875rem;
+        color: var(--muted);
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border-radius: var(--radius-sm);
+        margin: 0 4px;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: rgba(26,127,90,.1);
+        color: var(--primary) !important;
+        border-color: transparent !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: rgba(26,127,90,.05) !important;
+        border-color: transparent !important;
+    }
+
+    /* === Tabel Styling === */
+    .table-responsive {
+        padding: 1rem;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background: var(--bg);
+        border-bottom: 1px solid var(--ring);
+        color: var(--muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid var(--ring);
+    }
+
+    .table tbody tr:hover {
+        background-color: #f1f5f9;
+    }
+
+    /* === Status Badges === */
+    .badge-status {
+        padding: 0.4rem 0.8rem;
+        border-radius: var(--radius-sm);
+        font-weight: 500;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .badge-status.active { background: #dcfce7; color: #166534; }
+    .badge-status.inactive { background: #f1f5f9; color: #475569; }
+    .badge-status.bg-info { background: #e0f2fe; color: #075985; }
+    .badge-status.bg-secondary { background: #e2e8f0; color: #475569; }
+
+    /* === Action Buttons & Icons === */
+    .btn-add {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 4px 12px rgba(26, 127, 90, 0.15);
+    }
+
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(26, 127, 90, 0.2);
+        color: white;
+    }
+
+    .action-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: var(--radius-md);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        border: none;
+    }
+
+    .btn-edit { background: rgba(26, 127, 90, 0.1); color: var(--primary); }
+    .btn-edit:hover { background: rgba(26, 127, 90, 0.2); transform: translateY(-2px); }
+
+    .btn-delete { background: rgba(220, 38, 38, 0.1); color: var(--danger); }
+    .btn-delete:hover { background: rgba(220, 38, 38, 0.2); transform: translateY(-2px); }
+
+    .feather-16 { width: 1rem; height: 1rem; }
+
+    /* === Modal Styles === */
+    .modal-content { border-radius: var(--radius-lg); border: none; }
+    .modal-header { border-bottom: none; padding: 1.5rem 1.5rem 0; }
+    .modal-footer { border-top: none; padding: 0 1.5rem 1.5rem; }
+
+    .modal-body { padding: 2.5rem; text-align: center; }
+    .modal-icon { width: 4rem; height: 4rem; margin-bottom: 1.5rem; }
+
+    /* Responsive Adjustments */
+    @media (max-width: 992px) { /* Adjust breakpoint for filter section */
         .page-header {
-            background: linear-gradient(135deg, #1a7f5a 0%, #16c79a 100%);
-            border-radius: 24px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            color: white;
-            box-shadow: 0 4px 20px rgba(26, 127, 90, 0.15);
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .page-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .page-subtitle {
-            opacity: 0.9;
-            margin-top: 0.5rem;
-        }
-
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            flex-direction: column;
+            align-items: flex-start;
             gap: 1.5rem;
-            margin-bottom: 2rem;
         }
-
-        .stat-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-title {
-            color: #64748b;
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-value {
-            color: #1e293b;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        /* Main Content Card */
-        .content-card {
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-        }
-
-        /* Enhanced Table Styles */
-        .table-container {
-            padding: 1.5rem;
-        }
-
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .table-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1e293b;
-        }
-
-        .btn-add {
-            background: linear-gradient(135deg, #1a7f5a 0%, #16c79a 100%);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-            border: none;
-            box-shadow: 0 4px 12px rgba(26, 127, 90, 0.15);
-        }
-
-        .btn-add:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(26, 127, 90, 0.2);
-            color: white;
-        }
-
-        /* DataTable Customization */
-        .dataTables_wrapper .dataTables_length select,
-        .dataTables_wrapper .dataTables_filter input {
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .dataTables_wrapper .dataTables_filter input:focus {
-            border-color: #1a7f5a;
-            box-shadow: 0 0 0 3px rgba(26, 127, 90, 0.1);
-            outline: none;
-        }
-
-        /* Enhanced Status Badges */
-        .badge {
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 0.875rem;
-        }
-
-        .badge.active {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .badge.inactive {
-            background: #f1f5f9;
-            color: #475569;
-        }
-
-        /* Action Buttons */
-        .action-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
+        .filter-section {
+            width: 100%;
             justify-content: center;
-            transition: all 0.2s;
-            border: none;
+            border-radius: var(--radius-lg); /* More rounded on smaller screens */
+            padding: 1rem;
         }
-
-        .btn-edit {
-            background: rgba(26, 127, 90, 0.1);
-            color: #1a7f5a;
+        .filter-input-group .form-control,
+        .filter-input-group .form-select {
+            min-width: unset; /* Remove min-width on small screens */
+            width: 100%; /* Make them full width */
+            max-width: 100%;
         }
-
-        .btn-edit:hover {
-            background: rgba(26, 127, 90, 0.2);
-            transform: translateY(-2px);
+        .filter-input-group {
+            width: 100%; /* Make input groups full width */
         }
+    }
 
-        .btn-delete {
-            background: rgba(220, 38, 38, 0.1);
-            color: #dc2626;
-        }
-
-        .btn-delete:hover {
-            background: rgba(220, 38, 38, 0.2);
-            transform: translateY(-2px);
-        }
-
-        /* Enhanced Modal */
-        .modal-content {
-            border-radius: 24px;
-            border: none;
-        }
-
-        .modal-body {
-            padding: 2.5rem;
-            text-align: center;
-        }
-
-        .modal-icon {
-            width: 80px;
-            height: 80px;
-            color: #dc2626;
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .modal-text {
-            color: #64748b;
-            margin-bottom: 2rem;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .account-container {
-                padding: 1rem;
-            }
-
-            .page-header {
-                padding: 1.5rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    @media (max-width: 768px) {
+        .account-container { padding: 1rem; }
+        .page-header { padding: 1.5rem; }
+        .stats-grid { grid-template-columns: 1fr; }
+        .header-content { flex-direction: column; align-items: flex-start; }
+        .btn-add { width: 100%; justify-content: center; }
+    }
+</style>
 @endpush
 
 @section('title', 'Manajemen Akun')
 
 @section('content')
 <div class="account-container">
-    <!-- Header Section -->
-    <div class="page-header">
+    {{-- Header Section --}}
+    <header class="page-header">
         <div class="header-content">
-            <div>
-                <h1 class="page-title">Penghuni Kost</h1>
-                <p class="page-subtitle">Kelola data penghuni kost dengan mudah</p>
+            <h1 class="page-title">Manajemen Akun</h1>
+            <p class="page-subtitle">Kelola data penghuni kost dengan mudah</p>
+        </div>
+
+        {{-- Filter Section --}}
+        <div class="filter-section">
+            <div class="filter-input-group">
+                <i data-feather="search" class="input-icon"></i>
+                <input type="text" id="quickSearch" class="form-control" placeholder="Cari Nama/Email...">
             </div>
+
+            <div class="filter-input-group">
+                <i data-feather="users" class="input-icon"></i>
+                <select id="filterStatus" class="form-select">
+                    <option value="">Semua Status</option>
+                    <option value="Penghuni">Penghuni</option>
+                    <option value="Bukan Penghuni">Bukan Penghuni</option>
+                </select>
+            </div>
+
+            <div class="filter-input-group">
+                <i data-feather="home" class="input-icon"></i>
+                <input type="text" id="filterRoom" class="form-control" placeholder="No. Kamar">
+            </div>
+
+            {{-- Tombol "Tambah Penghuni" dipindahkan di sini untuk konsistensi --}}
             <a href="{{ route('admin.account.create') }}" class="btn btn-add">
-                <i data-feather="user-plus"></i>
-                <span>Tambah Penghuni</span>
+                <i data-feather="user-plus" class="feather-16"></i>
+                <span>Tambah</span>
             </a>
         </div>
-    </div>
+    </header>
 
-    <!-- Stats Grid -->
-    <div class="stats-grid">
+    {{-- Stats Grid --}}
+    <section class="stats-grid">
         <div class="stat-card">
-            <div class="stat-title">Total Penghuni</div>
-            <div class="stat-value">{{ $users->where('kost', '!=', null)->count() }}</div>
+            <div class="stat-title">Total Akun Terdaftar</div>
+            <div class="stat-value">{{ $users->count() }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-title">Kamar Terisi</div>
+            <div class="stat-title">Penghuni Aktif</div>
             <div class="stat-value">{{ $users->where('kost.status', 'Terisi')->count() }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-title">Kamar Kosong</div>
-            <div class="stat-value">{{ $users->where('kost.status', 'Kosong')->count() }}</div>
+            <div class="stat-title">Akun Tanpa Kamar</div>
+            <div class="stat-value">{{ $users->where('kost', null)->count() }}</div>
         </div>
-    </div>
+    </section>
 
-    <!-- Main Content -->
+    {{-- Main Content Card --}}
     <div class="content-card">
-        <div class="table-container">
-            @include('layouts.alert')
-            <div class="table-responsive">
-                <table class="table" id="accountTable">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Nama Penghuni</th>
-                            <th>Email</th>
-                            <th>Kamar</th>
-                            <th>Tanggal Masuk</th>
-                            <th>Tanggal Keluar</th>
-                            <th>Status</th>
-                            <th style="width: 100px;">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($users as $user)
-                        <tr>
-                            <td></td>
-                            <td class="fw-bold">{{ $user->name }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td>
-                                @if($user->kost)
-                                    <span class="badge bg-info">{{ $user->kost->nomor_kamar }}</span>
-                                @else
-                                    <span class="badge bg-secondary">Tidak Ada Kamar</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if($user->orders->where('status', 'confirmed')->first())
-                                    {{ $user->orders->where('status', 'confirmed')->first()->tanggal_masuk->format('d M Y') }}
-                                @else
-                                    -
-                                @endif
-                            </td>
-                            <td>
-                                @if($user->orders->where('status', 'confirmed')->first())
-                                    {{ $user->orders->where('status', 'confirmed')->first()->tanggal_keluar->format('d M Y') }}
-                                @else
-                                    -
-                                @endif
-                            </td>
-                            <td>
-                                @if($user->kost && $user->kost->penghuni)
-                                    <span class="badge bg-success">Penghuni</span>
-                                @else
-                                    <span class="badge bg-secondary">Bukan Penghuni</span>
-                                @endif
-                            </td>
-                            <td>
-                                <div class="d-flex gap-2">
-                                    <a href="{{ route('admin.account.edit', $user->id) }}"
-                                       class="action-btn btn-edit"
-                                       title="Edit">
-                                        <i data-feather="edit-2" class="feather-16"></i>
-                                    </a>
-                                    <button type="button"
-                                            class="action-btn btn-delete"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#deleteModal{{ $user->id }}"
-                                            title="Hapus">
-                                    <i data-feather="trash-2" class="feather-16"></i>
+        @include('layouts.alert')
+        {{-- `table-toolbar` sudah tidak diperlukan karena filter sudah di header --}}
+        {{-- <div class="table-toolbar">
+            <div class="filter-inline">
+                <select id="filterStatus" class="form-select">
+                    <option value="">Semua Status</option>
+                    <option value="Penghuni">Penghuni</option>
+                    <option value="Bukan Penghuni">Bukan Penghuni</option>
+                </select>
+                <input type="text" id="filterRoom" class="form-control" placeholder="Cari No. Kamar">
+                <input type="text" id="quickSearch" class="form-control" placeholder="Cari Nama/Email...">
+            </div>
+        </div> --}}
+        <div class="table-responsive">
+            <table class="table table-hover" id="accountTable">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">No</th>
+                        <th>Nama Penghuni</th>
+                        <th>Email</th>
+                        <th>Kamar</th>
+                        <th>Tanggal Masuk</th>
+                        <th>Tanggal Keluar</th>
+                        <th>Status</th>
+                        <th style="width: 100px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($users as $user)
+                    <tr>
+                        <td></td>
+                        <td class="fw-bold">{{ $user->name }}</td>
+                        <td>{{ $user->email }}</td>
+                        <td>
+                            @if($user->kost)
+                                <span class="badge badge-status bg-info">{{ $user->kost->nomor_kamar }}</span>
+                            @else
+                                <span class="badge badge-status bg-secondary">Tidak Ada Kamar</span>
+                            @endif
+                        </td>
+                        <td>
+                            {{ optional($user->orders->first())->tanggal_masuk?->format('d M Y') ?? '-' }}
+                        </td>
+                        <td>
+                            {{ optional($user->orders->first())->tanggal_keluar?->format('d M Y') ?? '-' }}
+                        </td>
+                        <td>
+                            @if($user->kost && $user->kost->penghuni)
+                                <span class="badge badge-status active">Penghuni</span>
+                            @else
+                                <span class="badge badge-status inactive">Bukan Penghuni</span>
+                            @endif
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2 justify-content-center">
+                                <a href="{{ route('admin.account.edit', $user->id) }}"
+                                   class="action-btn btn-edit" title="Edit">
+                                    <i data-feather="edit-2"></i>
+                                </a>
+                                <button type="button" class="action-btn btn-delete"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal{{ $user->id }}"
+                                        title="Hapus">
+                                    <i data-feather="trash-2"></i>
                                 </button>
                             </div>
                         </td>
                     </tr>
 
-                    <!-- Delete Modal -->
-                    <div class="modal fade" id="deleteModal{{ $user->id }}" tabindex="-1" aria-hidden="true">
+                    {{-- Delete Modal --}}
+                    <div class="modal fade" id="deleteModal{{ $user->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $user->id }}" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
                                 <div class="modal-body text-center p-5">
                                     <div class="text-danger mb-4">
-                                        <i data-feather="alert-circle" style="width: 64px; height: 64px;"></i>
+                                        <i data-feather="alert-circle" class="modal-icon"></i>
                                     </div>
                                     <h4 class="text-danger mb-3">Hapus Akun</h4>
-                                    <p class="mb-4">Apakah Anda yakin ingin menghapus akun {{ $user->name }}? Data yang sudah dihapus tidak dapat dikembalikan.</p>
+                                    <p class="mb-4 text-muted">Apakah Anda yakin ingin menghapus akun {{ $user->name }}? Data yang sudah dihapus tidak dapat dikembalikan.</p>
                                     <form action="{{ route('admin.account.destroy', $user->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="button" class="btn btn-secondary px-4 me-2" data-bs-dismiss="modal">
-                                            <i data-feather="x" class="me-2"></i>
-                                            Batal
-                                        </button>
-                                        <button type="submit" class="btn btn-danger px-4">
-                                            <i data-feather="trash-2" class="me-2"></i>
-                                            Ya, Hapus
-                                        </button>
+                                        <div class="d-flex justify-content-center gap-3">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                            <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+                                        </div>
                                     </form>
                                 </div>
                             </div>
@@ -369,28 +531,21 @@
 @endsection
 
 @push('js')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    function initIcons() {
-        // Clear existing icons first
-        document.querySelectorAll('.feather').forEach(icon => icon.remove());
-
-        // Reinitialize icons
-        feather.replace({
-            'stroke-width': 1.5,
-            'width': 16,
-            'height': 16,
-            'class': 'feather-16'
-        });
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+        feather.replace();
+    });
 
     $(document).ready(function() {
-        // Initialize DataTable
-        var t = $('#accountTable').DataTable({
-            "columnDefs": [{
-                "searchable": false,
-                "orderable": false,
-                "targets": 0
-            }],
+        // --- Inisialisasi DataTable ---
+        var table = $('#accountTable').DataTable({
+            "columnDefs": [
+                { "searchable": false, "orderable": false, "targets": 0 }
+            ],
             "pageLength": 10,
             "order": [],
             "language": {
@@ -408,49 +563,49 @@
                 }
             },
             "drawCallback": function() {
-                initIcons();
+                feather.replace();
             },
             "initComplete": function() {
-                initIcons();
+                feather.replace();
             }
         });
 
-        // Row numbering
-        t.on('order.dt search.dt', function () {
-            t.column(0, {search:'applied', order:'applied'}).nodes().each(function (cell, i) {
-                cell.innerHTML = i+1;
+        // --- Penomoran baris ---
+        table.on('order.dt search.dt', function () {
+            let i = 1;
+            table.column(0, {search:'applied', order:'applied'}).nodes().each(function (cell) {
+                cell.innerHTML = i++;
             });
-            initIcons();
+            feather.replace();
+        }).draw();
+
+        // --- Filter Kustom ---
+        // Gunakan fungsi search() DataTables yang sudah ada
+        $('#quickSearch').on('keyup', function() {
+            table.search(this.value).draw();
+            feather.replace();
         });
 
-        // Ensure icons are initialized after DataTable operations
-        $('#accountTable').on('draw.dt', function() {
-            setTimeout(initIcons, 50);
+        $('#filterStatus').on('change', function() {
+            let statusValue = $(this).val();
+            // Kolom Status ada di index 6
+            if (statusValue) {
+                table.column(6).search(statusValue, true, false).draw();
+            } else {
+                table.column(6).search('').draw();
+            }
+            feather.replace();
         });
 
-        // Initial icon initialization
-        initIcons();
-
-        // Handle modal events
-        $(document).on('shown.bs.modal', '.modal', function() {
-            initIcons();
+        $('#filterRoom').on('keyup', function() {
+            // Kolom Kamar ada di index 3
+            table.column(3).search(this.value).draw();
+            feather.replace();
         });
 
-        // Handle page changes
-        $('#accountTable').on('page.dt', function() {
-            setTimeout(initIcons, 100);
-        });
-
-        // Handle length change
-        $('#accountTable').on('length.dt', function() {
-            setTimeout(initIcons, 100);
-        });
-
-        // Handle search
-        $('#accountTable').on('search.dt', function() {
-            setTimeout(initIcons, 100);
-        });
+        // Fix Bootstrap modal conflict
+        $.fn.modal.Constructor.Default.keyboard = false;
+        $.fn.modal.Constructor.Default.backdrop = 'static';
     });
 </script>
 @endpush
-

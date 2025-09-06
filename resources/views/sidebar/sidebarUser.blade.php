@@ -46,7 +46,7 @@
                    class="nav-link {{ request()->routeIs('messages.*') ? 'active' : '' }}">
                     {{-- file-text → message-square untuk chat --}}
                     <i data-feather="message-square"></i>
-                    <span>Chat</span>
+                    <span>Pesan</span>
                     @if(isset($admin) && $admin->unread_count > 0)
                         <span class="badge-unread">{{ $admin->unread_count }}</span>
                     @endif

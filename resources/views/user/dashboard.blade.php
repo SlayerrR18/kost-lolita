@@ -247,15 +247,6 @@
         </div>
 
         <div class="card">
-          <h4 class="kicker"><i data-feather="calendar"></i> Periode</h4>
-          <div class="value">
-            {{ $contract?->tanggal_masuk?->translatedFormat('d M Y') ?? '-' }}
-            — {{ $contract?->tanggal_keluar?->translatedFormat('d M Y') ?? '-' }}
-          </div>
-          <div class="hint">Durasi: {{ $contract?->duration ?? '-' }} bulan</div>
-        </div>
-
-        <div class="card">
           <h4 class="kicker"><i data-feather="book-open"></i> Kontak Tersimpan</h4>
           <div class="kicker"><i data-feather="phone"></i> {{ $contract?->phone ?? '-' }}</div>
           <div class="kicker"><i data-feather="mail"></i> {{ $contract?->email ?? '-' }}</div>
@@ -268,11 +259,7 @@
           <h4 class="kicker"><i data-feather="map-pin"></i> Alamat</h4>
           <div class="value" style="font-size:1rem;font-weight:600">{{ $contract?->alamat ?? '-' }}</div>
         </div>
-        <div class="card">
-          <h4 class="kicker"><i data-feather="activity"></i> Status</h4>
-          <div class="value" style="text-transform:capitalize">{{ $contract?->status ?? '-' }}</div>
-          <div class="hint">Terakhir diperbarui: {{ $contract?->updated_at?->diffForHumans() ?? '-' }}</div>
-        </div>
+
         <div class="card">
           <h4 class="kicker"><i data-feather="log-in"></i> Tanggal Masuk</h4>
           <div class="value">{{ $contract?->tanggal_masuk?->translatedFormat('d F Y') ?? '-' }}</div>

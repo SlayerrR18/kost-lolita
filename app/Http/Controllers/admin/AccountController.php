@@ -9,6 +9,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class AccountController extends Controller
 {
@@ -21,6 +22,7 @@ class AccountController extends Controller
     // Tampilkan semua user user
     public function index()
     {
+        // Memuat relasi 'kost' dan 'orders' (yang merupakan kontrak)
         $users = User::with(['kost', 'orders' => function($query) {
             $query->where('status', 'confirmed')->latest();
         }])->where('role', 'user')->get();
@@ -44,41 +46,38 @@ class AccountController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'            => 'required|string|max:255',
-            'email'           => 'required|email|unique:users,email',
-            'password'        => 'required|string|min:6',
-            'kost_id'         => 'required|exists:kosts,id',
-            'tanggal_masuk'   => 'required|date',
-            'tanggal_keluar'  => 'required|date|after:tanggal_masuk',
+            'name'             => 'required|string|max:255',
+            'email'            => 'required|email|unique:users,email',
+            'password'         => 'required|string|min:6',
+            'kost_id'          => 'required|exists:kosts,id',
+            'tanggal_masuk'    => 'required|date',
+            'tanggal_keluar'   => 'required|date|after:tanggal_masuk',
         ]);
 
         try {
             DB::beginTransaction();
 
-
             $user = User::create([
                 'name'     => $validated['name'],
                 'email'    => $validated['email'],
-                'password' => Hash::make($validated['password123']),
+                'password' => Hash::make($validated['password']),
                 'role'     => 'user',
             ]);
 
             Order::create([
-                'user_id' => $user->id,
-                'kost_id' => $validated['kost_id'],
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'status' => 'confirmed',
-                'tanggal_masuk' => $validated['tanggal_masuk'],
+                'user_id'        => $user->id,
+                'kost_id'        => $validated['kost_id'],
+                'name'           => $validated['name'],
+                'email'          => $validated['email'],
+                'status'         => 'confirmed',
+                'tanggal_masuk'  => $validated['tanggal_masuk'],
                 'tanggal_keluar' => $validated['tanggal_keluar'],
-
-                'duration' => \Carbon\Carbon::parse($validated['tanggal_masuk'])
-                    ->diffInMonths(\Carbon\Carbon::parse($validated['tanggal_keluar']))
+                'duration'       => Carbon::parse($validated['tanggal_masuk'])->diffInMonths(Carbon::parse($validated['tanggal_keluar']))
             ]);
 
             $kost = Kost::find($validated['kost_id']);
             $kost->update([
-                'status' => 'Terisi',
+                'status'   => 'Terisi',
                 'penghuni' => $user->id
             ]);
 
@@ -86,7 +85,7 @@ class AccountController extends Controller
 
             return redirect()
                 ->route('admin.account.index')
-                ->with('success', 'Akun penghuni berhasil ditambahkan');
+                ->with('success', 'Akun penghuni berhasil ditambahkan.');
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -118,14 +117,14 @@ class AccountController extends Controller
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'phone' => 'required|string',
-            'address' => 'required|string',
-            'kost_id' => 'required|exists:kosts,id',
-            'tanggal_masuk' => 'required|date',
+            'name'           => 'required|string|max:255',
+            'email'          => 'required|email|unique:users,email,' . $user->id,
+            'phone'          => 'required|string',
+            'address'        => 'required|string',
+            'kost_id'        => 'required|exists:kosts,id',
+            'tanggal_masuk'  => 'required|date',
             'tanggal_keluar' => 'required|date|after:tanggal_masuk',
-            'password' => 'nullable|string|min:6',
+            'password'       => 'nullable|string|min:6',
         ]);
 
         try {
@@ -133,9 +132,9 @@ class AccountController extends Controller
 
             // Update user data
             $userData = [
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'phone' => $validated['phone'],
+                'name'    => $validated['name'],
+                'email'   => $validated['email'],
+                'phone'   => $validated['phone'],
                 'address' => $validated['address'],
             ];
 
@@ -153,14 +152,14 @@ class AccountController extends Controller
                 ->first();
 
             if ($order) {
-                $duration = \Carbon\Carbon::parse($validated['tanggal_masuk'])
-                    ->diffInMonths(\Carbon\Carbon::parse($validated['tanggal_keluar']));
+                $duration = Carbon::parse($validated['tanggal_masuk'])
+                    ->diffInMonths(Carbon::parse($validated['tanggal_keluar']));
 
                 $order->update([
-                    'kost_id' => $validated['kost_id'],
-                    'tanggal_masuk' => $validated['tanggal_masuk'],
+                    'kost_id'        => $validated['kost_id'],
+                    'tanggal_masuk'  => $validated['tanggal_masuk'],
                     'tanggal_keluar' => $validated['tanggal_keluar'],
-                    'duration' => $duration
+                    'duration'       => $duration
                 ]);
             }
 
@@ -169,14 +168,14 @@ class AccountController extends Controller
                 // Update old room status
                 if ($user->kost) {
                     $user->kost->update([
-                        'status' => 'Kosong',
+                        'status'   => 'Kosong',
                         'penghuni' => null
                     ]);
                 }
 
                 // Update new room status
                 Kost::find($validated['kost_id'])->update([
-                    'status' => 'Terisi',
+                    'status'   => 'Terisi',
                     'penghuni' => $user->id
                 ]);
 
@@ -188,7 +187,7 @@ class AccountController extends Controller
 
             return redirect()
                 ->route('admin.account.index')
-                ->with('success', 'Data penghuni berhasil diperbarui');
+                ->with('success', 'Data penghuni berhasil diperbarui.');
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -214,7 +213,7 @@ class AccountController extends Controller
             // Update kost status if exists
             if ($kost) {
                 $kost->update([
-                    'status' => 'Kosong',
+                    'status'   => 'Kosong',
                     'penghuni' => null
                 ]);
             }
@@ -223,7 +222,7 @@ class AccountController extends Controller
 
             return redirect()
                 ->route('admin.account.index')
-                ->with('success', 'Akun berhasil dihapus');
+                ->with('success', 'Akun berhasil dihapus.');
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -232,5 +231,4 @@ class AccountController extends Controller
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
-
 }

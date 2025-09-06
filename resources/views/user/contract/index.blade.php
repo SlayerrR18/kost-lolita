@@ -475,7 +475,7 @@
                     </div>
                     <div class="info-card">
                         <div class="info-card-title">Kontak Pengelola</div>
-                        <div class="info-card-value">{{ e($contract->manager_name ?? 'Admin Kost') }}</div>
+                        <div class="info-card-value">Pemilik Kost</div>
                         <div class="info-card-meta">{{ e($contract->manager_phone ?? '081238036180') }}</div>
                     </div>
                 </div>

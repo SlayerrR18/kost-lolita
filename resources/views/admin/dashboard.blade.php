@@ -5,21 +5,34 @@
 
 @push('css')
 <style>
+    /* === Palet & Umum (diselaraskan dengan desain sebelumnya) === */
     :root {
         --primary: #1a7f5a;
         --primary-2: #16c79a;
-        --primary-light: rgba(26,127,90,0.1);
+        --secondary: #f1f5f9;
+        --surface: #ffffff;
         --bg: #f8fafc;
         --ink: #1e293b;
         --muted: #64748b;
         --ring: #e2e8f0;
-        --success: #22c55e;
+        --success: #16a34a;
         --warning: #f59e0b;
         --danger: #ef4444;
+        --info: #0ea5e9;
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 24px;
+        --radius-pill: 9999px;
     }
 
+    body {
+        font-family: 'Poppins', sans-serif;
+        color: var(--ink);
+    }
 
-    /* Layout Container */
+    /* === Layout & Containers === */
     .dashboard-container {
         padding: 2rem;
         background: var(--bg);
@@ -30,17 +43,16 @@
         width: 100%;
         max-width: 1600px;
         margin: 0 auto;
-        padding: 0 1rem;
+        padding: 0;
     }
 
-    /* Modern Header */
     .page-header {
         background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
-        border-radius: 24px;
+        border-radius: var(--radius-lg);
         padding: 2rem;
         margin-bottom: 2rem;
         color: #fff;
-        box-shadow: 0 4px 20px rgba(26,127,90,.15);
+        box-shadow: 0 4px 20px rgba(26, 127, 90, .15);
     }
 
     .header-content {
@@ -50,7 +62,6 @@
         gap: 1.5rem;
         flex-wrap: wrap;
     }
-
 
     .page-title {
         font-size: 1.75rem;
@@ -63,82 +74,87 @@
         margin-top: 0.5rem;
     }
 
-    /* Stats Grid */
+    /* === Stats Grid === */
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 1.5rem;
         margin-bottom: 2rem;
     }
 
-    .finance-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-    }
-
-    /* Modern Cards */
+    /* === Modern Cards === */
     .stat-card {
-        background: #fff;
-        border-radius: 24px;
+        background: var(--surface);
+        border-radius: var(--radius-lg);
         padding: 1.5rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        box-shadow: var(--shadow-md);
         transition: all 0.3s ease;
         height: 100%;
         display: flex;
         flex-direction: column;
     }
 
-
     .stat-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        box-shadow: var(--shadow-lg);
     }
-
 
     .stat-content {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         height: 100%;
-        position: relative;
-        z-index: 1;
     }
-
 
     .stat-header {
         margin-bottom: 1rem;
     }
 
-
     .stat-title {
         color: var(--muted);
         font-size: 0.875rem;
-        font-weight: 500;
+        font-weight: 600;
+        margin: 0;
     }
 
-
     .stat-value {
-        font-size: 1.875rem;
-        font-weight: 700;
+        font-size: 2.25rem;
+        font-weight: 800;
         color: var(--ink);
         margin: 0.5rem 0;
     }
 
-    .stat-trend {
+    .stat-value.currency {
+        font-size: 1.75rem;
+    }
+
+    .stat-foot {
         display: flex;
         align-items: center;
         gap: 0.5rem;
         font-size: 0.875rem;
+        font-weight: 500;
     }
 
-    /* Chart Container */
+    .text-primary-color { color: var(--primary); }
+    .text-success-color { color: var(--success); }
+    .text-danger-color { color: var(--danger); }
+    .text-info-color { color: var(--info); }
+
+    /* === Chart Section === */
     .chart-container {
-        background: #fff;
-        border-radius: 24px;
+        background: var(--surface);
+        border-radius: var(--radius-lg);
         padding: 1.5rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        box-shadow: var(--shadow-md);
         margin-top: 2rem;
+        height: 400px;
+        position: relative;
+    }
+
+    #monthlyChart {
+        height: 100% !important;
+        width: 100% !important;
     }
 
     .chart-header {
@@ -150,7 +166,6 @@
         flex-wrap: wrap;
     }
 
-
     .chart-title {
         font-size: 1.25rem;
         font-weight: 600;
@@ -158,22 +173,51 @@
         margin: 0;
     }
 
-    /* Filter Controls */
+    /* === Filter Controls (IMPROVED) === */
     .filter-container {
         display: flex;
-        gap: 1rem;
+        gap: 0.75rem;
         flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .filter-container .form-select,
+    .filter-container .btn-apply-filter {
+        height: 38px;
     }
 
     .form-select {
         padding: 0.5rem 1rem;
         border: 1px solid var(--ring);
-        border-radius: 12px;
+        border-radius: var(--radius-md);
         font-size: 0.875rem;
         min-width: 150px;
+        color: var(--ink);
+        background-color: var(--surface);
     }
 
-    /* Responsive Adjustments */
+    .btn-apply-filter {
+        background: white;
+        color: var(--primary);
+        border: none;
+        border-radius: var(--radius-md);
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-apply-filter:hover {
+        background: var(--secondary);
+        transform: translateY(-1px);
+        color: var(--primary);
+    }
+
+    /* === Responsive Adjustments === */
     @media (max-width: 768px) {
         .dashboard-container {
             padding: 1rem;
@@ -184,8 +228,13 @@
             align-items: flex-start;
         }
 
-        .filter-container {
+        .page-header .filter-container {
             width: 100%;
+        }
+
+        .filter-container {
+            flex-direction: column;
+            align-items: stretch;
         }
 
         .form-select {
@@ -198,24 +247,24 @@
 @section('content')
 <div class="dashboard-container">
     <div class="container-fluid">
-        <!-- Header Section -->
+        {{-- Header Section --}}
         <div class="page-header">
             <div class="header-content">
                 <div>
                     <h1 class="page-title">Dashboard Admin</h1>
                     <p class="page-subtitle">{{ now()->translatedFormat('l, d F Y') }}</p>
                 </div>
+                {{-- Filter controls dipindahkan ke sini --}}
                 <div class="filter-container">
                     <form id="filterForm" class="d-flex gap-3 flex-wrap">
-                        <select name="year" class="form-select" onchange="this.form.submit()">
+                        <select id="filterYear" name="year" class="form-select">
                             @foreach($availableYears as $y)
                                 <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>
                                     Tahun {{ $y }}
                                 </option>
                             @endforeach
                         </select>
-
-                        <select name="month" class="form-select" onchange="this.form.submit()">
+                        <select id="filterMonth" name="month" class="form-select">
                             <option value="">Semua Bulan</option>
                             @foreach(range(1, 12) as $m)
                                 <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>
@@ -223,42 +272,36 @@
                                 </option>
                             @endforeach
                         </select>
-
-                        <select name="type" class="form-select" onchange="updateChartType(this.value)">
-                            <option value="all" {{ $type == 'all' ? 'selected' : '' }}>Semua Data</option>
-                            <option value="income" {{ $type == 'income' ? 'selected' : '' }}>Pemasukan</option>
-                            <option value="expense" {{ $type == 'expense' ? 'selected' : '' }}>Pengeluaran</option>
-                            <option value="profit" {{ $type == 'profit' ? 'selected' : '' }}>Profit</option>
-                        </select>
+                        <button type="submit" class="btn-apply-filter" id="applyFilterBtn">
+                            <i data-feather="filter"></i> Terapkan
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
 
-        <!-- Stats Grid -->
+        {{-- Stats Grid --}}
         <div class="stats-grid">
-            <!-- Kamar Stats -->
             <div class="stat-card">
                 <div class="stat-content">
                     <div class="stat-header">
                         <div class="stat-title">Kamar Kosong</div>
                         <div class="stat-value">{{ $total_kamar_kosong }}</div>
                     </div>
-                    <div class="stat-trend text-success">
+                    <div class="stat-foot text-primary-color">
                         <i data-feather="home"></i>
                         <span>Total Kamar Tersedia</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Penghuni Stats -->
             <div class="stat-card">
                 <div class="stat-content">
                     <div class="stat-header">
                         <div class="stat-title">Penghuni Aktif</div>
                         <div class="stat-value">{{ $total_penghuni }}</div>
                     </div>
-                    <div class="stat-trend text-primary">
+                    <div class="stat-foot text-primary-color">
                         <i data-feather="users"></i>
                         <span>Total Penghuni</span>
                     </div>
@@ -266,51 +309,57 @@
             </div>
         </div>
 
-        <!-- Finance Grid -->
-        <div class="finance-grid">
-            <!-- Pemasukan Card -->
+        {{-- Finance Grid --}}
+        <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-content">
                     <div class="stat-title">Total Pemasukan</div>
-                    <div class="stat-value">Rp {{ number_format($total_pemasukan, 0, ',', '.') }}</div>
-                    <div class="stat-trend text-success">
+                    <div class="stat-value currency">Rp {{ number_format($total_pemasukan, 0, ',', '.') }}</div>
+                    <div class="stat-foot text-success-color">
                         <i data-feather="trending-up"></i>
-                        Pendapatan
+                        <span>Pendapatan</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Pengeluaran Card -->
             <div class="stat-card">
                 <div class="stat-content">
                     <div class="stat-title">Total Pengeluaran</div>
-                    <div class="stat-value">Rp {{ number_format($total_pengeluaran, 0, ',', '.') }}</div>
-                    <div class="stat-trend text-danger">
+                    <div class="stat-value currency">Rp {{ number_format($total_pengeluaran, 0, ',', '.') }}</div>
+                    <div class="stat-foot text-danger-color">
                         <i data-feather="trending-down"></i>
-                        Biaya
+                        <span>Biaya</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Profit Card -->
             <div class="stat-card">
                 <div class="stat-content">
                     <div class="stat-title">Total Profit</div>
-                    <div class="stat-value">Rp {{ number_format($total_pemasukan - $total_pengeluaran, 0, ',', '.') }}</div>
-                    <div class="stat-trend text-info">
+                    <div class="stat-value currency">Rp {{ number_format($total_pemasukan - $total_pengeluaran, 0, ',', '.') }}</div>
+                    <div class="stat-foot text-info-color">
                         <i data-feather="dollar-sign"></i>
-                        Keuntungan Bersih
+                        <span>Keuntungan Bersih</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Chart Section -->
+        {{-- Chart Section --}}
         <div class="chart-container">
             <div class="chart-header">
                 <h2 class="chart-title">Grafik Keuangan</h2>
+                {{-- Filter tipe data chart dipindahkan ke sini --}}
+                <div class="filter-container">
+                    <select id="chartType" class="form-select">
+                        <option value="all" {{ $type == 'all' ? 'selected' : '' }}>Semua Data</option>
+                        <option value="income" {{ $type == 'income' ? 'selected' : '' }}>Pemasukan</option>
+                        <option value="expense" {{ $type == 'expense' ? 'selected' : '' }}>Pengeluaran</option>
+                        <option value="profit" {{ $type == 'profit' ? 'selected' : '' }}>Profit</option>
+                    </select>
+                </div>
             </div>
-            <canvas id="monthlyChart" height="100"></canvas>
+            <canvas id="monthlyChart"></canvas>
         </div>
     </div>
 </div>
@@ -321,94 +370,144 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         feather.replace();
-    });
-</script>
-<script>
-let myChart;
 
-document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('monthlyChart').getContext('2d');
+        let myChart;
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        const filterYear = document.getElementById('filterYear');
+        const filterMonth = document.getElementById('filterMonth');
+        const filterForm = document.getElementById('filterForm');
+        const chartTypeSelect = document.getElementById('chartType');
 
-    const datasets = {
-        income: {
-            label: 'Pemasukan',
-            data: @json($incomeData),
-            borderColor: '#10B981',
-            backgroundColor: '#10B98120',
-            fill: true,
-            tension: 0.4
-        },
-        expense: {
-            label: 'Pengeluaran',
-            data: @json($expenseData),
-            borderColor: '#EF4444',
-            backgroundColor: '#EF444420',
-            fill: true,
-            tension: 0.4
-        },
-        profit: {
-            label: 'Profit',
-            data: @json($profitData),
-            borderColor: '#3B82F6',
-            backgroundColor: '#3B82F620',
-            fill: true,
-            tension: 0.4
-        }
-    };
-
-    function createChart(type = 'all') {
-        const activeDatasets = [];
-
-        if (type === 'all' || type === 'income') activeDatasets.push(datasets.income);
-        if (type === 'all' || type === 'expense') activeDatasets.push(datasets.expense);
-        if (type === 'all' || type === 'profit') activeDatasets.push(datasets.profit);
-
-        if (myChart) {
-            myChart.destroy();
-        }
-
-        myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: @json($months),
-                datasets: activeDatasets
+        const datasets = {
+            income: {
+                label: 'Pemasukan',
+                data: @json($incomeData),
+                borderColor: '#16a34a',
+                backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#fff',
+                pointRadius: 5
             },
-            options: {
-                responsive: true,
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
+            expense: {
+                label: 'Pengeluaran',
+                data: @json($expenseData),
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#fff',
+                pointRadius: 5
+            },
+            profit: {
+                label: 'Profit',
+                data: @json($profitData),
+                borderColor: '#0ea5e9',
+                backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#fff',
+                pointRadius: 5
+            }
+        };
+
+        function createChart(type) {
+            const activeDatasets = [];
+            if (type === 'all' || type === 'income') activeDatasets.push(datasets.income);
+            if (type === 'all' || type === 'expense') activeDatasets.push(datasets.expense);
+            if (type === 'all' || type === 'profit') activeDatasets.push(datasets.profit);
+
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: @json($months),
+                    datasets: activeDatasets
                 },
-                plugins: {
-                    legend: {
-                        position: 'top'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 14,
+                                    family: 'Poppins'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            },
+                            titleFont: { family: 'Poppins' },
+                            bodyFont: { family: 'Poppins' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    if (value >= 1000000) {
+                                        return 'Rp ' + (value / 1000000).toFixed(0) + 'jt';
+                                    }
+                                    if (value >= 1000) {
+                                        return 'Rp ' + (value / 1000).toFixed(0) + 'rb';
+                                    }
+                                    return 'Rp ' + value;
+                                },
+                                font: { family: 'Poppins' }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { family: 'Poppins' }
                             }
                         }
                     }
                 }
-            }
+            });
+        }
+
+        createChart('{{ $type }}');
+
+        // Event listener for main filter button
+        filterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const year = filterYear.value;
+            const month = filterMonth.value;
+            const currentType = chartTypeSelect.value;
+            window.location.href = `{{ route('admin.dashboard') }}?year=${year}&month=${month}&type=${currentType}`;
         });
-    }
 
-    // Initial chart creation
-    createChart('{{ $type }}');
-
-    // Make createChart available globally
-    window.updateChartType = function(type) {
-        createChart(type);
-    };
-
-    // Initialize Feather Icons
-    feather.replace();
-});
-
+        // Event listener for chart type change
+        chartTypeSelect.addEventListener('change', function() {
+            createChart(this.value);
+        });
+    });
 </script>
 @endpush
