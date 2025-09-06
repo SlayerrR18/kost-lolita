@@ -208,14 +208,34 @@
           <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">
             <h4 class="kicker"><i data-feather="clock"></i> Sisa Kontrak</h4>
             @if($contract && $contract->tanggal_keluar->diffInDays(now()) <= 30)
-              <span class="badge">Segera berakhir</span>
+              <span class="badge bg-warning">Segera berakhir</span>
             @endif
           </div>
           <div class="value" id="remainText"
                @if($contract) data-end="{{ $contract->tanggal_keluar?->copy()->endOfDay()->toIso8601String() }}" @endif>
-            @if($contract) {{ $contract->tanggal_keluar->diffInDays(now()) }} Hari @else - @endif
+            @if($contract)
+              @php
+                $now = now();
+                $end = $contract->tanggal_keluar;
+                $days = $end->diffInDays($now);
+                $months = floor($days / 30);
+                $remainingDays = $days % 30;
+              @endphp
+
+              @if($days <= 30)
+                  {{ $days }} Hari
+              @else
+                  {{ $months }} Bulan {{ $remainingDays }} Hari
+              @endif
+            @else
+              -
+            @endif
           </div>
-          <div class="hint" id="remainSub"></div>
+          <div class="hint" id="remainSub">
+            @if($contract)
+              Berakhir pada {{ $contract->tanggal_keluar?->translatedFormat('d F Y') ?? '-' }}
+            @endif
+          </div>
         </div>
 
         <div class="card">
@@ -263,7 +283,7 @@
         </div>
       </div>
       <br>
-      
+
       {{-- Action buttons --}}
       <div class="actions">
         <a href="{{ route('user.contract') }}" class="btn-action btn-secondary">
@@ -304,23 +324,31 @@ function initIcons() {
 
 // Update remaining days counter
 function updateRemaining() {
-  const remainEl = document.getElementById('remainText');
-  const subEl = document.getElementById('remainSub');
+    const remainEl = document.getElementById('remainText');
+    const subEl = document.getElementById('remainSub');
 
-  if (remainEl && remainEl.dataset.end) {
-    const end = new Date(remainEl.dataset.end);
-    const now = new Date();
-    const days = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+    if (remainEl && remainEl.dataset.end) {
+        const end = new Date(remainEl.dataset.end);
+        const now = new Date();
+        const diffTime = Math.abs(end - now);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (days > 0) {
-      remainEl.textContent = `${days} Hari`;
-      subEl.textContent = `Berakhir pada ${end.toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      })}`;
+        if (diffDays > 0) {
+            if (diffDays <= 30) {
+                remainEl.textContent = `${diffDays} Hari`;
+            } else {
+                const months = Math.floor(diffDays / 30);
+                const remainingDays = diffDays % 30;
+                remainEl.textContent = `${months} Bulan ${remainingDays} Hari`;
+            }
+
+            subEl.textContent = `Berakhir pada ${end.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            })}`;
+        }
     }
-  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

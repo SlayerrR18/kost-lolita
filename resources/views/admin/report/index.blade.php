@@ -30,6 +30,19 @@
     .btn-icon.detail:hover{background:rgba(59,130,246,.18);transform:translateY(-1px)}
     .btn-icon.delete{background:rgba(220,38,38,.10);color:#dc2626}
     .btn-icon.delete:hover{background:rgba(220,38,38,.18);transform:translateY(-1px)}
+
+    .badge.dikirim {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    .badge.sedang_dikerjakan {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    .badge.selesai {
+        background: #dcfce7;
+        color: #166534;
+    }
 </style>
 @endpush
 
@@ -47,7 +60,11 @@
                 <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Cari nama/isi">
                 <select name="status" class="form-select">
                     <option value="">Semua status</option>
-                    @foreach(['open'=>'Open','in_progress'=>'In Progress','resolved'=>'Resolved'] as $k=>$v)
+                    @foreach([
+                        'dikirim' => 'Dikirim',
+                        'sedang_dikerjakan' => 'Sedang Dikerjakan',
+                        'selesai' => 'Selesai'
+                    ] as $k=>$v)
                         <option value="{{ $k }}" @selected(request('status')===$k)>{{ $v }}</option>
                     @endforeach
                 </select>
@@ -66,12 +83,12 @@
                     <thead>
                         <tr>
                             <th style="width:60px">No</th>
-                            <th>User</th>
+                            <th>Nama Penghuni</th>
                             <th>Isi</th>
                             <th>Tanggal</th>
                             <th style="width:110px;">Foto</th>
                             <th>Status</th>
-                            <th>Handler</th>
+                            <th>Penanggung Jawab</th>
                             <th style="width:120px;">Aksi</th>
                         </tr>
                     </thead>
@@ -108,7 +125,7 @@
                                 @endif
                             </td>
                             <td><span class="badge {{ $r->status }}">{{ Str::headline($r->status) }}</span></td>
-                            <td>{{ $r->handler->name ?? '-' }}</td>
+                            <td>{{ $r->handler->name ?? 'Owner' }}</td>
                             <td>
                                 <div class="d-inline-flex gap-1">
                                     <a href="{{ route('admin.reports.show', $r) }}"

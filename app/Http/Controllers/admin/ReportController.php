@@ -41,7 +41,7 @@ class ReportController extends Controller
     public function update(Request $request, Report $report)
     {
         $validated = $request->validate([
-            'status'   => 'required|in:open,in_progress,resolved',
+            'status'   => 'required|in:dikirim,sedang_dikerjakan,selesai',
             'response' => 'nullable|string|max:2000',
         ]);
 

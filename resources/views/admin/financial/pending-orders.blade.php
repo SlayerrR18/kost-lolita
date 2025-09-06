@@ -81,7 +81,7 @@
                             {{-- TIPE --}}
                             <td>
                                 <span class="badge {{ $order->is_extension ? 'bg-warning' : 'bg-info' }}">
-                                    {{ $order->is_extension ? 'Perpanjangan' : 'Baru' }}
+                                    {{ $order->is_extension ? 'Perpanjangan Kontrak' : 'Kontrak Baru' }}
                                 </span>
                             </td>
 

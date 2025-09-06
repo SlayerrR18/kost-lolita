@@ -48,10 +48,11 @@ class ReportController extends Controller
             'message' => $validated['message'],
             'photo'   => $photoPath,
             'date'    => $validated['date'] ?? now()->toDateString(),
+            'status'  => 'dikirim' // Set default status
         ]);
 
         return redirect()
             ->route('user.reports.index')
-            ->with('success', 'Report created successfully.');
+            ->with('success', 'Laporan berhasil dikirim.');
     }
 }

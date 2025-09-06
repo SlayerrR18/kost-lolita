@@ -29,6 +29,20 @@
     .badge.in_progress{background:#dbeafe;color:#1e40af}
     .badge.resolved{background:#dcfce7;color:#166534}
 
+    /* Update badge styles */
+    .badge.dikirim {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    .badge.sedang_dikerjakan {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    .badge.selesai {
+        background: #dcfce7;
+        color: #166534;
+    }
+
     .btn-icon.view{background:rgba(26,127,90,.10);color:#1a7f5a}
     .btn-icon.view:hover{background:rgba(26,127,90,.18);transform:translateY(-1px)}
     .btn-icon.download{background:#eef2f7;color:#0f172a}
@@ -72,7 +86,7 @@
                             <th>Isi Laporan</th>
                             <th>Tanggal</th>
                             <th>Status</th>
-                            <th>Jawaban Admin</th>
+                            <th>Jawaban Penanggung Jawab</th>
                             <th>Foto</th>
                         </tr>
                     </thead>
@@ -86,8 +100,20 @@
                             <td class="text-wrap" style="max-width:420px">{{ $report->message }}</td>
                             <td>{{ $tanggal }}</td>
                             <td>
-                                <span class="badge {{ $report->status ?? 'muted' }}">
-                                    {{ \Illuminate\Support\Str::headline($report->status ?? 'menunggu') }}
+                                <span class="badge {{ $report->status }}">
+                                    @switch($report->status)
+                                        @case('dikirim')
+                                            Dikirim
+                                            @break
+                                        @case('sedang_dikerjakan')
+                                            Sedang Dikerjakan
+                                            @break
+                                        @case('selesai')
+                                            Selesai
+                                            @break
+                                        @default
+                                            {{ \Illuminate\Support\Str::headline($report->status) }}
+                                    @endswitch
                                 </span>
                             </td>
                             <td class="text-wrap" style="max-width:420px">
@@ -163,7 +189,7 @@
                 search: "Cari:",
                 lengthMenu: "Tampilkan _MENU_ data",
                 info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                infoEmpty: "Tidak ada data yang ditampilkan",
+                infoEmpty: "Tidak da data yang ditampilkana",
                 infoFiltered: "(difilter dari _MAX_ total data)",
                 zeroRecords: "Tidak ada data yang cocok",
                 paginate: { first: "Pertama", last: "Terakhir", next: "Selanjutnya", previous: "Sebelumnya" }

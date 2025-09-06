@@ -42,7 +42,15 @@
                 </a>
             </li>
 
-            {{-- DROPDOWN KEUANGAN --}}
+            <li>
+                <a href="{{ route('admin.financial.pending-orders') }}"
+                   class="nav-link {{ request()->routeIs('admin.financial.pending-orders') ? 'active' : '' }}">
+                    {{-- ganti: shopping-cart -> shopping-bag (ikon “pesanan” lebih tepat) --}}
+                    <i data-feather="shopping-bag"></i>
+                    <span>Konfirmasi Pesanan</span>
+                </a>
+            </li>
+
             <li class="nav-item">
               <a
                 href="#financialDropdown"
@@ -50,11 +58,9 @@
                 data-bs-toggle="collapse"
                 role="button"
                 aria-expanded="{{ $financeOpen ? 'true' : 'false' }}"
-                aria-controls="financialDropdown"
-                >
-                {{-- was: wallet (tidak ada di Feather) --}}
+                aria-controls="financialDropdown">
                 <i data-feather="credit-card"></i>
-                <span>Riwayat Keuangan</span>
+                <span>Riwayat Transaksi</span>
                 <i data-feather="chevron-down" class="dropdown-icon"></i>
                 </a>
 
@@ -79,14 +85,6 @@
                 </div>
             </li>
 
-            <li>
-                <a href="{{ route('admin.financial.pending-orders') }}"
-                   class="nav-link {{ request()->routeIs('admin.financial.pending-orders') ? 'active' : '' }}">
-                    {{-- ganti: shopping-cart -> shopping-bag (ikon “pesanan” lebih tepat) --}}
-                    <i data-feather="shopping-bag"></i>
-                    <span>Konfirmasi Pesanan</span>
-                </a>
-            </li>
         </ul>
     </div>
 

@@ -24,6 +24,18 @@
   .badge.in_progress{background:#dbeafe;color:#1e40af}
   .badge.resolved{background:#dcfce7;color:#166534}
   .badge.muted{background:#f1f5f9;color:#475569}
+  .badge.dikirim {
+    background: #fef3c7;
+    color: #92400e;
+}
+.badge.sedang_dikerjakan {
+    background: #dbeafe;
+    color: #1e40af;
+}
+.badge.selesai {
+    background: #dcfce7;
+    color: #166534;
+}
 
   .thumb{display:inline-flex;align-items:center;gap:.5rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:.5rem .75rem}
   .thumb img{max-height:56px;border-radius:10px}
@@ -79,7 +91,7 @@
         </div>
 
         <div class="detail-term">Handler</div>
-        <div class="detail-desc">{{ $report->handler->name ?? '-' }}</div>
+        <div class="detail-desc">{{ $report->handler->name ?? 'Owner' }}</div>
       </div>
 
       <div class="detail-divider"></div>
@@ -121,9 +133,13 @@
           <div class="col-lg-4">
             <label class="form-label">Status</label>
             <select name="status" class="form-select">
-              @foreach(['open'=>'Open','in_progress'=>'In Progress','resolved'=>'Resolved'] as $k=>$v)
-                <option value="{{ $k }}" @selected($report->status===$k)>{{ $v }}</option>
-              @endforeach
+                @foreach([
+                    'dikirim' => 'Dikirim',
+                    'sedang_dikerjakan' => 'Sedang Dikerjakan',
+                    'selesai' => 'Selesai'
+                ] as $k=>$v)
+                    <option value="{{ $k }}" @selected($report->status===$k)>{{ $v }}</option>
+                @endforeach
             </select>
           </div>
           <div class="col-lg-8">
