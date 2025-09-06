@@ -304,7 +304,8 @@
             <p class="page-subtitle">Daftar semua masukan dan keluhan dari penghuni.</p>
         </div>
 
-        <div class="filter-section">
+        <form action="{{ route('admin.reports.index') }}" method="get" class="filter-section">
+            @csrf
             <div class="filter-input-group">
                 <i data-feather="search" class="input-icon"></i>
                 <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Cari nama/isi">
@@ -334,10 +335,10 @@
                 <input type="date" name="to" value="{{ request('to') }}" class="form-control">
             </div>
 
-            <button class="btn btn-add-filter" onclick="document.forms[0].submit()">
+            <button type="submit" class="btn btn-add-filter">
                 <i data-feather="filter" class="feather-16"></i> Terapkan
             </button>
-        </div>
+        </form>
     </div>
 
     <div class="content-card">

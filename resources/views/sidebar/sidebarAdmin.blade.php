@@ -1,7 +1,12 @@
 {{-- filepath: d:\Kampus\Web\kost-lolita\resources\views\sidebar\sidebarAdmin.blade.php --}}
-
 @php
-    $financeOpen = request()->routeIs('admin.financial.*');
+    // Logika penentuan status aktif yang lebih spesifik
+    $dashboardActive = request()->routeIs('admin.dashboard');
+    $manajemenKamarActive = request()->routeIs('admin.kost*');
+    $penghuniActive = request()->routeIs('admin.account*');
+    $konfirmasiActive = request()->routeIs('admin.financial.pending-orders');
+    $riwayatTransaksiOpen = request()->routeIs('admin.financial.income') || request()->routeIs('admin.financial.expense');
+    $laporanActive = request()->routeIs('admin.reports*');
 @endphp
 
 <div class="sidebar">
@@ -19,52 +24,50 @@
         <ul class="nav-menu">
             <li>
                 <a href="{{ route('admin.dashboard') }}"
-                   class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    {{-- ganti: bookmark -> layout --}}
+                   class="nav-link {{ $dashboardActive ? 'active' : '' }}">
                     <i data-feather="layout"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.kost.index') }}"
-                   class="nav-link {{ request()->routeIs('admin.kost*') ? 'active' : '' }}">
-                    {{-- tetap: home --}}
+                   class="nav-link {{ $manajemenKamarActive ? 'active' : '' }}">
                     <i data-feather="home"></i>
                     <span>Manajemen Kamar</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.account.index') }}"
-                   class="nav-link {{ request()->routeIs('admin.account*') ? 'active' : '' }}">
-                    {{-- tetap: users --}}
+                   class="nav-link {{ $penghuniActive ? 'active' : '' }}">
                     <i data-feather="users"></i>
-                    <span> Penghuni Kost</span>
+                    <span>Penghuni Kost</span>
                 </a>
             </li>
 
+            {{-- Bug #1: Konfirmasi Pesanan tidak lagi mengaktifkan dropdown lain --}}
             <li>
                 <a href="{{ route('admin.financial.pending-orders') }}"
-                   class="nav-link {{ request()->routeIs('admin.financial.pending-orders') ? 'active' : '' }}">
-                    {{-- ganti: shopping-cart -> shopping-bag (ikon “pesanan” lebih tepat) --}}
+                   class="nav-link {{ $konfirmasiActive ? 'active' : '' }}">
                     <i data-feather="shopping-bag"></i>
                     <span>Konfirmasi Pesanan</span>
                 </a>
             </li>
 
-            <li class="nav-item">
-              <a
-                href="#financialDropdown"
-                class="nav-link dropdown-toggle"
-                data-bs-toggle="collapse"
-                role="button"
-                aria-expanded="{{ $financeOpen ? 'true' : 'false' }}"
-                aria-controls="financialDropdown">
-                <i data-feather="credit-card"></i>
-                <span>Riwayat Transaksi</span>
-                <i data-feather="chevron-down" class="dropdown-icon"></i>
+            {{-- Bug #2: Dropdown hanya aktif pada rute Pemasukan/Pengeluaran --}}
+            <li class="nav-item has-submenu">
+                <a
+                  href="#financialDropdown"
+                  class="nav-link dropdown-toggle {{ $riwayatTransaksiOpen ? 'active' : '' }}"
+                  data-bs-toggle="collapse"
+                  role="button"
+                  aria-expanded="{{ $riwayatTransaksiOpen ? 'true' : 'false' }}"
+                  aria-controls="financialDropdown">
+                  <i data-feather="credit-card"></i>
+                  <span>Riwayat Transaksi</span>
+                  <i data-feather="chevron-down" class="dropdown-icon"></i>
                 </a>
 
-                <div class="collapse {{ $financeOpen ? 'show' : '' }}" id="financialDropdown">
+                <div class="collapse {{ $riwayatTransaksiOpen ? 'show' : '' }}" id="financialDropdown">
                     <ul class="nav-submenu">
                         <li>
                             <a href="{{ route('admin.financial.income') }}"
@@ -76,7 +79,6 @@
                         <li>
                             <a href="{{ route('admin.financial.expense') }}"
                                class="nav-link {{ request()->routeIs('admin.financial.expense') ? 'active' : '' }}">
-                                {{-- ganti: arrow-down-circle -> trending-down --}}
                                 <i data-feather="trending-down"></i>
                                 <span>Pengeluaran</span>
                             </a>
@@ -84,32 +86,21 @@
                     </ul>
                 </div>
             </li>
-
         </ul>
     </div>
 
     <div class="menu-section">
-        <span class="menu-title">GENERAL</span>
+        <span class="menu-title">AKUN</span>
         <ul class="nav-menu">
-            <li>
-                <a href="{{ route('messages.index') }}"
-                   class="nav-link {{ request()->routeIs('messages.*') ? 'active' : '' }}">
-                    {{-- ganti: mail -> message-square (lebih “chat”) --}}
-                    <i data-feather="message-square"></i>
-                    <span>Pesan</span>
-                </a>
-            </li>
-            <li>
+              <li>
                 <a href="{{ route('admin.reports.index') }}"
-                   class="nav-link {{ request()->routeIs('admin.reports*') ? 'active' : '' }}">
-                    {{-- ganti: book -> file-text (lebih “laporan”) --}}
+                   class="nav-link {{ $laporanActive ? 'active' : '' }}">
                     <i data-feather="file-text"></i>
-                    <span>Riwayat Laporan dan Keluhan</span>
+                    <span>Riwayat Laporan & Keluhan</span>
                 </a>
             </li>
             <li>
                 <button type="button" class="nav-link w-100" data-bs-toggle="modal" data-bs-target="#logoutModal">
-                    {{-- tetap: log-out --}}
                     <i data-feather="log-out"></i>
                     <span>Logout</span>
                 </button>
@@ -118,13 +109,11 @@
     </div>
 </div>
 
-<!-- Logout Modal -->
 <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-body text-center p-4">
                 <div class="text-warning mb-4">
-                    {{-- tetap: alert-circle --}}
                     <i data-feather="alert-circle" style="width: 64px; height: 64px;"></i>
                 </div>
                 <h5 class="modal-title mb-3" id="logoutModalLabel">Konfirmasi Logout</h5>
@@ -149,31 +138,26 @@
 </div>
 
 <style>
+/* Sidebar Utama */
 .sidebar {
     width: 280px;
-    height: calc(100vh - 40px);
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    margin: 20px;
-    border-radius: 24px;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    height: 100vh;
+    background: var(--surface);
     position: fixed;
     left: 0;
     top: 0;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
-.sidebar:hover {
-    transform: translateX(5px);
-}
-
+/* Header & Brand */
 .sidebar-header {
-    padding: 16px 0;
-    margin-bottom: 24px;
-    border-bottom: 1px solid rgba(241, 245, 249, 0.5);
+    border-bottom: 1px solid var(--ring);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .brand {
@@ -186,89 +170,69 @@
     width: 42px;
     height: 42px;
     object-fit: contain;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
     padding: 8px;
-    background: linear-gradient(135deg, #1a7f5a 0%, #16c79a 100%);
-    box-shadow: 0 4px 12px rgba(26, 127, 90, 0.15);
 }
 
 .brand-text {
     font-size: 22px;
     font-weight: 700;
-    background: linear-gradient(135deg, #1a7f5a 0%, #16c79a 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--primary);
 }
 
 .brand-accent {
-    color: #64748b;
-    -webkit-text-fill-color: #64748b;
+    color: var(--muted);
 }
 
+/* Menu Section */
 .menu-section {
-    margin-bottom: 32px;
+    margin-bottom: 1.5rem;
 }
 
 .menu-title {
     font-size: 12px;
     font-weight: 600;
-    color: #64748b;
-    margin-bottom: 16px;
+    color: var(--muted);
+    margin-bottom: 1rem;
     display: block;
     padding-left: 12px;
     letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .nav-link {
     display: flex;
     align-items: center;
     padding: 12px 16px;
-    color: #64748b;
+    color: var(--muted);
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     margin-bottom: 8px;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
     position: relative;
-    overflow: hidden;
-}
-
-.nav-link::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 4px;
-    height: 100%;
-    background: linear-gradient(135deg, #1a7f5a 0%, #16c79a 100%);
-    border-radius: 0 4px 4px 0;
-    opacity: 0;
-    transition: all 0.3s ease;
 }
 
 .nav-link:hover {
-    background: rgba(241, 245, 249, 0.7);
-    color: #1a7f5a;
-    transform: translateX(5px);
+    background: var(--secondary);
+    color: var(--primary);
 }
 
 .nav-link.active {
     background: rgba(26, 127, 90, 0.1);
-    color: #1a7f5a;
-}
-
-.nav-link.active::before {
-    opacity: 1;
+    color: var(--primary);
 }
 
 .nav-link i {
     width: 20px;
     height: 20px;
     margin-right: 12px;
-    transition: all 0.3s ease;
-}
-
-.nav-link:hover i {
-    transform: scale(1.1);
 }
 
 .nav-link span {
@@ -276,116 +240,98 @@
     font-weight: 500;
 }
 
-/* Add these styles to your existing sidebar styles */
-.dropdown-toggle {
-    position: relative;
-    padding-right: 2.5rem;
+/* Dropdown */
+.nav-item.has-submenu .nav-link {
+    justify-content: space-between;
 }
-
-/* Hilangkan bullet & whitespace pada daftar utama sidebar */
-.sidebar .nav-menu {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-/* Jaga-jaga bila ada reset yang membangkang di level <li> */
-.sidebar .nav-menu > li,
-.sidebar .nav-submenu > li {
-  list-style: none;
-}
-
 
 .dropdown-icon {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
     width: 16px;
     height: 16px;
     transition: transform 0.3s ease;
+    margin-right: 0 !important;
 }
 
-.dropdown-toggle[aria-expanded="true"] .dropdown-icon {
-    transform: translateY(-50%) rotate(180deg);
+.nav-link[aria-expanded="true"] .dropdown-icon {
+    transform: rotate(180deg);
 }
 
 .nav-submenu {
     list-style: none;
     padding: 0;
-    margin: 0 0 0 2.5rem;
-    border-left: 1px dashed rgba(26, 127, 90, 0.2);
+    margin: 0.5rem 0 0.5rem 2.25rem;
+    border-left: 1px solid var(--ring);
 }
 
-.nav-submenu .nav-link {
-    padding: 10px 16px;
-    font-size: 0.9rem;
+.nav-submenu a.nav-link {
+    padding-left: 1rem;
+    margin-bottom: 4px;
 }
 
-.nav-submenu .nav-link i {
-    width: 16px;
-    height: 16px;
-}
-
-/* Badge Styles */
-.badge-unread {
-    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-    color: white;
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-left: auto;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
-}
-
-/* Logout Button */
-.nav-link.logout-btn {
-    background: rgba(220, 38, 38, 0.1);
-    color: #dc2626;
-    margin-top: auto;
-}
-
-.nav-link.logout-btn:hover {
-    background: rgba(220, 38, 38, 0.15);
-    color: #dc2626;
-}
-
-/* Modal Improvements */
+/* Modal Logout */
 .modal-content {
     border: none;
-    border-radius: 24px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .modal-body {
     padding: 2.5rem;
+    text-align: center;
 }
 
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.modal-body .text-warning i {
+    width: 4rem;
+    height: 4rem;
+    color: var(--warning);
+}
+
+.modal-footer {
+    padding: 1rem 2rem;
+}
+
+/* Buttons */
 .btn {
+    border-radius: var(--radius-md);
     padding: 0.75rem 1.5rem;
-    border-radius: 12px;
     font-weight: 500;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    transition: all 0.3s ease;
 }
 
 .btn:hover {
     transform: translateY(-2px);
 }
 
-/* Responsive Design */
+.btn-secondary {
+    background: var(--secondary);
+    color: var(--ink);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+/* Responsive */
 @media (max-width: 1024px) {
     .sidebar {
         width: 80px;
         padding: 24px 12px;
+        align-items: center;
     }
 
     .brand-text,
     .menu-title,
-    .nav-link span {
+    .nav-link span,
+    .dropdown-icon {
         display: none;
     }
 
@@ -398,48 +344,40 @@
         margin-right: 0;
     }
 
-    .badge-unread {
-        position: absolute;
-        top: 0;
-        right: 0;
-        transform: translate(50%, -50%);
-        padding: 4px;
-        min-width: 20px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .sidebar-header {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 1rem;
     }
 
-    .sidebar .nav-menu,
-  .sidebar .nav-submenu { list-style: none; margin: 0; padding: 0; }
-  .sidebar .nav-menu > li,
-  .sidebar .nav-submenu > li { list-style: none; }
+    .nav-submenu {
+        display: none !important;
+    }
 
-  /* Rotasi chevron saat aria-expanded true (Bootstrap akan toggle attribute ini) */
-  .dropdown-toggle[aria-expanded="true"] .dropdown-icon {
-      transform: translateY(-50%) rotate(180deg);
-  }
+    .dropdown-toggle[aria-expanded="true"] + .nav-submenu {
+        display: block !important;
+    }
 }
 </style>
+
 <script src="https://unpkg.com/feather-icons"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Inisialisasi ikon
-  feather.replace();
+    // Inisialisasi ikon
+    feather.replace();
 
-  // Pastikan ikon tetap benar ketika collapse dibuka/tutup via JS
-  const financial = document.getElementById('financialDropdown');
-  if (financial) {
-    financial.addEventListener('shown.bs.collapse', () => feather.replace());
-    financial.addEventListener('hidden.bs.collapse', () => feather.replace());
-  }
+    // Pastikan ikon tetap benar ketika collapse dibuka/tutup via JS
+    const financial = document.getElementById('financialDropdown');
+    if (financial) {
+        financial.addEventListener('shown.bs.collapse', () => feather.replace());
+        financial.addEventListener('hidden.bs.collapse', () => feather.replace());
+    }
 
-  // Modal logout juga re-render ikon saat dibuka
-  const logoutModal = document.getElementById('logoutModal');
-  if (logoutModal) {
-    logoutModal.addEventListener('shown.bs.modal', () => feather.replace());
-  }
+    // Modal logout juga re-render ikon saat dibuka
+    const logoutModal = document.getElementById('logoutModal');
+    if (logoutModal) {
+        logoutModal.addEventListener('shown.bs.modal', () => feather.replace());
+    }
 });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

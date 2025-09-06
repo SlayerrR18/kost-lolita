@@ -620,7 +620,7 @@
                     <label class="form-label required" for="ktp_number">No. KTP</label>
                     <input type="text" name="ktp_number" id="ktp_number"
                                class="form-control @error('ktp_number') is-invalid @enderror"
-                               value="{{ old('ktp_number', $contract->ktp_number) }}" required
+                               value="{{ old('ktp_number', optional($contract)->ktp_number) }}" required
                                inputmode="numeric" autocomplete="off"
                                placeholder="Masukkan nomor KTP">
                     @error('ktp_number')
@@ -632,7 +632,7 @@
                     <label class="form-label required" for="emergency_phone">No. HP Keluarga yang Bisa Dihubungi</label>
                     <input type="tel" name="emergency_phone" id="emergency_phone"
                                class="form-control @error('emergency_phone') is-invalid @enderror"
-                               value="{{ old('emergency_phone', $contract->emergency_phone) }}" required
+                               value="{{ old('emergency_phone', optional($contract)->emergency_phone) }}" required
                                placeholder="Contoh: 081234567890">
                     @error('emergency_phone')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -794,7 +794,7 @@
         // Submit Edit Info (AJAX)
         const editInfoForm = document.getElementById('editInfoForm');
         if (editInfoForm) {
-            const updateInfoBtn = document.getElementById('updateInfoBtn');
+            const updateInfoBtn = editInfoForm.querySelector('#updateInfoBtn');
             editInfoForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const result = await submitFormJson(editInfoForm, { button: updateInfoBtn });
