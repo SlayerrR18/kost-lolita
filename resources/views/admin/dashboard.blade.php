@@ -136,6 +136,11 @@
         font-weight: 500;
     }
 
+    .stat-foot-icon {
+        width: 1rem;
+        height: 1rem;
+    }
+
     .text-primary-color { color: var(--primary); }
     .text-success-color { color: var(--success); }
     .text-danger-color { color: var(--danger); }
@@ -289,7 +294,7 @@
                         <div class="stat-value">{{ $total_kamar_kosong }}</div>
                     </div>
                     <div class="stat-foot text-primary-color">
-                        <i data-feather="home"></i>
+                        <i data-feather="home" class="stat-foot-icon"></i>
                         <span>Total Kamar Tersedia</span>
                     </div>
                 </div>
@@ -302,7 +307,7 @@
                         <div class="stat-value">{{ $total_penghuni }}</div>
                     </div>
                     <div class="stat-foot text-primary-color">
-                        <i data-feather="users"></i>
+                        <i data-feather="users" class="stat-foot-icon"></i>
                         <span>Total Penghuni</span>
                     </div>
                 </div>
@@ -316,7 +321,7 @@
                     <div class="stat-title">Total Pemasukan</div>
                     <div class="stat-value currency">Rp {{ number_format($total_pemasukan, 0, ',', '.') }}</div>
                     <div class="stat-foot text-success-color">
-                        <i data-feather="trending-up"></i>
+                        <i data-feather="trending-up" class="stat-foot-icon"></i>
                         <span>Pendapatan</span>
                     </div>
                 </div>
@@ -327,7 +332,7 @@
                     <div class="stat-title">Total Pengeluaran</div>
                     <div class="stat-value currency">Rp {{ number_format($total_pengeluaran, 0, ',', '.') }}</div>
                     <div class="stat-foot text-danger-color">
-                        <i data-feather="trending-down"></i>
+                        <i data-feather="trending-down" class="stat-foot-icon"></i>
                         <span>Biaya</span>
                     </div>
                 </div>
@@ -338,7 +343,7 @@
                     <div class="stat-title">Total Profit</div>
                     <div class="stat-value currency">Rp {{ number_format($total_pemasukan - $total_pengeluaran, 0, ',', '.') }}</div>
                     <div class="stat-foot text-info-color">
-                        <i data-feather="dollar-sign"></i>
+                        <i data-feather="dollar-sign" class="stat-foot-icon"></i>
                         <span>Keuntungan Bersih</span>
                     </div>
                 </div>

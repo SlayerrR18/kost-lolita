@@ -1,7 +1,248 @@
-{{-- resources/views/admin/financial/pending-orders.blade.php (Improved) --}}
+{{-- resources/views/admin/financial/pending-orders.blade.php (Improved V3) --}}
 @extends('layouts.main')
 
 @section('title', 'Konfirmasi Pesanan')
+
+@push('css')
+<style>
+    /* === Palet & Umum (diselaraskan dengan desain sebelumnya) === */
+    :root {
+        --primary: #1a7f5a;
+        --primary-2: #16c79a;
+        --secondary: #f1f5f9;
+        --accent: #0f172a;
+        --surface: #ffffff;
+        --bg: #f8fafc;
+        --ink: #1e293b;
+        --muted: #64748b;
+        --ring: #e2e8f0;
+        --danger: #dc2626;
+        --success: #16a34a;
+        --info: #0ea5e9;
+        --warning: #f59e0b;
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 24px;
+        --radius-pill: 9999px;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
+
+    /* === Layout & Containers === */
+    .main-container {
+        padding: 2rem;
+        background-color: var(--bg);
+        min-height: 100vh;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(26, 127, 90, 0.15);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .page-subtitle {
+        opacity: 0.9;
+        margin-top: 0.5rem;
+    }
+
+    /* === Stats Card === */
+    .stats-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stats-title {
+        color: var(--muted);
+        font-weight: 600;
+        font-size: .875rem;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        margin: 0;
+    }
+
+    .stats-value {
+        color: var(--ink);
+        font-weight: 800;
+        font-size: 1.75rem;
+        margin-top: .15rem;
+    }
+
+
+    /* === Main Content Card & Table === */
+    .card-base {
+        background-color: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background-color: var(--bg);
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+        border-bottom: 1px solid var(--ring);
+    }
+
+    .table tbody td {
+        padding: 1.25rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--ring);
+    }
+
+    .table tbody tr:hover {
+        background-color: #f1f5f9;
+    }
+
+    .table .fw-medium {
+        color: var(--ink);
+    }
+    .table .small-text {
+        font-size: 0.875rem;
+        color: var(--muted);
+    }
+
+    /* === Badge & Tombol === */
+    .badge-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: var(--radius-sm);
+        font-weight: 500;
+        font-size: 0.875rem;
+        white-space: nowrap;
+    }
+
+    .badge-status.badge-info { background-color: #e0f2fe; color: #075985; }
+    .badge-status.badge-warning { background-color: #fef3c7; color: #92400e; }
+
+    .btn-refresh {
+        background-color: var(--secondary);
+        color: var(--ink);
+        border: none;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.25s ease;
+        box-shadow: var(--shadow-md);
+        text-decoration: none;
+    }
+
+    .btn-refresh:hover {
+        background-color: #e7eef6;
+        transform: translateY(-2px);
+    }
+
+    .btn-preview {
+        background-color: var(--secondary);
+        color: var(--muted);
+        border: none;
+        border-radius: var(--radius-sm);
+        padding: 0.5rem;
+        transition: background-color 0.2s;
+    }
+
+    .btn-preview:hover {
+        background-color: #e2e8f0;
+    }
+
+    .btn-action-approve, .btn-action-reject {
+        border-radius: var(--radius-md);
+        padding: 0.65rem 1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    .btn-action-approve {
+        background-color: var(--success);
+        color: white;
+    }
+
+    .btn-action-approve:hover {
+        background-color: #15803d;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .btn-action-reject {
+        background-color: var(--danger);
+        color: white;
+    }
+
+    .btn-action-reject:hover {
+        background-color: #b91c1c;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .modal-content { border-radius: var(--radius-md); border: none; }
+    .modal-header { border-bottom: 1px solid var(--ring); padding: 1.25rem 1.5rem; }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer { border-top: 1px solid var(--ring); padding: 1.25rem 1.5rem; }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--muted);
+    }
+
+    .empty-state-icon {
+        width: 64px;
+        height: 64px;
+        color: #cbd5e1;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-icon.text-primary { color: var(--primary); }
+</style>
+@endpush
 
 @section('content')
 <div class="main-container">
@@ -9,7 +250,7 @@
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
                 <h1 class="page-title">Konfirmasi Pesanan</h1>
-                <p class="mb-0">Kelola pesanan yang menunggu konfirmasi</p>
+                <p class="page-subtitle">Kelola pesanan yang menunggu konfirmasi</p>
             </div>
             <div class="d-flex gap-2">
                 <button class="btn btn-refresh" onclick="window.location.reload()">
@@ -18,6 +259,11 @@
                 </button>
             </div>
         </div>
+    </div>
+
+    <div class="stats-card mb-4">
+        <div class="stats-title">Jumlah Pesanan Pending</div>
+        <div class="stats-value">{{ $pendingOrders->count() }}</div>
     </div>
 
     <div class="card-base">
@@ -42,22 +288,22 @@
                                 <td>
                                     <div class="fw-medium">Kamar {{ $order->kost->nomor_kamar ?? '-' }}</div>
                                     @if($order->kost)
-                                        <div class="small text-muted">
+                                        <div class="small-text">
                                             Rp {{ number_format($order->kost->harga, 0, ',', '.') }}/bulan
                                         </div>
                                     @endif
                                 </td>
                                 <td>
                                     <div class="fw-medium">{{ $order->name }}</div>
-                                    <div class="small text-muted">{{ $order->alamat }}</div>
+                                    <div class="small-text">{{ $order->alamat }}</div>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2 mb-1">
-                                        <i data-feather="mail" class="text-muted" style="width:14px"></i>
+                                        <i data-feather="mail" class="small-text" style="width:14px"></i>
                                         <span>{{ $order->email }}</span>
                                     </div>
                                     <div class="d-flex align-items-center gap-2">
-                                        <i data-feather="phone" class="text-muted" style="width:14px"></i>
+                                        <i data-feather="phone" class="small-text" style="width:14px"></i>
                                         <span>{{ $order->phone }}</span>
                                     </div>
                                 </td>
@@ -71,17 +317,17 @@
                                             <i data-feather="image"></i>
                                         </button>
                                     @else
-                                        <span class="text-muted small">Belum Ada</span>
+                                        <span class="small-text">Belum Ada</span>
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="badge {{ $order->is_extension ? 'badge-warning' : 'badge-info' }}">
+                                    <span class="badge-status {{ $order->is_extension ? 'badge-warning' : 'badge-info' }}">
                                         {{ $order->is_extension ? 'Perpanjangan' : 'Baru' }}
                                     </span>
                                 </td>
                                 <td>
                                     <div class="fw-medium">{{ $order->created_at->format('d M Y') }}</div>
-                                    <div class="small text-muted">{{ $order->created_at->format('H:i') }}</div>
+                                    <div class="small-text">{{ $order->created_at->format('H:i') }}</div>
                                 </td>
                                 <td>
                                     <div class="d-flex gap-2 justify-content-center">
@@ -121,7 +367,6 @@
 </div>
 
 {{-- Modals --}}
-
 <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -207,8 +452,8 @@
                     <div class="d-flex align-items-start">
                         <i data-feather="info" class="me-2 mt-1"></i>
                         <div>
-                            <small class="d-block fw-medium">Password default telah dibuat.</small>
-                            <small class="text-muted">Silakan atur ulang password di menu Manajemen Akun jika diperlukan.</small>
+                            <small class="d-block fw-medium">Password default telah dibuat</small>
+                            <small class="text-muted">Silakan atur ulang password di menu Manajemen Akun jika diperlukan</small>
                         </div>
                     </div>
                 </div>
@@ -218,7 +463,7 @@
                     <i data-feather="users"></i> Ke Manajemen Akun
                 </a>
                 <button type="button" class="btn btn-refresh" onclick="window.location.reload()">
-                    Muat Ulang
+                    <i data-feather="refresh-cw"></i> Muat Ulang
                 </button>
             </div>
         </div>
@@ -251,228 +496,6 @@
     </div>
 </div>
 @endsection
-
-@push('css')
-<style>
-    /* === Palet & Umum === */
-    :root {
-        --primary: #1a7f5a;
-        --primary-2: #16c79a;
-        --secondary: #f1f5f9;
-        --accent: #0f172a;
-        --surface: #ffffff;
-        --bg: #f8fafc;
-        --ink: #1e293b;
-        --muted: #64748b;
-        --ring: #e2e8f0;
-        --danger: #dc2626;
-        --success: #16a34a;
-        --info: #075985;
-        --warning: #92400e;
-        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
-        --radius-sm: 8px;
-        --radius-md: 12px;
-        --radius-lg: 24px;
-    }
-
-    /* === Layout & Containers === */
-    .main-container {
-        padding: 2rem;
-        background-color: var(--bg);
-        min-height: 100vh;
-    }
-
-    .page-header {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
-        border-radius: var(--radius-lg);
-        padding: 2rem;
-        margin-bottom: 2rem;
-        color: #fff;
-        box-shadow: 0 4px 20px rgba(26, 127, 90, 0.15);
-    }
-
-    .page-title {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin: 0;
-    }
-
-    .card-base {
-        background-color: var(--surface);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-md);
-        overflow: hidden;
-    }
-
-    /* === Tabel === */
-    .table-responsive {
-        border-radius: var(--radius-lg);
-        overflow: hidden;
-    }
-
-    .table {
-        margin-bottom: 0;
-    }
-
-    .table th {
-        background-color: var(--bg);
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 1rem;
-        border-bottom: 1px solid var(--ring);
-    }
-
-    .table td {
-        padding: 1.25rem 1rem;
-        vertical-align: middle;
-        border-bottom: 1px solid var(--ring);
-    }
-
-    .table tbody tr:hover {
-        background-color: #f1f5f9;
-    }
-
-    .table .fw-medium {
-        color: var(--ink);
-    }
-
-    /* === Badge & Tombol === */
-    .badge-info { background-color: #e0f2fe; color: #075985; }
-    .badge-warning { background-color: #fef3c7; color: #92400e; }
-
-    .btn-refresh, .btn-cancel {
-        background-color: var(--secondary);
-        color: var(--accent);
-        border: none;
-        padding: 0.75rem 1.25rem;
-        border-radius: var(--radius-md);
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.25s ease;
-    }
-
-    .btn-refresh:hover, .btn-cancel:hover {
-        background-color: #e7eef6;
-        transform: translateY(-2px);
-    }
-
-    .btn-preview {
-        background-color: var(--secondary);
-        color: var(--muted);
-        border-radius: var(--radius-sm);
-        padding: 0.5rem;
-        transition: background-color 0.2s;
-    }
-    .btn-preview:hover {
-        background-color: #e2e8f0;
-    }
-
-    .btn-action-approve {
-        background-color: var(--success);
-        color: white;
-        border-radius: var(--radius-md);
-        padding: 0.65rem 1rem;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.2s ease;
-    }
-
-    .btn-action-approve:hover {
-        background-color: #15803d;
-        transform: translateY(-2px);
-        color: white;
-    }
-
-    .btn-action-reject {
-        background-color: var(--danger);
-        color: white;
-        border-radius: var(--radius-md);
-        padding: 0.65rem 1rem;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.2s ease;
-    }
-
-    .btn-action-reject:hover {
-        background-color: #b91c1c;
-        transform: translateY(-2px);
-        color: white;
-    }
-
-    /* === Empty State === */
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        color: var(--muted);
-    }
-
-    .empty-state-icon {
-        width: 64px;
-        height: 64px;
-        color: #cbd5e1;
-        margin-bottom: 1.5rem;
-    }
-
-    /* === Modal === */
-    .modal-content {
-        border-radius: var(--radius-md);
-        border: none;
-    }
-
-    .modal-header {
-        border-bottom: 1px solid var(--ring);
-        padding: 1.5rem;
-        background-color: var(--bg);
-    }
-
-    .modal-header.bg-success {
-        background-color: var(--success) !important;
-    }
-
-    .modal-header.bg-danger {
-        background-color: var(--danger) !important;
-    }
-
-    .modal-icon {
-        width: 64px;
-        height: 64px;
-        stroke-width: 1.5;
-    }
-
-    .order-details-card {
-        background-color: var(--bg);
-        border-radius: var(--radius-sm);
-        padding: 1.25rem;
-        text-align: left;
-    }
-
-    .order-details-card h6 {
-        font-weight: 600;
-        color: var(--ink);
-        margin-bottom: 1rem;
-    }
-
-    .detail-item {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.5rem;
-    }
-
-    .detail-label {
-        color: var(--muted);
-        font-size: 0.875rem;
-    }
-</style>
-@endpush
 
 @push('js')
 <script>
