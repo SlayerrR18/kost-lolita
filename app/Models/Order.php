@@ -24,6 +24,10 @@ class Order extends Model
         'user_id','kost_id','name','email','phone','alamat',
         'duration','tanggal_masuk','tanggal_keluar','status',
         'ktp_image','bukti_pembayaran','type','parent_order_id','confirmed_at',
+        'emergency_phone',
+        'ktp_number',
+        'emergency_contact_name',
+        'emergency_contact_relation'
     ];
 
     protected $casts = [

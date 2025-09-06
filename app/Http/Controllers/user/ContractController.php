@@ -5,7 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -20,51 +20,16 @@ class ContractController extends Controller
     // Halaman kontrak
     public function index()
     {
-        $contract = Order::where('user_id', auth()->id())
-                       ->with('kost')
-                       ->latest()
-                       ->first();
+        $contract = Order::with('kost')
+            ->where('user_id', Auth::id())
+            ->where('status', 'confirmed')
+            ->latest()
+            ->first();
 
-        if ($contract) {
-            // Debug KTP image path
-            \Log::info('KTP Image Debug:', [
-                'raw_path' => $contract->ktp_image,
-                'storage_path' => storage_path('app/public/' . $contract->ktp_image),
-                'exists' => Storage::disk('public')->exists($contract->ktp_image),
-                'url' => Storage::url($contract->ktp_image)
-            ]);
+        $totalDays = $contract ? $contract->tanggal_masuk->diffInDays($contract->tanggal_keluar) : 0;
+        $remainingDays = $contract ? now()->diffInDays($contract->tanggal_keluar, false) : 0;
 
-            $totalDays = $contract->tanggal_masuk->diffInDays($contract->tanggal_keluar);
-            $remainingDays = now()->diffInDays($contract->tanggal_keluar, false);
-            $progress = round(($totalDays - max(0, $remainingDays)) / $totalDays * 100);
-
-            // Determine contract phase
-            $phase = 'active';
-            if (now()->lt($contract->tanggal_masuk)) {
-                $phase = 'pre';
-            } elseif (now()->gt($contract->tanggal_keluar)) {
-                $phase = 'post';
-            }
-
-            // Define status class based on contract status
-            $statusClass = match ($contract->status) {
-                'active' => 'status-active text-success bg-success-subtle',
-                'pending' => 'status-pending text-warning bg-warning-subtle',
-                'expired' => 'status-expired text-danger bg-danger-subtle',
-                default => 'text-secondary bg-secondary-subtle'
-            };
-
-            return view('user.contract.index', compact(
-                'contract',
-                'totalDays',
-                'remainingDays',
-                'progress',
-                'phase',
-                'statusClass'
-            ));
-        }
-
-        return view('user.contract.index', ['contract' => null]);
+        return view('user.contract.index', compact('contract', 'totalDays', 'remainingDays'));
     }
 
     // Ajukan perpanjangan
@@ -182,6 +147,32 @@ class ContractController extends Controller
         ]);
 
         return redirect()->route('user.contract')->with('success', 'Perpanjangan kontrak berhasil diajukan, tunggu konfirmasi selanjutnya.');
+    }
+
+    public function updateInfo(Request $request)
+    {
+        $validated = $request->validate([
+            'ktp_number' => 'required|string|max:20',
+            'emergency_phone' => 'required|string|max:15',
+        ]);
+
+        try {
+            $contract = Order::where('user_id', Auth::id())
+                ->where('status', 'confirmed')
+                ->latest()
+                ->firstOrFail();
+
+            $contract->update($validated);
+
+            return response()->json([
+                'message' => 'Informasi berhasil diperbarui'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Gagal memperbarui informasi: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
 

@@ -94,6 +94,10 @@
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                             <div class="form-text">
+                                <i data-feather="info" class="feather-small me-1"></i>
+                                Nama lengkap sesuai KTP
+                        </div>
                         </div>
 
                         <div class="form-group">

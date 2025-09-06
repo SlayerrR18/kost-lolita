@@ -122,9 +122,13 @@ Route::middleware(['auth','role:user'])->group(function () {
 });
 
 // Kontrak user (butuh login saja, role bebas kalau kamu izinkan)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/contract',           [ContractController::class, 'index'])->name('user.contract');
-    Route::post('/contract/extend',   [ContractController::class, 'extend'])->name('user.contract.extend');
+Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
+    // Contract routes
+    Route::controller(ContractController::class)->group(function() {
+        Route::get('/contract', 'index')->name('contract');
+        Route::put('/contract/update-info', 'updateInfo')->name('contract.update-info');
+        Route::post('/contract/extend', 'extend')->name('contract.extend');
+    });
 });
 
 // Pesan (chat)

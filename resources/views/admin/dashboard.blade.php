@@ -18,6 +18,7 @@
         --danger: #ef4444;
     }
 
+
     /* Layout Container */
     .dashboard-container {
         padding: 2rem;
@@ -49,6 +50,7 @@
         gap: 1.5rem;
         flex-wrap: wrap;
     }
+
 
     .page-title {
         font-size: 1.75rem;
@@ -87,10 +89,12 @@
         flex-direction: column;
     }
 
+
     .stat-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     }
+
 
     .stat-content {
         display: flex;
@@ -101,15 +105,18 @@
         z-index: 1;
     }
 
+
     .stat-header {
         margin-bottom: 1rem;
     }
+
 
     .stat-title {
         color: var(--muted);
         font-size: 0.875rem;
         font-weight: 500;
     }
+
 
     .stat-value {
         font-size: 1.875rem;
@@ -142,6 +149,7 @@
         gap: 1rem;
         flex-wrap: wrap;
     }
+
 
     .chart-title {
         font-size: 1.25rem;
@@ -401,5 +409,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize Feather Icons
     feather.replace();
 });
+
 </script>
 @endpush
