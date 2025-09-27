@@ -120,6 +120,7 @@
         border-radius: var(--radius-sm);
         margin-top: 8px;
         display: block;
+        cursor: pointer; /* [BARU] Menambahkan cursor pointer pada gambar */
     }
 
     /* === Composer === */
@@ -173,6 +174,15 @@
         align-items:center;
     }
 
+    /* [BARU] Styling untuk gambar di dalam modal */
+    .modal-image-content {
+        max-width: 100%;
+        max-height: 80vh; /* Pastikan gambar tidak terlalu tinggi */
+        display: block;
+        margin: auto;
+        border-radius: var(--radius-md);
+    }
+
     /* === Responsive === */
     @media (max-width: 992px){
         .chat-shell{
@@ -215,7 +225,8 @@
                                         $isImage = in_array(strtolower($fileExtension), ['jpg', 'jpeg', 'png', 'gif']);
                                     @endphp
                                     @if($isImage)
-                                        <a href="{{ asset('storage/'.$m->attachment) }}" target="_blank">
+                                        {{-- [DIUBAH] Atribut diubah untuk memicu modal --}}
+                                        <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-image-url="{{ asset('storage/'.$m->attachment) }}">
                                             <img src="{{ asset('storage/'.$m->attachment) }}" alt="Lampiran" class="img-fluid">
                                         </a>
                                     @else
@@ -251,6 +262,19 @@
         </section>
     </div>
 </div>
+
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="background-color: transparent; border: none;">
+            <div class="modal-header" style="border-bottom: none;">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="" class="img-fluid modal-image-content" alt="Gambar Lampiran">
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('js')
@@ -267,6 +291,17 @@
     const chipBox = document.getElementById('filePreview');
     const btn = document.getElementById('sendBtn');
 
+    // [BARU] Logika untuk menangani modal gambar
+    const imageModal = document.getElementById('imageModal');
+    if (imageModal) {
+        imageModal.addEventListener('show.bs.modal', function (event) {
+            const triggerElement = event.relatedTarget;
+            const imageUrl = triggerElement.getAttribute('data-image-url');
+            const modalImage = imageModal.querySelector('.modal-image-content');
+            modalImage.src = imageUrl;
+        });
+    }
+
     // File attachment logic
     if (file && chipBox) {
         file.addEventListener('change', () => {
@@ -276,7 +311,6 @@
                 const fileType = file.files[0].type;
                 const isImage = fileType.startsWith('image/');
                 const fileName = file.files[0].name;
-
                 let icon = isImage ? 'image' : 'file';
 
                 chipBox.innerHTML = `<div class="chip"><i data-feather="${icon}"></i> ${fileName} <a style="margin-left:6px;cursor:pointer" onclick="clearAttachment()">×</a></div>`;
@@ -338,7 +372,12 @@
             const isImage = m.attachment.match(/\.(jpeg|jpg|png|gif)$/i);
             const attachmentUrl = `/storage/${m.attachment}`;
             if (isImage) {
-                attachmentHtml = `<div class="message-attachment"><a href="${attachmentUrl}" target="_blank"><img src="${attachmentUrl}" alt="Lampiran"></a></div>`;
+                // [DIUBAH] Atribut disesuaikan untuk memicu modal pada pesan baru
+                attachmentHtml = `<div class="message-attachment">
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-image-url="${attachmentUrl}">
+                        <img src="${attachmentUrl}" alt="Lampiran">
+                    </a>
+                </div>`;
             } else {
                 attachmentHtml = `<div class="message-attachment"><a href="${attachmentUrl}" target="_blank"><i data-feather="paperclip"></i> Lampiran</a></div>`;
             }

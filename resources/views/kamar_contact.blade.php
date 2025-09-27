@@ -3,27 +3,52 @@
 <section id="kamar" class="rooms">
     <div class="container">
         <div class="section-header">
-            <h2>Fasilitas <span>Kami</span></h2>
-            <p>Pilihan kamar nyaman dengan berbagai fasilitas untuk kenyamanan Anda</p>
+            <span class="section-tagline">Pilihan Terbaik di Ruteng</span>
+            <h2>Temukan Kamar Impian Anda</h2>
+            <p>Setiap kamar dirancang untuk memberikan kenyamanan maksimal dengan fasilitas modern yang akan menunjang aktivitas Anda sehari-hari.</p>
+        </div>
+
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter="all">Semua</button>
+            <button class="filter-btn" data-filter="Tersedia">Hanya yang Tersedia</button>
         </div>
 
         <div class="rooms-grid">
             @forelse($kosts as $kost)
-            <div class="room-card">
+            {{-- Menambahkan data-attribute untuk filtering JS --}}
+            <div class="room-card" data-status="{{ $kost->status }}" data-type="{{-- $kost->tipe_kamar --}}">
                 <div class="room-image">
                     @php
                         $fotos = is_array($kost->foto) ? $kost->foto : (empty($kost->foto) ? [] : [$kost->foto]);
                     @endphp
 
                     @if(count($fotos) > 0)
-                        <div id="carouselKost{{ $kost->id }}" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-inner">
+                        <div id="carouselKost{{ $kost->id }}" class="carousel slide" data-bs-ride="false">
+                            {{-- Indicators dengan thumbnail --}}
+                            <div class="carousel-indicators">
                                 @foreach($fotos as $i => $foto)
-                                    <div class="carousel-item {{ $i == 0 ? 'active' : '' }}">
-                                        <img src="{{ asset('storage/'.$foto) }}" class="d-block w-100" alt="Kamar {{ $kost->nomor_kamar }}">
-                                    </div>
+                                <button type="button"
+                                        data-bs-target="#carouselKost{{ $kost->id }}"
+                                        data-bs-slide-to="{{ $i }}"
+                                        class="{{ $i == 0 ? 'active' : '' }}"
+                                        style="background-image: url('{{ asset('storage/'.$foto) }}');">
+                                </button>
                                 @endforeach
                             </div>
+
+                            {{-- Carousel items --}}
+                            <div class="carousel-inner">
+                                @foreach($fotos as $i => $foto)
+                                <div class="carousel-item {{ $i == 0 ? 'active' : '' }}">
+                                    <img src="{{ asset('storage/'.$foto) }}"
+                                         class="d-block w-100"
+                                         alt="Kamar {{ $kost->nomor_kamar }}"
+                                         style="height: 280px; object-fit: cover;">
+                                </div>
+                                @endforeach
+                            </div>
+
+                            {{-- Controls --}}
                             @if(count($fotos) > 1)
                             <button class="carousel-control-prev" type="button" data-bs-target="#carouselKost{{ $kost->id }}" data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon"></span>
@@ -37,20 +62,30 @@
                         <img src="{{ asset('img/default-room.jpg') }}" class="d-block w-100" alt="Default Room Image">
                     @endif
                     <div class="room-tag {{ $kost->isAvailable() ? 'status-available' : 'status-unavailable' }}">
+                        <i data-feather="{{ $kost->isAvailable() ? 'check' : 'x' }}"></i>
                         {{ $kost->status }}
                     </div>
                 </div>
 
                 <div class="room-content">
-                    <h3>Kamar {{ $kost->nomor_kamar }}</h3>
-                    <div class="room-features">
-                        @foreach($kost->fasilitas as $fasilitas)
-                            <div class="feature-item">
-                                <i data-feather="check-circle"></i>
-                                <span>{{ $fasilitas }}</span>
-                            </div>
-                        @endforeach
+                    <div class="content-top">
+                        <h3>Kamar No. {{ $kost->nomor_kamar }}</h3>
+                        <p class="room-description">Ideal untuk mahasiswa yang mencari ketenangan dan fokus belajar.</p>
                     </div>
+
+                    <div class="main-features">
+                        <h4>Fasilitas Utama</h4>
+                        <div class="features-grid">
+                            @foreach($kost->fasilitas as $fasilitas)
+                                @if($loop->index < 4) {{-- Tampilkan 4 fasilitas utama saja --}}
+                                    <div class="feature-item">
+                                        <i data-feather="check-circle"></i> <span>{{ $fasilitas }}</span>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+
                     <div class="room-price">
                         <div class="price-tag">
                             <span class="amount">Rp {{ number_format($kost->harga, 0, ',', '.') }}</span>
@@ -58,13 +93,11 @@
                         </div>
                         @if($kost->isAvailable())
                         <a href="{{ route('order.create', $kost->id) }}" class="btn-book">
-                            <i data-feather="key"></i>
                             Pesan Sekarang
                         </a>
                         @else
                         <button class="btn-book disabled" disabled>
-                            <i data-feather="x-circle"></i>
-                            Tidak Tersedia
+                            Sudah Dipesan
                         </button>
                         @endif
                     </div>
@@ -72,37 +105,12 @@
             </div>
             @empty
             <div class="no-rooms">
-                <p>Belum ada kamar tersedia</p>
+                <i data-feather="home"></i>
+                <h3>Oops! Belum Ada Kamar</h3>
+                <p>Saat ini belum ada kamar yang tersedia. Silakan cek kembali nanti.</p>
             </div>
             @endforelse
         </div>
     </div>
 </section>
-<!-- Contact Start -->
-<section id="contact" class="contact">
-    <h2>Kontak <span>Kami</span></h2>
-    <p>Silahkan hubungi kami untuk informasi lebih lanjut</p>
-    <div class="row">
-        <iframe src="https://www.google.com/maps/embed?pb=..." allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="map"></iframe>
-        <form action="">
-            <div class="input-group">
-                <i data-feather="user"></i>
-                <input type="text" placeholder="Nama Lengkap" required>
-            </div>
-            <div class="input-group">
-                <i data-feather="mail"></i>
-                <input type="email" placeholder="Email Address" required>
-            </div>
-            <div class="input-group">
-                <i data-feather="phone"></i>
-                <input type="tel" placeholder="Nomor HP" required>
-            </div>
-            <button type="submit" class="btn">Kirim Pesan</button>
-        </form>
-    </div>
-</section>
 @endsection
-
-
-<script src="js/script.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

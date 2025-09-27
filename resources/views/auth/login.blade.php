@@ -16,407 +16,238 @@
             --ink: #0f172a;
             --muted: #64748b;
             --ring: #e2e8f0;
-            --danger: #dc2626;
-            --bg: #f8fafc;
-            --surface: #fff;
-            --radius-lg: 20px;
+            --danger: #ef4444;
+            --surface: #ffffff;
+            --bg-soft: #f8fafc;
+            --radius-lg: 24px;
             --radius-md: 12px;
-            --radius-sm: 8px;
-            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 10px 30px rgba(2, 6, 23, 0.08);
-            --shadow-lg: 0 14px 24px rgba(26, 127, 90, 0.22);
+            --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.15);
         }
 
-        html, body {
-            height: 100%;
+        @keyframes animateGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* [BARU] Keyframes untuk animasi ikon yang melayang */
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+            10%, 90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh);
+                opacity: 0;
+            }
+        }
+
+        html { height: 100%; }
 
         body {
+            position: relative; /* Diperlukan agar z-index pada child bekerja */
+            height: 100%;
             font-family: 'Poppins', sans-serif;
-            background: var(--bg);
-            color: var(--ink);
             display: grid;
             place-items: center;
-            padding: 1rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #059669, #10b981, #34d399, #065f46);
+            background-size: 400% 400%;
+            animation: animateGradient 15s ease infinite;
+            overflow: hidden; /* Mencegah scroll dari ikon yang melayang */
         }
 
-        /* === Container Utama === */
-        .auth-container {
+        /* [BARU] Container untuk ikon-ikon di background */
+        .background-icons {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 1200px;
-            min-height: 520px;
+            height: 100%;
+            z-index: 1; /* Di bawah kartu login */
+        }
+
+        /* [BARU] Style untuk setiap ikon */
+        .background-icons span {
+            position: absolute;
+            display: block;
+            width: 40px; /* Ukuran default */
+            height: 40px;
+            bottom: -100px; /* Mulai dari bawah layar */
+            color: rgba(255, 255, 255, 0.15); /* Warna ikon transparan */
+            animation: floatUp 25s infinite linear;
+            pointer-events: none; /* Agar tidak bisa di-klik */
+        }
+
+        /* [BARU] Variasi untuk setiap ikon (ini kuncinya!) */
+        .background-icons span:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-duration: 22s; animation-delay: 0s; }
+        .background-icons span:nth-child(2) { left: 10%; width: 30px; height: 30px; animation-duration: 18s; animation-delay: 2s; }
+        .background-icons span:nth-child(3) { left: 70%; width: 50px; height: 50px; animation-duration: 28s; animation-delay: 4s; }
+        .background-icons span:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-duration: 20s; animation-delay: 0s; }
+        .background-icons span:nth-child(5) { left: 65%; width: 25px; height: 25px; animation-duration: 15s; animation-delay: 1s; }
+        .background-icons span:nth-child(6) { left: 85%; width: 90px; height: 90px; animation-duration: 35s; animation-delay: 5s; }
+        .background-icons span:nth-child(7) { left: 5%; width: 45px; height: 45px; animation-duration: 19s; animation-delay: 7s; }
+        .background-icons span:nth-child(8) { left: 50%; width: 35px; height: 35px; animation-duration: 24s; animation-delay: 3s; }
+
+        .login-card {
+            width: 100%;
+            max-width: 450px;
             background: var(--surface);
             border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-md);
-            display: grid;
-            grid-template-columns: 1.05fr 1fr;
-            overflow: hidden;
-        }
-
-        @media (max-width: 1024px) {
-            .auth-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* === Kolom Kiri (Form) === */
-        .auth-form-section {
+            border: 1px solid #e7eaf0;
             padding: 2.5rem 2.75rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .brand-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.625rem;
-            margin-bottom: 1.75rem;
-        }
-
-        .brand-logo img {
-            width: 40px;
-            height: 40px;
-            object-fit: contain;
-        }
-
-        .brand-logo span {
-            font-weight: 700;
-            letter-spacing: 0.2px;
-            font-size: 1.25rem;
-        }
-
-        .header-text {
-            margin-bottom: 1.5rem;
-        }
-
-        .title {
-            font-size: clamp(1.625rem, 3vw, 2.25rem);
-            line-height: 1.2;
-            margin: 0.5rem 0 0.5rem;
-        }
-
-        .subtitle {
-            color: var(--muted);
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .input-field {
-            position: relative; /* Penting: agar ikon absolut di dalamnya relatif terhadap ini */
-        }
-
-        .input-field .input-icon { /* Kelas baru untuk ikon */
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 1.125rem;
-            height: 1.125rem;
-            color: var(--muted);
-            transition: color 0.2s ease;
-            pointer-events: none; /* Agar tidak menghalangi klik input */
-        }
-
-        .input {
-            width: 100%;
-            padding: 0.75rem 2.75rem 0.75rem 2.75rem; /* Tambah padding kiri untuk ikon */
-            border: 2px solid var(--ring);
-            border-radius: var(--radius-md);
-            font-size: 0.95rem;
-            outline: none;
-            transition: all 0.2s ease;
-            background: var(--surface);
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            animation: fadeInUp 0.8s ease-out;
             color: var(--ink);
+            position: relative; /* Menaikkan posisi di atas background */
+            z-index: 2; /* Di atas ikon */
         }
 
-        /* Tambahkan padding kanan untuk input password agar tidak tumpang tindih dengan toggle button */
-        #password.input {
-            padding-right: 3.5rem; /* Cukup ruang untuk ikon mata */
-        }
-
-        .input::placeholder {
-            color: var(--muted);
-            opacity: 0.7;
-        }
-
-        .input:focus {
-            border-color: var(--brand);
-            box-shadow: 0 0 0 4px rgba(26, 127, 90, 0.1);
-        }
-
-        .input:focus + .input-icon { /* Saat input fokus, ubah warna ikon */
-            color: var(--brand);
-        }
-
-        .toggle-pass {
-            position: absolute;
-            right: 0.625rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: transparent;
-            border: none;
-            padding: 0.5rem;
-            cursor: pointer;
-            color: var(--muted);
-            transition: color 0.2s ease;
-            z-index: 10;
-        }
-
-        .toggle-pass:hover {
-            color: var(--brand);
-        }
-
-        .form-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            margin: 0.75rem 0 1.25rem;
-            font-size: 0.8125rem;
-            color: var(--muted);
-        }
-
-        .form-row label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            user-select: none;
-            cursor: pointer;
-            font-size: 0.875rem;
-        }
-
-        .form-row a {
-            color: var(--muted);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .form-row a:hover {
-            color: var(--brand);
-        }
-
-        .btn-submit {
-            width: 100%;
-            border: none;
-            border-radius: var(--radius-md);
-            padding: 0.75rem 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-light) 100%);
-            color: #fff;
-            box-shadow: 0 10px 20px rgba(26, 127, 90, 0.15);
-        }
-
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 24px rgba(26, 127, 90, 0.22);
-        }
-
-        .error-list {
-            background: #fef2f2;
-            border: 1px solid #fee2e2;
-            border-radius: var(--radius-md);
-            padding: 0.75rem 1rem;
-            margin-top: 1rem;
-        }
-
-        .error-list ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .error-list li {
-            color: var(--danger);
-            font-size: 0.8125rem;
-        }
-
-        .auth-footer {
-            margin-top: 1.5rem;
-            font-size: 0.8125rem;
-            color: var(--muted);
-        }
-
-        .auth-footer a {
-            color: var(--brand);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        /* === Kolom Kanan (Ilustrasi) === */
-        .auth-art-section {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            background:
-                radial-gradient(1100px 520px at 90% 10%, rgba(255, 255, 255, 0.15), transparent 60%),
-                radial-gradient(800px 500px at 10% 100%, rgba(255, 255, 255, 0.12), transparent 55%),
-                linear-gradient(135deg, var(--brand) 0%, #22c39a 35%, var(--brand-light) 70%, #3ce3b8 100%);
-        }
-
-        .auth-art-section::before {
-            content: "";
-            position: absolute;
-            inset: 1rem;
-            border-radius: 1rem;
-            border: 2px solid rgba(255, 255, 255, 0.14);
-        }
-
-        .art-svg {
-            width: min(560px, 92%);
-            height: auto;
-        }
-
-        @media (max-width: 1024px) {
-            .auth-art-section {
-                display: none;
-            }
-        }
+        /* ... Sisa CSS Anda sama persis seperti sebelumnya ... */
+        @media (max-width: 576px) { .login-card { padding: 2rem 1.5rem; } }
+        .brand-logo { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; margin-bottom: 1.75rem; }
+        .brand-logo img { width: 56px; height: 56px; }
+        .brand-logo span { font-weight: 700; font-size: 1.5rem; color: var(--ink); }
+        .header-text { margin-bottom: 2rem; }
+        .title { font-weight: 600; margin-bottom: 0.5rem; color: var(--ink); }
+        .subtitle { color: var(--muted); font-size: 0.95rem; }
+        .login-form { text-align: left; }
+        .form-group { margin-bottom: 1.25rem; }
+        .input-field { position: relative; }
+        .input-field .input-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--muted); transition: color 0.3s ease; }
+        .input { width: 100%; padding: 0.8rem 1rem 0.8rem 2.75rem; border: 1px solid var(--ring); border-radius: var(--radius-md); background: var(--bg-soft); color: var(--ink); font-size: 0.95rem; outline: none; transition: all 0.3s ease; }
+        .input::placeholder { color: var(--muted); opacity: 0.8; }
+        .input:focus { background: var(--surface); border-color: var(--brand); box-shadow: 0 0 0 4px rgba(26, 127, 90, 0.1); }
+        .input:focus + .input-icon { color: var(--brand); }
+        #password.input { padding-right: 3.5rem; }
+        .toggle-pass { position: absolute; right: 0.625rem; top: 50%; transform: translateY(-50%); background: none; border: none; padding: 0.5rem; cursor: pointer; color: var(--muted); transition: color 0.3s ease; }
+        .toggle-pass:hover { color: var(--ink); }
+        .form-row { display: flex; justify-content: space-between; margin: 1rem 0 1.5rem; font-size: 0.875rem; }
+        .form-row label { display: flex; align-items: center; gap: 0.5rem; color: var(--muted); cursor: pointer; }
+        .form-row a { color: var(--muted); text-decoration: none; transition: color 0.3s ease; }
+        .form-row a:hover { color: var(--brand); }
+        .btn-submit { width: 100%; border: none; border-radius: var(--radius-md); padding: 0.85rem 1rem; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: linear-gradient(135deg, var(--brand) 0%, var(--brand-light) 100%); color: var(--surface); box-shadow: 0 8px 20px rgba(26, 127, 90, 0.2); }
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(26, 127, 90, 0.3); }
+        .btn-submit:disabled { cursor: not-allowed; opacity: 0.7; transform: translateY(0); }
+        .spinner { width: 18px; height: 18px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .divider { display: flex; align-items: center; text-align: center; color: var(--muted); font-size: 0.8rem; margin: 1.75rem 0; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--ring); }
+        .divider:not(:empty)::before { margin-right: .5em; }
+        .divider:not(:empty)::after { margin-left: .5em; }
+        .btn-social { width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--ring); background: var(--surface); color: var(--ink); font-weight: 500; text-decoration: none; transition: all 0.3s ease; }
+        .btn-social:hover { background: var(--bg-soft); border-color: #d1d9e4; }
+        .btn-social img { width: 20px; height: 20px; }
+        .auth-footer { margin-top: 1.75rem; color: var(--muted); font-size: 0.9rem; }
+        .auth-footer a { color: var(--brand); font-weight: 600; text-decoration: none; }
     </style>
 </head>
 <body>
-    <main class="auth-container">
-        <section class="auth-form-section">
-            <div class="brand-logo">
-                <img src="{{ asset('img/Logo-no-bg.png') }}" alt="Logo Kost Lolita">
-                <span>Kost Lolita</span>
+
+    <div class="background-icons">
+        <span><i data-feather="home"></i></span>
+        <span><i data-feather="key"></i></span>
+        <span><i data-feather="bed"></i></span>
+        <span><i data-feather="wifi"></i></span>
+        <span><i data-feather="moon"></i></span>
+        <span><i data-feather="map-pin"></i></span>
+        <span><i data-feather="home"></i></span>
+        <span><i data-feather="key"></i></span>
+    </div>
+
+    <main class="login-card">
+        <div class="brand-logo">
+            <img src="{{ asset('img/Logo-no-bg.png') }}" alt="Logo Kost Lolita">
+            <span>Kost Lolita</span>
+        </div>
+        <div class="header-text">
+            <h1 class="title">Selamat Datang</h1>
+            <p class="subtitle">Kost Aman, Nyaman Dan Tentram.</p>
+        </div>
+        @if(session('success'))
+            <div class="alert alert-success" role="alert">{{ session('success') }}</div>
+        @endif
+        @if($errors->any())
+            <div class="alert alert-danger" role="alert">
+                {{ $errors->first() }}
             </div>
-
-            <div class="header-text">
-                <div class="d-flex align-items-center gap-2" style="color:#16c79a;font-weight:600;margin-bottom:6px">
-                    <i data-feather="shield"></i> Aman & Nyaman
+        @endif
+        <form class="login-form" action="{{ route('login') }}" method="POST" id="loginForm" novalidate>
+            @csrf
+            <div class="form-group">
+                <div class="input-field">
+                    <input type="email" class="input" id="email" name="email" value="{{ old('email') }}" placeholder="Email" required autocomplete="username">
+                    <i data-feather="mail" class="input-icon"></i>
                 </div>
-                <h1 class="title">Hallo, Selamat Datang <br> Di kost Lolita</h1>
-                <p class="subtitle">Masuk untuk mengelola kontrak, pembayaran, dan notifikasi kost kamu.</p>
             </div>
-
-            {{-- Flash messages --}}
-            @if(session('success'))
-                <div class="alert alert-success mt-2" role="alert">{{ session('success') }}</div>
-            @endif
-
-            <form action="{{ route('login') }}" method="POST" novalidate>
-                @csrf
-                <div class="form-group">
-                    <div class="input-field">
-                        <input type="email" class="input" id="email" name="email" value="{{ old('email') }}"
-                               placeholder="Email" required autocomplete="username">
-                        <i data-feather="mail" class="input-icon"></i> </div>
+            <div class="form-group">
+                <div class="input-field">
+                    <input type="password" class="input" id="password" name="password" placeholder="Password" required autocomplete="current-password">
+                    <i data-feather="lock" class="input-icon"></i>
+                    <button type="button" class="toggle-pass" aria-label="Tampilkan/Sembunyikan Password">
+                        <i data-feather="eye"></i>
+                    </button>
                 </div>
-
-                <div class="form-group">
-                    <div class="input-field">
-                        <input type="password" class="input" id="password" name="password" placeholder="Password"
-                               required autocomplete="current-password" minlength="6">
-                        <i data-feather="lock" class="input-icon"></i> <button type="button" class="toggle-pass" aria-label="Tampilkan/Sembunyikan Password">
-                            <i data-feather="eye"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <label>
-                        <input type="checkbox" name="remember" style="accent-color:#16c79a" checked> Ingat Saya
-                    </label>
-                    @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}">Lupa password?</a>
-                    @endif
-                </div>
-
-                <button type="submit" class="btn-submit">
-                    <i data-feather="log-in"></i> Masuk
-                </button>
-
-                @if($errors->any())
-                    <div class="error-list">
-                        <ul>
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
+            </div>
+            <div class="form-row">
+                <label>
+                    <input type="checkbox" name="remember" style="accent-color: var(--brand);" checked> Ingat Saya
+                </label>
+                @if (Route::has('password.request'))
+                    <a href="{{ route('password.request') }}">Lupa password?</a>
                 @endif
-
-                <p class="auth-footer">Belum punya akun?
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}">Daftar</a>
-                    @else
-                        <a href="{{ url('/') }}">Kembali ke Beranda</a>
-                    @endif
-                </p>
-            </form>
-        </section>
-
-        {{-- RIGHT: ILLUSTRATION --}}
-        <section class="auth-art-section" aria-hidden="true">
-            <svg class="art-svg" viewBox="0 0 900 700" xmlns="http://www.w3.org/2000/svg" role="img">
-                <title>Kost Aman: check-in, kunci & ponsel</title>
-                <g opacity=".95" fill="#ffffff">
-                    <path d="M120 160c18-40 78-40 96 0 44-12 80 34 50 66H70c-14-24 2-54 50-66z" opacity=".25" />
-                    <path d="M740 110c20-30 74-26 88 8 32-6 60 26 40 50H690c-8-18 6-42 50-58z" opacity=".25" />
-                    <path d="M710 550c22-36 86-32 102 8 34-8 64 22 44 46H648c-10-16 6-38 62-54z" opacity=".25" />
-                </g>
-                <g transform="translate(520,120) rotate(-6)">
-                    <rect x="0" y="0" rx="36" ry="36" width="260" height="460" fill="#064e3b" opacity=".18" />
-                    <rect x="12" y="12" rx="28" ry="28" width="236" height="436" fill="#065f46" />
-                    <rect x="18" y="60" rx="24" ry="24" width="224" height="360" fill="url(#gradScreen)" />
-                    <circle cx="130" cy="28" r="6" fill="#e5e7eb" />
-                    <g stroke="#ffffff" stroke-width="3" fill="none" opacity=".9" transform="translate(70,220)">
-                        <circle cx="60" cy="40" r="38" opacity=".25" />
-                        <path d="M32,48c8,18 20,28 39,28 22,0 35-12 45-32" />
-                        <path d="M28,28c12,-22 34,-30 64,-20 25,8 36,28 36,48" />
-                        <path d="M58,10c18,2 36,16 36,42 0,18 -2,24 -8,36" />
-                    </g>
-                    <rect x="70" y="370" width="140" height="10" rx="5" fill="#34d399" opacity=".35" />
-                    <rect x="70" y="370" width="86" height="10" rx="5" fill="#6ee7b7" />
-                </g>
-                <g transform="translate(680,340)">
-                    <rect x="-36" y="36" width="120" height="100" rx="16" fill="#ffffff" opacity=".2" />
-                    <rect x="-28" y="44" width="104" height="84" rx="14" fill="#ffffff" opacity=".9" />
-                    <rect x="-12" y="86" width="72" height="12" rx="6" fill="#10b981" />
-                    <path d="M8,44 a34,34 0 0 1 68,0 v10 h-12 v-10 a22,22 0 0 0 -44,0 v10 H8z" fill="#ffffff" opacity=".9" />
-                </g>
-                <g transform="translate(160,420)">
-                    <rect x="-10" y="-120" width="200" height="160" rx="16" fill="#ffffff" opacity=".2" />
-                    <path d="M0,-40 l100,-70 100,70 v100 a16,16 0 0 1 -16,16 h-168 a16,16 0 0 1 -16,-16z" fill="#fff" opacity=".95" />
-                    <rect x="80" y="-18" width="40" height="74" rx="6" fill="#16c79a" />
-                    <circle cx="115" cy="18" r="4" fill="#fff" />
-                </g>
-                <defs>
-                    <linearGradient id="gradScreen" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stop-color="#16c79a" />
-                        <stop offset="60%" stop-color="#22c39a" />
-                        <stop offset="100%" stop-color="#2dd4bf" />
-                    </linearGradient>
-                </defs>
-            </svg>
-        </section>
+            </div>
+            <button type="submit" class="btn-submit" id="submitBtn">
+                Masuk
+            </button>
+        </form>
+        <div class="divider">atau</div>
+        <a href="#" class="btn-social">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google icon">
+            Masuk dengan Google
+        </a>
+        <p class="auth-footer">
+            Belum punya akun?
+            @if (Route::has('register'))
+                <a href="{{ route('register') }}">Daftar sekarang</a>
+            @else
+                <a href="{{ url('/') }}">Kembali ke Beranda</a>
+            @endif
+        </p>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            feather.replace({ 'stroke-width': 1.8 });
+            feather.replace({ 'stroke-width': 1.5 });
 
+            // ... Sisa JavaScript sama persis ...
             const togglePassBtn = document.querySelector('.toggle-pass');
             const passwordInput = document.getElementById('password');
-
             if (togglePassBtn && passwordInput) {
                 togglePassBtn.addEventListener('click', () => {
                     const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                     passwordInput.setAttribute('type', type);
-                    togglePassBtn.innerHTML = feather.icons[type === 'password' ? 'eye' : 'eye-off'].toSvg();
+                    const eyeIcon = type === 'password' ? 'eye' : 'eye-off';
+                    togglePassBtn.innerHTML = feather.icons[eyeIcon].toSvg({ 'stroke-width': 1.5 });
+                });
+            }
+
+            const loginForm = document.getElementById('loginForm');
+            const submitBtn = document.getElementById('submitBtn');
+            if(loginForm && submitBtn) {
+                loginForm.addEventListener('submit', () => {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = `<div class="spinner"></div> Sedang memproses...`;
                 });
             }
         });

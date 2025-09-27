@@ -227,6 +227,7 @@
         border-radius: var(--radius-sm);
         margin-top: 8px;
         display: block;
+        cursor: pointer; /* [BARU] Menambahkan cursor pointer pada gambar */
     }
 
     /* === Composer === */
@@ -280,6 +281,15 @@
         align-items:center;
     }
 
+    /* [BARU] Styling untuk gambar di dalam modal */
+    .modal-image-content {
+        max-width: 100%;
+        max-height: 80vh; /* Pastikan gambar tidak terlalu tinggi */
+        display: block;
+        margin: auto;
+        border-radius: var(--radius-md);
+    }
+
     /* === Responsive === */
     @media (max-width: 992px){
         .chat-shell{
@@ -323,7 +333,7 @@
                         <div class="meta">
                             <h6>{{ $u->name }}</h6>
                             <p>
-                                @if($isAttachment)<i data-feather="paperclip" class="me-1"></i>@endif
+                                @if($isAttachment)<i data-feather="paperclip" class="me-1" style="width:12px;height:12px;"></i>@endif
                                 {{ Str::limit($snippet, 30) }}
                             </p>
                         </div>
@@ -340,9 +350,9 @@
             @if($selectedUserId)
                 <div class="main-header">
                     <div class="who">
-                        <div class="avatar" style="width:34px;height:34px">{{ strtoupper(mb_substr($messages->first()?->user?->name ?? 'U',0,1)) }}</div>
+                        <div class="avatar" style="width:34px;height:34px">{{ strtoupper(mb_substr($selectedUser->name ?? 'U',0,1)) }}</div>
                         <div>
-                            <div class="name">{{ $messages->first()?->user?->name ?? 'Penghuni' }}</div>
+                            <div class="name">{{ $selectedUser->name ?? 'Penghuni' }}</div>
                             <div class="status">Percakapan pribadi</div>
                         </div>
                     </div>
@@ -356,14 +366,26 @@
                             <div class="message-separator">{{ \Carbon\Carbon::parse($d)->translatedFormat('d F Y') }}</div>
                             @php $lastDate = $d; @endphp
                         @endif
-                        <div class="message-row {{ $m->user_id === auth()->id() ? 'me':'you' }}">
+                        <div class="message-row {{ $m->sender_id === auth()->id() ? 'me':'you' }}">
                             <div class="message-bubble">
                                 <div class="text">{{ $m->content }}</div>
                                 @if($m->attachment)
                                     <div class="message-attachment">
-                                        <a href="{{ asset('storage/'.$m->attachment) }}" target="_blank">
-                                            <img src="{{ asset('storage/'.$m->attachment) }}" alt="Lampiran" class="img-fluid">
-                                        </a>
+                                        @php
+                                            $fileExtension = pathinfo($m->attachment, PATHINFO_EXTENSION);
+                                            $isImage = in_array(strtolower($fileExtension), ['jpg', 'jpeg', 'png', 'gif']);
+                                        @endphp
+                                        @if($isImage)
+                                            {{-- [DIUBAH] Atribut diubah untuk memicu modal --}}
+                                            <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-image-url="{{ asset('storage/'.$m->attachment) }}">
+                                                <img src="{{ asset('storage/'.$m->attachment) }}" alt="Lampiran" class="img-fluid">
+                                            </a>
+                                        @else
+                                            <a href="{{ asset('storage/'.$m->attachment) }}" target="_blank">
+                                                <i data-feather="file-text"></i>
+                                                {{ basename($m->attachment) }}
+                                            </a>
+                                        @endif
                                     </div>
                                 @endif
                                 <div class="message-time">{{ $m->created_at->format('H:i') }}</div>
@@ -396,6 +418,19 @@
                 </div>
             @endif
         </section>
+    </div>
+</div>
+
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="background-color: transparent; border: none;">
+            <div class="modal-header" style="border-bottom: none;">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="" class="img-fluid modal-image-content" alt="Gambar Lampiran">
+            </div>
+        </div>
     </div>
 </div>
 
@@ -445,6 +480,17 @@
     const chipBox = document.getElementById('filePreview');
     const btn = document.getElementById('sendBtn');
 
+    // [BARU] Logika untuk menangani modal gambar
+    const imageModal = document.getElementById('imageModal');
+    if (imageModal) {
+        imageModal.addEventListener('show.bs.modal', function (event) {
+            const triggerElement = event.relatedTarget;
+            const imageUrl = triggerElement.getAttribute('data-image-url');
+            const modalImage = imageModal.querySelector('.modal-image-content');
+            modalImage.src = imageUrl;
+        });
+    }
+
     // File attachment logic
     if (file && chipBox) {
         file.addEventListener('change', () => {
@@ -454,7 +500,6 @@
                 const fileType = file.files[0].type;
                 const isImage = fileType.startsWith('image/');
                 const fileName = file.files[0].name;
-
                 let icon = isImage ? 'image' : 'file';
 
                 chipBox.innerHTML = `<div class="chip"><i data-feather="${icon}"></i> ${fileName} <a style="margin-left:6px;cursor:pointer" onclick="clearAttachment()">×</a></div>`;
@@ -471,7 +516,6 @@
             chipBox.hidden = true;
             chipBox.innerHTML = '';
         }
-        feather.replace();
     }
 
     // Send message logic
@@ -481,33 +525,42 @@
             if (!input.value.trim() && !(file && file.files[0])) return;
 
             btn.disabled = true;
+            const originalBtnHtml = btn.innerHTML;
+            btn.innerHTML = `<div class="spinner-border spinner-border-sm" role="status"></div>`;
+
             const fd = new FormData(form);
             fd.append('content', input.value.trim() || '(lampiran)');
             fd.append('recipient_id', '{{ $selectedUserId }}');
 
-            const res = await fetch('{{ route("messages.store") }}', {
-                method:'POST',
-                headers:{'X-Requested-With':'XMLHttpRequest', 'X-CSRF-TOKEN': '{{ csrf_token() }}'},
-                body: fd
-            });
+            try {
+                const res = await fetch('{{ route("messages.store") }}', {
+                    method:'POST',
+                    headers:{'X-Requested-With':'XMLHttpRequest', 'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                    body: fd
+                });
+                const data = await res.json();
 
-            const data = await res.json();
-
-            if (data.success) {
-                input.value = '';
-                clearAttachment();
-                appendMessage(data.message);
-                if (container) container.scrollTop = container.scrollHeight;
-            } else {
-                alert(data.message || 'Gagal mengirim pesan');
+                if (data.success) {
+                    input.value = '';
+                    clearAttachment();
+                    appendMessage(data.message);
+                    if (container) container.scrollTop = container.scrollHeight;
+                } else {
+                    alert(data.message || 'Gagal mengirim pesan');
+                }
+            } catch (error) {
+                alert('Terjadi kesalahan jaringan.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+                feather.replace();
             }
-            btn.disabled = false;
         });
     }
 
     function appendMessage(m){
         const date = new Date(m.created_at);
-        const isMe = m.user_id === {{ auth()->id() }};
+        const isMe = m.sender_id === {{ auth()->id() }};
         const row = document.createElement('div');
         row.className = `message-row ${isMe ? 'me':'you'}`;
 
@@ -516,9 +569,14 @@
             const isImage = m.attachment.match(/\.(jpeg|jpg|png|gif)$/i);
             const attachmentUrl = `/storage/${m.attachment}`;
             if (isImage) {
-                attachmentHtml = `<div class="message-attachment"><a href="${attachmentUrl}" target="_blank"><img src="${attachmentUrl}" alt="Lampiran"></a></div>`;
+                // [DIUBAH] Atribut disesuaikan untuk memicu modal pada pesan baru
+                attachmentHtml = `<div class="message-attachment">
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-image-url="${attachmentUrl}">
+                        <img src="${attachmentUrl}" alt="Lampiran">
+                    </a>
+                </div>`;
             } else {
-                attachmentHtml = `<div class="message-attachment"><a href="${attachmentUrl}" target="_blank"><i data-feather="paperclip"></i> Lampiran</a></div>`;
+                attachmentHtml = `<div class="message-attachment"><a href="${attachmentUrl}" target="_blank"><i data-feather="file-text"></i> ${m.attachment.split('/').pop()}</a></div>`;
             }
         }
 
@@ -537,7 +595,7 @@
         return s.replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
     }
 
-    // Polling logic (if needed)
+    // Polling logic
     @if(isset($selectedUserId) && $selectedUserId)
     let lastMessageId = {{ $messages->last()?->id ?? 0 }};
     setInterval(async () => {
@@ -546,9 +604,9 @@
                 headers: {'X-Requested-With':'XMLHttpRequest', 'Accept':'application/json'}
             });
             const newMessages = await res.json();
-            if (newMessages.length > 0) {
-                newMessages.forEach(m => appendMessage(m));
-                lastMessageId = newMessages[newMessages.length - 1].id;
+            if (newMessages.messages.length > 0) {
+                newMessages.messages.forEach(m => appendMessage(m));
+                lastMessageId = newMessages.messages[newMessages.messages.length - 1].id;
                 if (container) container.scrollTop = container.scrollHeight;
             }
         } catch(e) {
@@ -557,65 +615,34 @@
     }, 5000); // Poll every 5 seconds
     @endif
 
+    // Modal untuk chat baru
     window.showNewChatModal = function(){
         const modal = new bootstrap.Modal(document.getElementById('newChatModal'));
         modal.show();
-        feather.replace();
     }
 
-    window.startNewChat = async function(){
+    window.startNewChat = function(){
         const uid = document.getElementById('userSelect').value;
-        const text = document.getElementById('newMessageContent').value.trim();
-        if(!uid || !text){ alert('Pilih penghuni & isi pesan'); return; }
-
-        const formModal = document.getElementById('newChatModal').querySelector('form');
-        const fd = new FormData();
-        fd.append('content', text);
-        fd.append('recipient_id', uid);
-        fd.append('_token', '{{ csrf_token() }}');
-
-        const res = await fetch('{{ route("messages.store") }}', {
-            method:'POST',
-            body: fd
-        });
-        const data = await res.json();
-
-        if (data.success) {
-            window.location = '{{ route("messages.index") }}?user_id='+uid;
-        } else {
-            alert(data.message || 'Gagal mengirim pesan');
-        }
+        if(!uid) return;
+        window.location = '{{ route("messages.index") }}?user_id='+uid;
     }
 
-    // Polling untuk unread count di sidebar admin
-    @if(Auth::user()->role === 'admin')
-    setInterval(async () => {
-        try {
-            const res = await fetch('{{ route('messages.index') }}', { headers: {'X-Requested-With':'XMLHttpRequest', 'Accept':'application/json'} });
-            const data = await res.json();
-            const convs = data.conversations;
-
-            convs.forEach(conv => {
-                const item = document.querySelector(`.conversation-item[href*="user_id=${conv.id}"]`);
-                if (item) {
-                    const badge = item.querySelector('.unread-badge');
-                    if (conv.unread_count > 0) {
-                        if (badge) {
-                            badge.textContent = conv.unread_count;
-                        } else {
-                            item.innerHTML += `<span class="unread-badge">${conv.unread_count}</span>`;
-                        }
-                    } else if (badge) {
-                        badge.remove();
-                    }
+    // Search
+    const searchInput = document.getElementById('convSearch');
+    if(searchInput){
+        searchInput.addEventListener('keyup', function(){
+            const filter = this.value.toLowerCase();
+            const convItems = document.querySelectorAll('#convList .conversation-item');
+            convItems.forEach(item => {
+                const name = item.querySelector('h6').textContent.toLowerCase();
+                if(name.includes(filter)){
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
                 }
             });
-        } catch(e) {
-            console.error('Failed to update unread count:', e);
-        }
-    }, 15000); // Every 15 seconds
-    @endif
-
+        });
+    }
 })();
 </script>
 @endpush

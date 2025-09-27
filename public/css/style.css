@@ -229,55 +229,245 @@ html {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Hero Section */
+/* ===================================== */
+/* [GANTI SEMUA] Hero Section (Home) Styling */
+/* ===================================== */
+
 .home {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    background-image:
-        url("../img/bg.jpg");
-    background-size: cover;
-    background-position: center;
-    padding: 7rem 7% 1.4rem;
+    background-color: #f8fafc; /* Latar belakang bersih, tidak lagi gambar penuh */
+    background-image: radial-gradient(
+            circle at 100% 0%,
+            rgba(26, 127, 90, 0.05),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 0% 100%,
+            rgba(22, 199, 154, 0.05),
+            transparent 40%
+        );
+    padding: 8rem 7% 4rem;
+    overflow: hidden; /* Mencegah elemen keluar batas */
 }
 
+.home .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.home-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr; /* Kolom teks sedikit lebih besar */
+    align-items: center;
+    gap: 3rem;
+}
+
+/* Styling untuk konten teks di sisi kiri */
 .home .content {
-    max-width: 600px;
+    max-width: none; /* Hapus batasan lebar lama */
+    color: #1e293b; /* Ubah warna teks menjadi gelap */
+}
+
+/* [BARU] Animasi untuk elemen yang muncul */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.home .tagline {
+    display: inline-block;
+    background-color: rgba(26, 127, 90, 0.1);
+    color: #1a7f5a;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.5s ease-out;
 }
 
 .home .content h1 {
     font-size: 3.2rem;
     font-weight: 700;
-    color: white;
-    margin-bottom: 1rem;
-    line-height: 1.2;
+    line-height: 1.3;
+    margin-bottom: 1.5rem;
+    color: #1e293b;
+    animation: fadeIn 0.5s ease-out 0.2s;
+    animation-fill-mode: backwards; /* Agar tetap di state awal sebelum animasi */
+}
+
+.home .content h1 .highlight {
+    color: #1a7f5a;
+    /* Efek underline modern */
+    background-image: linear-gradient(120deg, #a7f3d0 0%, #6ee7b7 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 0.3em;
+    background-position: 0 88%;
 }
 
 .home .content p {
-    font-size: 1.25rem;
-    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    color: #64748b;
+    line-height: 1.8;
     margin-bottom: 2rem;
-    line-height: 1.6;
+    animation: fadeIn 0.5s ease-out 0.4s;
+    animation-fill-mode: backwards;
 }
 
-.home .cta {
+/* [BARU] Keunggulan Utama */
+.key-features {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    animation: fadeIn 0.5s ease-out 0.6s;
+    animation-fill-mode: backwards;
+}
+
+.key-features .feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #475569;
+    font-weight: 500;
+}
+
+.key-features .feature i {
+    color: #1a7f5a;
+}
+
+/* [BARU] Grup Tombol CTA */
+.cta-group {
+    display: flex;
+    gap: 1rem;
+    animation: fadeIn 0.5s ease-out 0.8s;
+    animation-fill-mode: backwards;
+}
+
+.cta-primary,
+.cta-secondary {
+    padding: 0.8rem 1.75rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.875rem 2rem;
-    background: #1a7f5a;
+    border: 2px solid transparent;
+}
+
+.cta-primary {
+    background: linear-gradient(90deg, #1a7f5a 0%, #16c79a 100%);
     color: white;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(26, 127, 90, 0.2);
+}
+.cta-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(26, 127, 90, 0.3);
 }
 
-.home .cta:hover {
-    background: #15664a;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(26, 127, 90, 0.25);
+.cta-secondary {
+    background: transparent;
+    color: #1a7f5a;
+    border-color: #d1fae5;
+}
+.cta-secondary:hover {
+    background: #d1fae5;
 }
 
+/* [BARU] Galeri Gambar Interaktif */
+.hero-gallery {
+    position: relative;
+    width: 100%;
+    height: 450px; /* Beri ketinggian tetap */
+    perspective: 1000px; /* Untuk efek 3D */
+}
+
+.gallery-card {
+    position: absolute;
+    width: 60%;
+    height: 70%;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    border: 4px solid white;
+    transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.gallery-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gallery-card.card-1 {
+    top: 0;
+    left: 0;
+    z-index: 2;
+}
+.gallery-card.card-2 {
+    top: 20%;
+    right: 0;
+    z-index: 3; /* Kartu tengah paling atas */
+}
+.gallery-card.card-3 {
+    bottom: 0;
+    left: 20%;
+    z-index: 1;
+}
+
+/* Efek paralaks saat hover */
+.hero-gallery:hover .card-1 {
+    transform: rotate(-5deg) translate(-20px, 10px);
+}
+.hero-gallery:hover .card-2 {
+    transform: rotate(3deg) translateY(-20px);
+}
+.hero-gallery:hover .card-3 {
+    transform: rotate(5deg) translate(20px, -10px);
+}
+
+/* Responsive untuk Beranda */
+@media (max-width: 992px) {
+    .home-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .key-features,
+    .cta-group {
+        justify-content: center;
+    }
+    .hero-gallery {
+        display: none; /* Sembunyikan galeri kompleks di layar kecil untuk kebersihan */
+    }
+    .home .content h1 {
+        font-size: 2.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .home {
+        padding-top: 6rem;
+    }
+    .home .content h1 {
+        font-size: 2.4rem;
+    }
+    .home .content p {
+        font-size: 1rem;
+    }
+    .cta-group {
+        flex-direction: column;
+        align-items: center;
+    }
+}
 /* About */
 
 .Home {
@@ -288,7 +478,7 @@ html {
     background-size: cover;
     background-position: center;
     position: relative;
-    background-image: url("../img/bg.jpg");
+    background-image: url("img/bg.jpg");
 }
 
 .Home .content {
@@ -327,47 +517,210 @@ html {
     box-shadow: 1px 1px 3px rgba(1, 1, 3, 0.5);
 }
 
-/* About Section */
+/* =================================== */
+/* [GANTI SEMUA] About Section Styling */
+/* =================================== */
+
 .about {
-    padding: 8rem 7% 4rem;
-    background: #f8fafc;
-}
-
-.about h2 {
-    font-size: 2.5rem;
+    padding: 8rem 7% 6rem;
+    background-color: #f8fafc; /* Warna background yang bersih */
     color: #1e293b;
-    text-align: center;
-    margin-bottom: 3rem;
 }
 
-.about h2 span {
+.about .container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* [BARU] Header Section */
+.about .section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.about .section-tagline {
+    color: #1a7f5a;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.about .section-header h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.3;
+}
+
+.about .section-header h2 span {
     color: #1a7f5a;
 }
 
-.about .row {
+/* [BARU] Main Grid Layout */
+.about-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1.2fr; /* Layout asimetris */
     gap: 4rem;
     align-items: center;
 }
 
-.about .about-img img {
+@media (max-width: 992px) {
+    .about-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+}
+
+/* [BARU] Image Stack Styling */
+.about-image-stack {
+    position: relative;
+    min-height: 450px;
+}
+
+.about-image-stack::before {
+    content: "";
+    position: absolute;
+    bottom: -20px;
+    left: -20px;
+    width: 80%;
+    height: 80%;
+    background: rgba(26, 127, 90, 0.08);
+    border-radius: 24px;
+    z-index: 0;
+}
+
+.image-card-main,
+.image-card-secondary {
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.image-card-main {
+    position: relative; /* Diubah agar tidak absolut */
+    width: 90%;
+    z-index: 2;
+}
+
+.image-card-secondary {
+    position: absolute;
+    width: 55%;
+    bottom: -10%;
+    right: 0;
+    border: 6px solid #fff;
+    z-index: 3;
+}
+
+.about-image-stack img {
     width: 100%;
-    border-radius: 16px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
-.about .content h3 {
+/* [BARU] Content Styling */
+.about-content h3 {
     font-size: 2rem;
+    font-weight: 700;
     color: #1e293b;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
-.about .content p {
+.about-content > p {
     font-size: 1.1rem;
+    line-height: 1.8;
     color: #64748b;
-    line-height: 1.7;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* [BARU] Feature List Styling */
+.feature-list {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.feature-icon {
+    flex-shrink: 0;
+    width: 50px;
+    height: 50px;
+    display: grid;
+    place-items: center;
+    background-color: rgba(26, 127, 90, 0.1);
+    color: #1a7f5a;
+    border-radius: 12px;
+}
+
+.feature-icon i {
+    width: 24px;
+    height: 24px;
+}
+
+.feature-text h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.feature-text p {
+    font-size: 1rem;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* [BARU] Stats Container */
+.stats-container {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.stat-item h4 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1a7f5a;
+}
+
+.stat-item p {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+/* [BARU] Tombol CTA */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 2rem;
+    background: linear-gradient(90deg, #1a7f5a 0%, #16c79a 100%);
+    color: white;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(26, 127, 90, 0.2);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(26, 127, 90, 0.3);
+}
+
+.btn-primary i {
+    transition: transform 0.3s ease;
+}
+
+.btn-primary:hover i {
+    transform: translateX(4px);
 }
 
 /* Kamar */
@@ -580,14 +933,14 @@ footer .credits {
 }
 
 .room-card {
-    background: #fff;
+    display: flex;
+    flex-direction: column;
+    background: white;
     border-radius: 24px;
-    box-shadow: 0 8px 32px rgba(26, 127, 90, 0.1);
     overflow: hidden;
-    max-width: 400px;
-    width: 100%;
-    margin-bottom: 2rem;
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    height: 100%;
 }
 
 .room-card:hover {
@@ -599,12 +952,95 @@ footer .credits {
 .room-image {
     position: relative;
     height: 280px; /* Increased from 240px */
+    flex: 0 0 auto; /* Prevent image from stretching */
 }
 
 .room-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+.carousel {
+    height: 100%;
+}
+
+.carousel-inner {
+    height: 100%;
+}
+
+.carousel-item {
+    height: 100%;
+}
+
+.carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Improve carousel controls */
+.carousel-control-prev,
+.carousel-control-next {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.carousel-control-prev {
+    left: 1rem;
+}
+.carousel-control-next {
+    right: 1rem;
+}
+
+.room-card:hover .carousel-control-prev,
+.room-card:hover .carousel-control-next {
+    opacity: 1;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    width: 20px;
+    height: 20px;
+    filter: invert(1) grayscale(100);
+}
+
+/* Improve indicators */
+.carousel-indicators {
+    position: absolute;
+    bottom: 10px;
+    margin: 0;
+    padding: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+}
+
+.carousel-indicators button {
+    width: 40px !important;
+    height: 30px !important;
+    border-radius: 4px;
+    border: 2px solid white !important;
+    background-size: cover !important;
+    background-position: center !important;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+    margin: 0 !important;
+}
+
+.carousel-indicators button.active {
+    opacity: 1;
+    transform: scale(1.1);
+    border-color: #1a7f5a !important;
 }
 
 .room-tag {
@@ -620,19 +1056,44 @@ footer .credits {
 }
 
 .room-content {
-    padding: 2rem; /* Increased from 1.75rem */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    background: white;
 }
 
-.room-content h3 {
-    font-size: 1.5rem; /* Increased from 1.35rem */
-    margin-bottom: 1.25rem; /* Increased from 1rem */
+.content-top {
+    margin-bottom: 1.5rem;
 }
 
-.room-features {
+.content-top h3 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.room-description {
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.main-features {
+    margin-bottom: auto;
+    padding-bottom: 1.5rem;
+}
+
+.main-features h4 {
+    color: #1e293b;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.features-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem; /* Increased from 1rem */
-    margin-bottom: 2rem; /* Increased from 1.5rem */
+    gap: 1rem;
 }
 
 .feature-item {
@@ -640,13 +1101,10 @@ footer .credits {
     align-items: center;
     gap: 0.5rem;
     color: #64748b;
-    font-size: 1rem; /* Increased from 0.95rem */
 }
 
 .feature-item i {
-    color: var(--primary);
-    width: 22px; /* Increased from 20px */
-    height: 22px;
+    color: #1a7f5a;
 }
 
 .room-price {
@@ -663,37 +1121,39 @@ footer .credits {
 }
 
 .price-tag .amount {
-    font-size: 1.5rem; /* Increased from 1.35rem */
-    font-weight: 600;
-    color: var(--primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a7f5a;
 }
 
 .price-tag .period {
-    font-size: 1rem; /* Increased from 0.95rem */
+    color: #64748b;
+    font-size: 0.875rem;
 }
 
 .btn-book {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1a7f5a 0%, #16c79a 100%);
+    color: white;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: linear-gradient(90deg, #1a7f5a 80%, #16c79a 100%);
-    color: white;
-    padding: 0.875rem 1.75rem;
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 1rem;
-    box-shadow: 0 2px 8px rgba(26, 127, 90, 0.1);
-    border: none;
-    text-decoration: none;
-    transition: background 0.2s, box-shadow 0.2s;
 }
 
-.btn-book.disabled,
-.btn-book[disabled] {
-    background: #e5e7eb;
-    color: #b0b0b0;
+.btn-book:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 127, 90, 0.2);
+}
+
+.btn-book.disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
     cursor: not-allowed;
-    box-shadow: none;
 }
 
 #hamburger-menu {
@@ -803,89 +1263,89 @@ footer .credits {
     box-shadow: 0 4px 12px rgba(26, 127, 90, 0.2);
 }
 
-/* Responsive */
+/* Add/Update Section Header Styling */
+.section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    padding: 0 2rem;
+}
+
+.section-tagline {
+    display: inline-block;
+    background: rgba(26, 127, 90, 0.1);
+    color: #1a7f5a;
+    padding: 0.5rem 1.5rem;
+    border-radius: 100px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.section-header h2 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.section-header p {
+    font-size: 1.1rem;
+    color: #64748b;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Filter Bar Styling */
+.filter-bar {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    padding: 0 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 100px;
+    border: 2px solid #1a7f5a;
+    background: transparent;
+    color: #1a7f5a;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: #1a7f5a;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Responsive Adjustments */
 @media (max-width: 768px) {
-    .contract-container {
-        padding: 6rem 5% 3rem;
+    .section-header {
+        margin-bottom: 2rem;
     }
 
-    .contract-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Laptop */
-@media (max-width: 1366px) {
-    html {
-        font-size: 75%;
-    }
-}
-
-/* Tablet */
-@media (max-width: 768px) {
-    html {
-        font-size: 62.5%;
+    .section-header h2 {
+        font-size: 2rem;
     }
 
-    .navbar {
-        padding: 1rem 5%;
+    .section-header p {
+        font-size: 1rem;
     }
 
-    .isi-navbar {
-        position: fixed;
-        top: 80px; /* Adjust based on navbar height */
-        right: -100%;
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(10px);
-        width: 270px;
-        height: 100vh;
-        padding: 2rem;
-        transition: 0.3s ease-in-out;
-        box-shadow: -4px 0 15px rgba(0, 0, 0, 0.05);
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
+    .filter-bar {
+        margin-bottom: 2rem;
     }
 
-    .isi-navbar.active {
-        right: 0;
-    }
-
-    .isi-navbar a {
-        display: block;
-        font-size: 1.1rem;
-        padding: 0.8rem 1rem;
-    }
-
-    #hamburger-menu {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .navbar-modern {
-        top: 1rem;
-        width: 95%;
-        padding: 0.75rem 1.5rem;
-    }
-
-    .navbar-center {
-        display: none;
-    }
-
-    .nav-contact {
-        font-size: 0.9rem;
-        padding: 0.4rem 1rem;
-    }
-
-    .rooms {
-        padding-top: 7rem; /* Sesuaikan untuk mobile */
-    }
-}
-
-/* Handphone */
-@media (max-width: 450px) {
-    html {
-        font-size: 55%;
+    .filter-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.875rem;
     }
 }
