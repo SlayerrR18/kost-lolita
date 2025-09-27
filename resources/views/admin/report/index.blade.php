@@ -1,6 +1,8 @@
 {{-- resources/views/admin/reports/index.blade.php --}}
 @extends('layouts.main')
 
+@section('title','Report Penghuni')
+
 @push('css')
 <link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
 <link href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" rel="stylesheet">
@@ -18,6 +20,7 @@
         --success: #16a34a;
         --danger: #dc2626;
         --info: #0ea5e9;
+        --warning: #f59e0b;
         --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
         --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
         --radius-sm: 8px;
@@ -246,10 +249,14 @@
         justify-content: center;
         transition: all 0.2s;
         border: none;
+        cursor: pointer;
     }
 
     .btn-detail { background: rgba(59,130,246,.12); color: #1d4ed8; }
     .btn-detail:hover { background: rgba(59,130,246,.18); transform: translateY(-2px); }
+
+    .btn-download { background: var(--secondary); color: var(--ink); }
+    .btn-download:hover { background: #e2e8f0; transform: translateY(-1px); }
 
     .btn-delete { background: rgba(220, 38, 38, 0.1); color: var(--danger); }
     .btn-delete:hover { background: rgba(220, 38, 38, 0.2); transform: translateY(-2px); }
@@ -258,8 +265,8 @@
 
     /* === Modal Styles === */
     .modal-content { border-radius: var(--radius-lg); border: none; }
-    .modal-header { border-bottom: none; padding: 1.5rem 1.5rem 0; }
-    .modal-footer { border-top: none; padding: 0 1.5rem 1.5rem; }
+    .modal-header { border-bottom: 1px solid var(--ring); padding: 1.5rem; background: var(--bg); }
+    .modal-footer { border-top: 1px solid var(--ring); padding: 1.5rem; }
 
     .modal-body { padding: 2.5rem; text-align: center; }
     .modal-icon { width: 4rem; height: 4rem; margin-bottom: 1.5rem; }
@@ -360,7 +367,7 @@
                     </thead>
                     <tbody>
                         @foreach($reports as $r)
-                        <tr>
+                        <tr data-report-id="{{ $r->id }}">
                             <td>{{ $loop->iteration }}</td>
                             <td class="fw-bold">{{ $r->user->name ?? '-' }}</td>
                             <td><span class="text-muted-sub">{{ Str::limit($r->message, 120) }}</span></td>
@@ -370,18 +377,18 @@
                                     @php $img = asset('storage/'.$r->photo); @endphp
                                     <div class="d-inline-flex gap-1">
                                         <button type="button"
-                                                class="btn-icon detail"
-                                                onclick="showImage(`{{ $img }}`)"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-title="Lihat foto"
+                                                class="btn-action btn-detail"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#imageModal"
+                                                data-img-url="{{ $img }}"
+                                                title="Lihat foto"
                                                 aria-label="Lihat foto">
                                             <i data-feather="eye"></i>
                                         </button>
                                         <a href="{{ $img }}"
-                                           class="btn-icon download"
+                                           class="btn-action btn-download"
                                            download
-                                           data-bs-toggle="tooltip"
-                                           data-bs-title="Unduh"
+                                           title="Unduh"
                                            aria-label="Unduh foto">
                                             <i data-feather="download"></i>
                                         </a>
@@ -391,27 +398,22 @@
                                 @endif
                             </td>
                             <td><span class="badge-status {{ $r->status }}">{{ Str::headline($r->status) }}</span></td>
-                            <td><span class="text-muted-sub">{{ $r->handler->name ?? 'Owner' }}</span></td>
+                            <td><span class="text-muted-sub">Owner</span></td>
                             <td>
                                 <div class="d-inline-flex gap-1">
                                     <a href="{{ route('admin.reports.show', $r) }}"
-                                       class="btn-icon detail"
-                                       data-bs-toggle="tooltip"
-                                       data-bs-title="Detail"
+                                       class="btn-action btn-detail"
+                                       title="Detail"
                                        aria-label="Detail">
                                         <i data-feather="info"></i>
                                     </a>
-                                    <form action="{{ route('admin.reports.destroy', $r) }}" method="POST" class="d-inline"
-                                          onsubmit="return confirm('Hapus report ini?');">
-                                        @csrf @method('DELETE')
-                                        <button type="submit"
-                                                class="btn-icon delete"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-title="Hapus"
-                                                aria-label="Hapus">
-                                            <i data-feather="trash-2"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn-action btn-delete"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal"
+                                            data-report-id="{{ $r->id }}"
+                                            title="Hapus report">
+                                        <i data-feather="trash-2"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -428,6 +430,45 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Lihat Foto Laporan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <img id="previewImage" src="" alt="Foto Laporan" class="img-fluid rounded-bottom">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i data-feather="alert-triangle" class="modal-icon text-danger mb-4" aria-hidden="true"></i>
+                <h5 class="mb-3">Hapus Laporan Ini?</h5>
+                <p class="text-muted mb-0">Apakah Anda yakin ingin menghapus laporan ini? Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form id="deleteForm" method="POST" action="">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('js')
@@ -437,11 +478,6 @@
     }
     function initTooltips(){
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
-    }
-    function renumber(table){
-        table.column(0, {search:'applied', order:'applied'}).nodes().each(function (cell, i) {
-            cell.innerHTML = i + 1;
-        });
     }
 
     $(function(){
@@ -456,57 +492,36 @@
                 zeroRecords:"Tidak ada data yang cocok",
                 paginate:{first:"Pertama",last:"Terakhir",next:"Selanjutnya",previous:"Sebelumnya"}
             },
-            drawCallback:function(){ initIcons(); initTooltips(); renumber(this.api()); },
-            initComplete:function(){ initIcons(); initTooltips(); renumber(this.api()); }
+            drawCallback:function(){ initIcons(); initTooltips(); },
+            initComplete:function(){ initIcons(); initTooltips(); }
         });
 
         // Remove original datatables search/length
         $('.dataTables_filter, .dataTables_length').hide();
 
-        // Modal preview image: hapus modal lama agar tidak numpuk
-        window.showImage = function(url) {
-            const oldModal = document.getElementById('imageModal');
-            if (oldModal) oldModal.remove();
+        // Event listener untuk tombol hapus
+        $('#reportTable').on('click', '.btn-delete', function() {
+            const reportId = $(this).data('report-id');
+            const formAction = '{{ route("admin.reports.destroy", ":id") }}'.replace(':id', reportId);
+            $('#deleteForm').attr('action', formAction);
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+            feather.replace(); // Re-render ikon di modal
+        });
 
-            const modal = document.createElement('div');
-            modal.className = 'modal fade';
-            modal.id = 'imageModal';
-            modal.tabIndex = -1;
-            modal.innerHTML = `
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Lihat Foto</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body text-center">
-                            <img id="previewImage" src="${url}" alt="Image" class="img-fluid rounded" />
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            new bootstrap.Modal(modal).show();
-        };
+        // Event listener untuk tombol lihat foto
+        $('#reportTable').on('click', '.btn-detail', function() {
+            const imgUrl = $(this).data('img-url');
+            const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+            document.getElementById('previewImage').src = imgUrl;
+            imageModal.show();
+            feather.replace();
+        });
 
-        // Attach event listeners to the new filter fields
-        const filterForm = document.querySelector('.filter-section');
-        if (filterForm) {
-            filterForm.addEventListener('change', function(e) {
-                // Submit form when a filter changes
-                if (e.target.tagName === 'SELECT' || (e.target.tagName === 'INPUT' && e.target.type === 'date')) {
-                    this.closest('form').submit();
-                }
-            });
-        }
-
-        // Custom search logic for quickSearch
-        const quickSearchInput = document.querySelector('input[name="q"]');
-        if (quickSearchInput) {
-            quickSearchInput.addEventListener('keyup', function(e) {
-                // We're handling the form submit on button click instead of keyup
-            });
-        }
+        // Re-render ikon saat modal dibuka
+        $('#imageModal, #deleteModal').on('shown.bs.modal', function () {
+            feather.replace();
+        });
     });
 </script>
 @endpush

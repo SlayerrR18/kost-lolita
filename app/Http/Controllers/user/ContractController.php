@@ -21,32 +21,30 @@ class ContractController extends Controller
     // Halaman kontrak
     public function index()
     {
-        // Ambil kontrak terakhir yang terkonfirmasi
-        $contract = Order::with('kost')
+        $latestContract = Order::with('kost')
             ->where('user_id', Auth::id())
             ->where('status', 'confirmed')
             ->latest('tanggal_masuk')
             ->first();
 
-        // Hitung total hari dan sisa hari jika ada kontrak
+        $firstContract = Order::with('kost')
+            ->where('user_id', Auth::id())
+            ->where('status', 'confirmed')
+            ->oldest('tanggal_masuk')
+            ->first();
+
         $totalDays = 0;
         $remainingDays = 0;
 
-        if ($contract) {
-            // Kita harus mengambil tanggal masuk dari kontrak pertama untuk total durasi
-            $firstContract = Order::where('user_id', Auth::id())
-                ->where('status', 'confirmed')
-                ->oldest('tanggal_masuk')
-                ->first();
-
-            $totalDays = $firstContract->tanggal_masuk->diffInDays($contract->tanggal_keluar);
-            $remainingDays = now()->diffInDays($contract->tanggal_keluar, false);
+        if ($latestContract) {
+            $totalDays = $firstContract->tanggal_masuk->diffInDays($latestContract->tanggal_keluar);
+            $remainingDays = now()->diffInDays($latestContract->tanggal_keluar, false);
         }
 
-        return view('user.contract.index', compact('contract', 'totalDays', 'remainingDays'));
+        return view('user.contract.index', compact('latestContract', 'firstContract', 'totalDays', 'remainingDays'));
     }
 
-    // ... (metode lainnya tidak perlu diubah) ...
+    // Ajukan perpanjangan
     public function extend(Request $request)
     {
         if ($request->expectsJson() || $request->ajax()) {
@@ -80,13 +78,13 @@ class ContractController extends Controller
 
                 $bukti = $request->file('bukti_pembayaran')->store('payments', 'public');
 
-                $order = Order::create([
+                $dataToCopy = $contract->only([
+                    'kost_id', 'name', 'email', 'phone', 'alamat',
+                    'ktp_number', 'emergency_phone', 'ktp_image'
+                ]);
+
+                $order = Order::create(array_merge($dataToCopy, [
                     'user_id'          => auth()->id(),
-                    'kost_id'          => $contract->kost_id,
-                    'name'             => $contract->name,
-                    'email'            => $contract->email,
-                    'phone'            => $contract->phone,
-                    'alamat'           => $contract->alamat,
                     'duration'         => (int)$request->input('duration'),
                     'tanggal_masuk'    => $start,
                     'tanggal_keluar'   => $end,
@@ -94,8 +92,7 @@ class ContractController extends Controller
                     'bukti_pembayaran' => $bukti,
                     'type'             => 'extension',
                     'parent_order_id'  => $contract->id,
-                    'ktp_image'        => $contract->getRawOriginal('ktp_image')
-                ]);
+                ]));
 
                 DB::commit();
 
@@ -122,7 +119,7 @@ class ContractController extends Controller
             }
         }
 
-        // Non-AJAX fallback
+        // Non-AJAX fallback, juga harus disalin
         $validated = $request->validate([
             'duration'         => 'required|integer|min:1|max:12',
             'bukti_pembayaran' => 'required|image|mimes:jpg,jpeg,png|max:10240',
@@ -139,13 +136,13 @@ class ContractController extends Controller
 
         $bukti = $request->file('bukti_pembayaran')->store('payments','public');
 
-        $order = Order::create([
+        $dataToCopy = $contract->only([
+            'kost_id', 'name', 'email', 'phone', 'alamat',
+            'ktp_number', 'emergency_phone', 'ktp_image'
+        ]);
+
+        $order = Order::create(array_merge($dataToCopy, [
             'user_id'          => auth()->id(),
-            'kost_id'          => $contract->kost_id,
-            'name'             => $contract->name,
-            'email'            => $contract->email,
-            'phone'            => $contract->phone,
-            'alamat'           => $contract->alamat,
             'duration'         => (int)$validated['duration'],
             'tanggal_masuk'    => $start,
             'tanggal_keluar'   => $end,
@@ -153,8 +150,7 @@ class ContractController extends Controller
             'bukti_pembayaran' => $bukti,
             'type'             => 'extension',
             'parent_order_id'  => $contract->id,
-            'ktp_image'        => $contract->ktp_image,
-        ]);
+        ]));
 
         return redirect()->route('user.contract')->with('success', 'Perpanjangan kontrak berhasil diajukan, tunggu konfirmasi selanjutnya.');
     }

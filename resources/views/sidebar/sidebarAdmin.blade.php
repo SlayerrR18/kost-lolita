@@ -7,6 +7,7 @@
     $konfirmasiActive = request()->routeIs('admin.financial.pending-orders');
     $riwayatTransaksiOpen = request()->routeIs('admin.financial.income') || request()->routeIs('admin.financial.expense');
     $laporanActive = request()->routeIs('admin.reports*');
+    $messagesActive = request()->routeIs('messages.*');
 @endphp
 
 <div class="sidebar">
@@ -97,6 +98,13 @@
                    class="nav-link {{ $laporanActive ? 'active' : '' }}">
                     <i data-feather="file-text"></i>
                     <span>Riwayat Laporan & Keluhan</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('messages.index') }}"
+                   class="nav-link {{ $messagesActive ? 'active' : '' }}">
+                    <i data-feather="message-square"></i>
+                    <span>Pesan</span>
                 </a>
             </li>
             <li>

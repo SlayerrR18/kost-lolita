@@ -4,7 +4,7 @@
 
 @push('css')
 <style>
-    /* ... (CSS Anda, tidak ada perubahan di sini) ... */
+    /* ... (CSS yang sudah Anda berikan) ... */
     :root {
         /* Modern color palette */
         --primary: #1a7f5a;
@@ -14,7 +14,7 @@
         --ink: #1e293b;
         --muted: #64748b;
         --ring: #e2e8f0;
-        --success: #22c55e;
+        --success: #16a34a; /* Adjusted to match admin success */
         --warning: #f59e0b;
         --danger: #ef4444;
 
@@ -22,10 +22,14 @@
         --xpad: clamp(1rem, 3vw, 2rem);
         --ypad: clamp(1.5rem, 4vw, 3rem);
         --gap: clamp(1rem, 2vw, 1.5rem);
-        --radius: 24px;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 24px;
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
     }
 
-    .report-container {
+    .dashboard-container {
         min-height: 100vh;
         background: var(--bg);
         padding: var(--ypad) var(--xpad);
@@ -41,7 +45,7 @@
     .page-header {
         background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
         color: #fff;
-        border-radius: var(--radius);
+        border-radius: var(--radius-lg);
         padding: clamp(1.5rem, 4vw, 2.5rem);
         margin-bottom: var(--gap);
         box-shadow: 0 8px 32px rgba(26,127,90,0.15);
@@ -53,19 +57,44 @@
         box-shadow: 0 12px 40px rgba(26,127,90,0.2);
     }
 
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .page-title {
+        font-size: clamp(1.75rem, 3vw, 2.25rem);
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .page-subtitle {
+        opacity: 0.9;
+        margin-top: 0.5rem;
+    }
+
     /* Modern cards */
-    .card {
+    .card-base {
         background: #fff;
-        border-radius: var(--radius);
+        border-radius: var(--radius-lg);
         padding: clamp(1.25rem, 3vw, 2rem);
         box-shadow: 0 4px 24px rgba(0,0,0,0.06);
         transition: all 0.3s ease;
         border: 1px solid rgba(0,0,0,0.05);
     }
-
-    .card:hover {
+    .card-base:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    }
+
+    .card-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
     }
 
     /* Status badges */
@@ -74,22 +103,13 @@
         border-radius: 999px;
         font-weight: 600;
         font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
-
-    .status-badge.pending {
-        background: var(--warning);
-        color: #fff;
-    }
-
-    .status-badge.confirmed {
-        background: var(--success);
-        color: #fff;
-    }
-
-    .status-badge.expired {
-        background: var(--danger);
-        color: #fff;
-    }
+    .status-badge.pending { background: var(--warning); color: #fff; }
+    .status-badge.confirmed { background: var(--success); color: #fff; }
+    .status-badge.expired { background: var(--danger); color: #fff; }
 
     /* Modern grid layout */
     .grid {
@@ -105,7 +125,16 @@
         grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     }
 
-    /* Modern typography */
+    /* Modern typography & card elements */
+    .kicker {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
     .value {
         font-size: clamp(1.25rem, 2.5vw, 1.75rem);
         font-weight: 700;
@@ -113,10 +142,33 @@
         margin: 0.5rem 0;
         line-height: 1.2;
     }
+    .value.large {
+        font-size: clamp(2rem, 3.5vw, 2.5rem);
+    }
 
     .hint {
         color: var(--muted);
         font-size: 0.875rem;
+    }
+
+    .card .icon-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--ink);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    .card .icon-label i {
+        color: var(--primary);
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
     }
 
     /* Modern buttons */
@@ -130,6 +182,7 @@
         transition: all 0.3s ease;
         border: none;
         cursor: pointer;
+        text-decoration: none;
     }
 
     .btn-primary {
@@ -172,7 +225,6 @@
             flex-direction: column;
             align-items: flex-start;
         }
-
         .actions {
             margin-top: var(--gap);
             justify-content: flex-start;
@@ -183,12 +235,7 @@
 
 {{-- Update content section with new classes and structure --}}
 @section('content')
-    @php
-      // Menggunakan variabel baru dari controller
-      $contract = $latestContract;
-    @endphp
-
-    <div class="report-container">
+    <div class="dashboard-container">
         <div class="container-narrow">
             <div class="page-header">
                 <div class="header-content">
@@ -196,7 +243,7 @@
                         <h1 class="page-title">Selamat Datang, {{ auth()->user()->name }}!</h1>
                         <p class="page-subtitle">{{ now()->translatedFormat('l, d F Y') }}</p>
                     </div>
-                    @if($contract && $contract->tanggal_keluar->diffInDays(now()) <= 30)
+                    @if($latestContract && $latestContract->tanggal_keluar->diffInDays(now()) <= 30)
                         <div class="status-badge pending">
                             <i data-feather="alert-circle"></i> Kontrak Akan Berakhir
                         </div>
@@ -206,19 +253,19 @@
 
             {{-- Kartu ringkas --}}
             <div class="grid">
-                <div class="card">
+                <div class="card-base card-content">
                     <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">
                         <h4 class="kicker"><i data-feather="clock"></i> Sisa Kontrak</h4>
-                        @if($contract && $contract->tanggal_keluar->diffInDays(now()) <= 30)
+                        @if($latestContract && $latestContract->tanggal_keluar->diffInDays(now()) <= 30)
                             <span class="badge status-badge pending">Segera berakhir</span>
                         @endif
                     </div>
-                    <div class="value" id="remainText"
-                        @if($contract) data-end="{{ $contract->tanggal_keluar?->copy()->endOfDay()->toIso8601String() }}" @endif>
-                        @if($contract)
+                    <div class="value large" id="remainText"
+                        @if($latestContract) data-end="{{ $latestContract->tanggal_keluar?->copy()->endOfDay()->toIso8601String() }}" @endif>
+                        @if($latestContract)
                             @php
                                 $now = now();
-                                $end = $contract->tanggal_keluar;
+                                $end = $latestContract->tanggal_keluar;
                                 $days = $end->diffInDays($now);
                                 $months = floor($days / 30);
                                 $remainingDays = $days % 30;
@@ -234,39 +281,47 @@
                         @endif
                     </div>
                     <div class="hint" id="remainSub">
-                        @if($contract)
-                            Berakhir pada {{ $contract->tanggal_keluar?->translatedFormat('d F Y') ?? '-' }}
+                        @if($latestContract)
+                            Berakhir pada {{ $latestContract->tanggal_keluar?->translatedFormat('d F Y') ?? '-' }}
                         @endif
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card-base card-content">
                     <h4 class="kicker"><i data-feather="home"></i> Nomor Kamar</h4>
-                    <div class="value">
-                        {{ $contract?->kost?->nomor_kamar ? 'Kamar '.$contract->kost->nomor_kamar : '-' }}
+                    <div class="value large">
+                        {{ $latestContract?->kost?->nomor_kamar ? 'Kamar '.$latestContract->kost->nomor_kamar : '-' }}
                     </div>
-                    <div class="hint">Rp {{ number_format($contract?->kost?->harga ?? 0,0,',','.') }}/bulan</div>
+                    <div class="hint">Rp {{ number_format($latestContract?->kost?->harga ?? 0,0,',','.') }}/bulan</div>
                 </div>
 
-                <div class="card">
+                <div class="card-base card-content">
                     <h4 class="kicker"><i data-feather="book-open"></i> Kontak Tersimpan</h4>
-                    <div class="kicker"><i data-feather="phone"></i> {{ $contract?->phone ?? '-' }}</div>
-                    <div class="kicker"><i data-feather="mail"></i> {{ $contract?->email ?? '-' }}</div>
+                    <div class="card-actions">
+                        <div class="icon-label">
+                            <i data-feather="phone"></i>
+                            <span>{{ $latestContract?->phone ?? '-' }}</span>
+                        </div>
+                        <div class="icon-label">
+                            <i data-feather="mail"></i>
+                            <span>{{ $latestContract?->email ?? '-' }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             {{-- Detail tambahan --}}
-            <div class="row-2">
-                <div class="card">
+            <div class="grid">
+                <div class="card-base card-content">
                     <h4 class="kicker"><i data-feather="map-pin"></i> Alamat</h4>
-                    <div class="value" style="font-size:1rem;font-weight:600">{{ $contract?->alamat ?? '-' }}</div>
+                    <div class="value" style="font-size:1rem;font-weight:600">{{ $latestContract?->alamat ?? '-' }}</div>
                 </div>
 
-                <div class="card">
+                <div class="card-base card-content">
                     <h4 class="kicker"><i data-feather="log-in"></i> Tanggal Masuk</h4>
                     <div class="value">{{ $firstContract?->tanggal_masuk?->translatedFormat('d F Y') ?? '-' }}</div>
                 </div>
-                <div class="card">
+                <div class="card-base card-content">
                     <h4 class="kicker"><i data-feather="log-out"></i> Tanggal Keluar</h4>
                     <div class="value">{{ $latestContract?->tanggal_keluar?->translatedFormat('d F Y') ?? '-' }}</div>
                 </div>
@@ -274,11 +329,11 @@
             <br>
 
             {{-- Action buttons --}}
-            <div class="actions">
+            <div class="d-flex justify-content-end gap-3 mt-4">
                 <a href="{{ route('user.contract') }}" class="btn-action btn-secondary">
                     <i data-feather="file-text"></i> Detail Kontrak
                 </a>
-                @if($contract && $contract->tanggal_keluar->diffInDays(now()) <= 30)
+                @if($latestContract && $latestContract->tanggal_keluar->diffInDays(now()) <= 30)
                     <a href="{{ route('user.contract') }}#extendModal" class="btn-action btn-primary">
                         <i data-feather="refresh-ccw"></i> Perpanjang Kontrak
                     </a>

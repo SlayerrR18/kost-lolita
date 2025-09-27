@@ -371,8 +371,7 @@
 @endif
 
 @php
-    /** @var \App\Models\Contract|null $contract */
-    $status = $contract->status ?? null;
+    $status = optional($latestContract)->status ?? null;
     $statusClass = match(strtolower((string)$status)){
         'active','aktif' => 'active',
         'pending','menunggu' => 'pending',
@@ -388,7 +387,7 @@
             <p class="page-subtitle">Ringkasan status kontrak, masa berlaku, dan tindakan cepat</p>
         </div>
 
-        @if(isset($contract) && optional($contract->tanggal_keluar)->diffInDays(now()) <= 30)
+        @if(isset($latestContract) && optional($latestContract->tanggal_keluar)->diffInDays(now()) <= 30)
             <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#extendModal" type="button">
                 <i data-feather="refresh-ccw" aria-hidden="true"></i>
                 <span>Ajukan Perpanjangan</span>
@@ -397,45 +396,45 @@
     </header>
 
     {{-- Main Content --}}
-    @if($contract)
+    @if($latestContract)
         <div class="content-grid">
             {{-- Kiri: Profil & Statistik Kontrak --}}
             <section class="card-base profile-section" aria-labelledby="profile-heading">
                 <div class="profile-header">
-                    @if($contract->ktp_image_url)
-                        <img src="{{ $contract->ktp_image_url }}" alt="Foto KTP {{ e($contract->name) }}" class="profile-image" onerror="handleImageError(this)">
+                    @if(optional($latestContract)->ktp_image_url)
+                        <img src="{{ $latestContract->ktp_image_url }}" alt="Foto KTP {{ e(optional($latestContract)->name) }}" class="profile-image" onerror="handleImageError(this)">
                     @else
                         <div class="profile-image-placeholder" aria-hidden="true">
                             <i data-feather="user"></i>
                         </div>
                     @endif
                     <div class="profile-info">
-                        <h3>{{ e($contract->name) }}</h3>
-                        <div class="subtle">{{ e($contract->email) }}</div>
-                        <div class="subtle">{{ e($contract->phone) }}</div>
+                        <h3>{{ e(optional($latestContract)->name) }}</h3>
+                        <div class="subtle">{{ e(optional($latestContract)->email) }}</div>
+                        <div class="subtle">{{ e(optional($latestContract)->phone) }}</div>
                     </div>
                 </div>
 
                 <div class="tags-container">
-                    <span class="tag"><i data-feather="home"></i> Kamar {{ e(optional($contract->kost)->nomor_kamar) }}</span>
-                    <span class="tag"><i data-feather="credit-card"></i> Rp {{ number_format(optional($contract->kost)->harga ?? 0,0,',','.') }}/bulan</span>
-                    <span class="tag"><i data-feather="calendar"></i> {{ (int)($contract->duration ?? 0) }} bulan</span>
+                    <span class="tag"><i data-feather="home"></i> Kamar {{ e(optional($latestContract->kost)->nomor_kamar) }}</span>
+                    <span class="tag"><i data-feather="credit-card"></i> Rp {{ number_format(optional($latestContract->kost)->harga ?? 0,0,',','.') }}/bulan</span>
+                    <span class="tag"><i data-feather="calendar"></i> {{ (int)(optional($latestContract)->duration ?? 0) }} bulan</span>
                     <span class="badge-status {{ $statusClass }}">
                         <i data-feather="{{ $statusClass==='active'?'check-circle':($statusClass==='pending'?'clock':'x-circle') }}"></i>
-                        {{ \Illuminate\Support\Str::headline($contract->status ?? 'Menunggu') }}
+                        {{ \Illuminate\Support\Str::headline(optional($latestContract)->status ?? 'Menunggu') }}
                     </span>
                 </div>
 
-                <div class="subtle">{{ e($contract->alamat) }}</div>
+                <div class="subtle">{{ e(optional($latestContract)->alamat) }}</div>
 
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-label">Tanggal Masuk</div>
-                        <div class="stat-value">{{ optional($contract->tanggal_masuk)->translatedFormat('d M Y') }}</div>
+                        <div class="stat-value">{{ optional($firstContract->tanggal_masuk)->translatedFormat('d M Y') }}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Tanggal Keluar</div>
-                        <div class="stat-value">{{ optional($contract->tanggal_keluar)->translatedFormat('d M Y') }}</div>
+                        <div class="stat-value">{{ optional($latestContract->tanggal_keluar)->translatedFormat('d M Y') }}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Total Hari</div>
@@ -459,24 +458,24 @@
                 <div class="info-grid">
                     <div class="info-card">
                         <div class="info-card-title">Tagihan Bulanan</div>
-                        <div class="info-card-value">Rp {{ number_format(optional($contract->kost)->harga ?? 0,0,',','.') }}</div>
-                        <div class="info-card-meta">Termasuk listrik/air: <strong>{{ optional($contract->kost)->include_utility ? 'Ya' : 'Tidak' }}</strong></div>
+                        <div class="info-card-value">Rp {{ number_format(optional($latestContract->kost)->harga ?? 0,0,',','.') }}</div>
+                        <div class="info-card-meta">Termasuk listrik/air: <strong>{{ optional($latestContract->kost)->include_utility ? 'Ya' : 'Tidak' }}</strong></div>
                     </div>
                     <div class="info-card">
                         <div class="info-card-title">Metode Pembayaran</div>
-                        <div class="info-card-value">{{ e($contract->payment_method ?? 'Transfer Bank') }}</div>
+                        <div class="info-card-value">{{ e(optional($latestContract)->payment_method ?? 'Transfer Bank') }}</div>
                         <div class="info-card-meta">Detail di menu Riwayat Pembayaran</div>
                     </div>
                     <div class="info-card">
                         <div class="info-card-title">Perpanjangan Mulai</div>
-                        @php $mulai = optional($contract->tanggal_keluar)->copy()?->addDay(); @endphp
-                        <div class="info-card-value">{{ optional($mulai)->translatedFormat('d M Y') }}</div>
+                        @php $mulai = optional($latestContract->tanggal_keluar)->copy()?->addDay(); @endphp
+                        <div class="info-card-value">{{ optional($mulai)->translatedFormat('d F Y') }}</div>
                         <div class="info-card-meta">Tanggal efektif setelah kontrak berakhir</div>
                     </div>
                     <div class="info-card">
                         <div class="info-card-title">Kontak Pengelola</div>
                         <div class="info-card-value">Pemilik Kost</div>
-                        <div class="info-card-meta">{{ e($contract->manager_phone ?? '081238036180') }}</div>
+                        <div class="info-card-meta">{{ e(optional($latestContract)->manager_phone ?? '081238036180') }}</div>
                     </div>
                 </div>
 
@@ -491,11 +490,11 @@
                     <div class="info-card-value">
                         <div class="mb-2">
                             <small class="text-muted">No. KTP:</small><br>
-                            {{ $contract->ktp_number ? e($contract->ktp_number) : '-' }}
+                            {{ optional($latestContract)->ktp_number ? e($latestContract->ktp_number) : '-' }}
                         </div>
                         <div>
                             <small class="text-muted">Kontak Darurat:</small><br>
-                            {{ $contract->emergency_phone ? e($contract->emergency_phone) : '-' }}
+                            {{ optional($latestContract)->emergency_phone ? e($latestContract->emergency_phone) : '-' }}
                         </div>
                     </div>
                 </div>
@@ -503,7 +502,7 @@
                 <div class="actions-container">
                     <a href="{{ route('user.dashboard') }}" class="btn-secondary"><i data-feather="home"></i> Ke Dashboard</a>
                     <a href="{{ route('user.history.index') }}" class="btn-secondary"><i data-feather="credit-card"></i> Lihat Riwayat</a>
-                    @if(optional($contract->tanggal_keluar)->diffInDays(now()) <= 30)
+                    @if(optional($latestContract->tanggal_keluar)->diffInDays(now()) <= 30)
                         <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#extendModal" type="button">
                             <i data-feather="refresh-ccw"></i> Ajukan Perpanjangan
                         </button>
@@ -535,7 +534,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
             </div>
             <div class="modal-body">
-                <input type="hidden" id="roomPrice" value="{{ (int)(optional($contract->kost)->harga ?? 0) }}">
+                <input type="hidden" id="roomPrice" value="{{ (int)(optional($latestContract->kost)->harga ?? 0) }}">
 
                 <div class="mb-3">
                     <label class="form-label" for="duration">Durasi</label>
@@ -544,12 +543,12 @@
                             <option value="{{ $i }}">{{ $i }} Bulan</option>
                         @endfor
                     </select>
-                    <div class="form-text">Harga: Rp {{ number_format(optional($contract->kost)->harga ?? 0,0,',','.') }} / bulan</div>
+                    <div class="form-text">Harga: Rp {{ number_format(optional($latestContract->kost)->harga ?? 0,0,',','.') }} / bulan</div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Total Pembayaran</label>
-                    <div class="form-control bg-light" id="totalPayment">Rp {{ number_format(optional($contract->kost)->harga ?? 0,0,',','.') }}</div>
+                    <div class="form-control bg-light" id="totalPayment">Rp {{ number_format(optional($latestContract->kost)->harga ?? 0,0,',','.') }}</div>
                 </div>
 
                 <div class="mb-3">
@@ -557,7 +556,7 @@
                     <input type="file" name="bukti_pembayaran" id="bukti_pembayaran" class="form-control" accept="image/*" required>
                 </div>
 
-                @php $mulai = optional($contract->tanggal_keluar)->copy()?->addDay(); @endphp
+                @php $mulai = optional($latestContract->tanggal_keluar)->copy()?->addDay(); @endphp
                 <div class="alert alert-info">Perpanjangan mulai: <strong>{{ optional($mulai)->translatedFormat('d F Y') }}</strong></div>
 
                 <div id="extendErrors" class="alert alert-danger d-none" role="alert"></div>
@@ -620,7 +619,7 @@
                     <label class="form-label required" for="ktp_number">No. KTP</label>
                     <input type="text" name="ktp_number" id="ktp_number"
                                class="form-control @error('ktp_number') is-invalid @enderror"
-                               value="{{ old('ktp_number', optional($contract)->ktp_number) }}" required
+                               value="{{ old('ktp_number', optional($latestContract)->ktp_number) }}" required
                                inputmode="numeric" autocomplete="off"
                                placeholder="Masukkan nomor KTP">
                     @error('ktp_number')
@@ -632,7 +631,7 @@
                     <label class="form-label required" for="emergency_phone">No. HP Keluarga yang Bisa Dihubungi</label>
                     <input type="tel" name="emergency_phone" id="emergency_phone"
                                class="form-control @error('emergency_phone') is-invalid @enderror"
-                               value="{{ old('emergency_phone', optional($contract)->emergency_phone) }}" required
+                               value="{{ old('emergency_phone', optional($latestContract)->emergency_phone) }}" required
                                placeholder="Contoh: 081234567890">
                     @error('emergency_phone')
                         <div class="invalid-feedback">{{ $message }}</div>

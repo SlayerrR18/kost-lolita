@@ -6,100 +6,123 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class MessageController extends Controller
 {
     public function index()
-        {
-            $user = Auth::user();
-            $admin = User::where('role', 'admin')->first();
-            $adminId = optional($admin)->id;
+    {
+        $user = Auth::user();
+        $admin = User::where('role', 'admin')->first();
+        $adminId = optional($admin)->id;
 
-            if ($user->role === 'admin') {
-                // daftar percakapan (user unik) + unread count + last message
-                $conversations = Message::selectRaw('user_id, MAX(created_at) as last_at')
-                    ->groupBy('user_id')
-                    ->orderByDesc('last_at')
-                    ->get()
-                    ->map(function($row) use ($adminId){
-                        $u = User::find($row->user_id);
-                        if(!$u || $u->id == $adminId) return null;
-                        $u->unread_count = Message::where('user_id',$u->id)
-                            ->where('admin_id',$adminId)->where('is_read',false)->count();
-                        $u->last_message  = Message::where(function($q)use($u){
-                                $q->where('user_id',$u->id)->orWhere('admin_id',$u->id);
-                            })->latest()->first();
-                        return $u;
-                    })->filter()->values();
+        if ($user->role === 'admin') {
+            $conversations = Message::selectRaw('user_id, MAX(created_at) as last_at')
+                ->groupBy('user_id')
+                ->orderByDesc('last_at')
+                ->get()
+                ->map(function($row) use ($adminId){
+                    $u = User::find($row->user_id);
+                    if(!$u || $u->id == $adminId) return null;
+                    $u->unread_count = Message::where('user_id', $u->id)
+                        ->where('admin_id', $adminId)
+                        ->where('is_read', false)
+                        ->count();
+                    $u->last_message = Message::where(function($q)use($u){
+                        $q->where('user_id', $u->id)
+                          ->orWhere('admin_id', $u->id);
+                    })->latest()->first();
+                    return $u;
+                })->filter()->values();
 
-                $selectedUserId = request('user_id');
-                $messages = collect();
-                if ($selectedUserId) {
-                    $messages = Message::where(function($q) use($selectedUserId){
-                        $q->where('user_id',$selectedUserId)->orWhere('admin_id',$selectedUserId);
-                    })->with(['user','admin'])->orderBy('created_at')->get();
+            $selectedUserId = request('user_id');
+            $messages = collect();
+            if ($selectedUserId) {
+                $messages = Message::where(function($q) use($selectedUserId, $adminId){
+                    $q->where('user_id', $selectedUserId)
+                      ->where('admin_id', $adminId);
+                })
+                ->orWhere(function($q) use($selectedUserId, $adminId){
+                    $q->where('admin_id', $selectedUserId)
+                      ->where('user_id', $adminId);
+                })
+                ->with(['user', 'admin'])
+                ->orderBy('created_at')
+                ->get();
 
-                    // tandai pesan user -> admin sebagai read
-                    Message::where('user_id',$selectedUserId)
-                        ->where('admin_id',$adminId)
-                        ->where('is_read',false)
-                        ->update(['is_read'=>true]);
-                }
-
-                $totalUnread = $conversations->sum('unread_count');
-                $users = User::where('role','user')->orderBy('name')->get();
-
-                return view('admin.message.index', compact(
-                    'conversations','messages','selectedUserId','adminId','totalUnread','users'
-                ));
+                Message::where('user_id', $selectedUserId)
+                    ->where('admin_id', $adminId)
+                    ->where('is_read', false)
+                    ->update(['is_read' => true]);
             }
 
-            // user view
-            $messages = Message::where(function($q) use ($user){
-                $q->where('user_id',$user->id)->orWhere('admin_id',$user->id);
-            })->with(['user','admin'])->orderBy('created_at')->get();
+            $totalUnread = $conversations->sum('unread_count');
+            $users = User::where('role', 'user')->orderBy('name')->get();
 
-            // tandai pesan admin -> user sebagai read
-            Message::where('user_id',$user->id)->where('admin_id',$user->id)->update(['is_read'=>true]);
-
-            return view('user.message.index', compact('messages','adminId'));
+            return view('admin.message.index', compact(
+                'conversations','messages','selectedUserId','adminId','totalUnread','users'
+            ));
         }
+
+        // user view
+        $admin = User::where('role', 'admin')->first();
+        $adminId = optional($admin)->id;
+
+        $messages = Message::where(function($q) use ($user, $adminId){
+            $q->where('user_id', $user->id)
+              ->where('admin_id', $adminId);
+        })
+        ->orWhere(function($q) use ($user, $adminId){
+            $q->where('admin_id', $user->id)
+              ->where('user_id', $adminId);
+        })
+        ->with(['user', 'admin'])
+        ->orderBy('created_at')
+        ->get();
+
+        Message::where('user_id', $user->id)
+            ->where('admin_id', $adminId)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return view('user.message.index', compact('messages', 'adminId'));
+    }
 
     public function store(Request $request)
     {
+        // Logika store Anda sudah cukup baik, tidak perlu perubahan besar
+        // Saya hanya akan merapikan sedikit untuk kejelasan
         try {
-            \Log::info('Received message request', $request->all());
+            DB::beginTransaction();
 
             $validated = $request->validate([
-                'content' => 'required|string|min:1',
-                'attachment' => 'nullable|file|max:5120',
+                'content' => 'required_without:attachment|string|min:1|nullable',
+                'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
                 'recipient_id' => 'required|exists:users,id'
             ], [
-                'content.required' => 'Pesan tidak boleh kosong',
-                'content.min' => 'Pesan tidak boleh kosong',
+                'content.required_without' => 'Pesan tidak boleh kosong jika tidak ada lampiran.',
+                'content.min' => 'Pesan tidak boleh kosong.',
             ]);
 
             $user = Auth::user();
+            $attachmentPath = null;
 
             if ($request->hasFile('attachment')) {
-                $path = $request->file('attachment')->store('chat-attachments', 'public');
-                $validated['attachment'] = $path;
+                $attachmentPath = $request->file('attachment')->store('chat-attachments', 'public');
             }
 
             $message = Message::create([
                 'user_id' => $user->id,
                 'admin_id' => $validated['recipient_id'],
-                'content' => $validated['content'],
-                'attachment' => $validated['attachment'] ?? null,
+                'content' => $validated['content'] ?? '(Lampiran)',
+                'attachment' => $attachmentPath,
                 'is_read' => false
             ]);
 
-            $message->load(['user', 'admin']);
+            DB::commit();
 
-            \Log::info('Message created successfully', [
-                'message_id' => $message->id,
-                'content' => $message->content
-            ]);
+            $message->load(['user', 'admin']);
 
             return response()->json([
                 'success' => true,
@@ -108,16 +131,17 @@ class MessageController extends Controller
             ]);
 
         } catch (ValidationException $e) {
-            \Log::error('Validation failed', ['errors' => $e->errors()]);
+            DB::rollback();
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengirim pesan: ' . $e->errors()['content'][0]
+                'message' => 'Gagal mengirim pesan.',
+                'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            \Log::error('Message store failed', ['error' => $e->getMessage()]);
+            DB::rollback();
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengirim pesan: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
             ], 500);
         }
     }
