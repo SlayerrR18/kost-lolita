@@ -16,30 +16,49 @@ class DashboardController extends Controller
 
     public function index()
     {
-        // Ambil kontrak aktif terbaru user (untuk tanggal keluar dan sisa hari)
+        $userId = Auth::id();
+
+        // Ambil kontrak aktif terbaru user
         $latestContract = Order::with('kost')
-            ->where('user_id', Auth::id())
+            ->where('user_id', $userId)
             ->where('status', 'confirmed')
             ->latest('tanggal_masuk')
             ->first();
 
-        // Ambil kontrak pertama user (untuk tanggal masuk awal)
+        // Ambil kontrak pertama user
         $firstContract = Order::with('kost')
-            ->where('user_id', Auth::id())
+            ->where('user_id', $userId)
             ->where('status', 'confirmed')
             ->oldest('tanggal_masuk')
             ->first();
 
+        // [UBAH INI] Ambil permohonan perpanjangan terakhir
+        // Tambahkan 'confirmed' ke dalam pencarian status
+        $pendingExtension = Order::with('kost')
+            ->where('user_id', $userId)
+            ->whereNotNull('parent_order_id')
+            ->whereIn('status', ['pending', 'rejected', 'confirmed']) // Tambahkan 'confirmed'
+            ->latest()
+            ->first();
+
+        // Logika agar notifikasi 'confirmed' tidak muncul selamanya
+        // Kita anggap notifikasi 'diterima' hanya relevan jika kontraknya adalah kontrak terbaru.
+        if ($pendingExtension && $pendingExtension->status == 'confirmed') {
+            // Jika ID perpanjangan yang diterima tidak sama dengan ID kontrak aktif terbaru,
+            // berarti sudah ada perpanjangan lain setelahnya, jadi jangan tampilkan notifikasi.
+            if ($latestContract && $pendingExtension->id != $latestContract->id) {
+                $pendingExtension = null;
+            }
+        }
+
+
+        // Variabel yang sudah ada
         $remainingDays = null;
         $shouldExtend  = false;
-
         if ($latestContract) {
-            $today = now()->startOfDay();
-            $end   = $latestContract->tanggal_keluar->copy()->endOfDay();
-            $diff  = $today->diffInDays($end, false);
-
+            $diff = now()->startOfDay()->diffInDays($latestContract->tanggal_keluar->copy()->endOfDay(), false);
             $remainingDays = max(0, $diff);
-            $shouldExtend  = $diff <= 30 && $diff > 0; // Tampilkan tombol/alert jika kontrak akan berakhir dalam 30 hari (bukan sudah berakhir)
+            $shouldExtend  = $diff <= 30 && $diff >= 0;
         }
 
         return view('user.dashboard', [
@@ -47,6 +66,7 @@ class DashboardController extends Controller
             'firstContract'  => $firstContract,
             'remainingDays'  => $remainingDays,
             'shouldExtend'   => $shouldExtend,
+            'pendingExtension' => $pendingExtension,
         ]);
     }
 }

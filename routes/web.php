@@ -127,6 +127,7 @@ Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
     Route::controller(ContractController::class)->group(function() {
         Route::get('/contract', 'index')->name('contract');
         Route::put('/contract/update-info', 'updateInfo')->name('contract.update-info');
+        Route::get('available-rooms', 'availableRooms')->name('contract.available-rooms');
         Route::post('/contract/extend', 'extend')->name('contract.extend');
     });
 });

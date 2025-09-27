@@ -151,7 +151,7 @@ class FinancialController extends Controller
         }
     }
 
-  public static function recordIncome($user, $kost)
+    public static function recordIncome($user, $kost)
     {
         return Financial::create([
             'kost_id'           => $kost->id,
@@ -167,120 +167,143 @@ class FinancialController extends Controller
     public static function getTotalIncome()
     {
         return Financial::where('status', 'Pemasukan')
-                       ->sum('total');
+                        ->sum('total');
     }
 
-   public function confirmOrder(Order $order)
-{
-    abort_if($order->status !== 'pending', 400, 'Order bukan pending.');
+    /**
+     * Konfirmasi order (termasuk perpanjangan dan perpanjangan + pindah kamar)
+     */
+    public function confirmOrder(Order $order)
+    {
+        // Pastikan order berstatus pending sebelum dikonfirmasi
+        abort_if($order->status !== 'pending', 400, 'Order bukan pending.');
 
-    DB::beginTransaction();
-    try {
-        // Cegah overlap
-        if ($this->hasOverlap($order)) {
-            throw new \RuntimeException('Periode bertabrakan dengan kontrak lain.');
-        }
+        DB::beginTransaction();
+        try {
+            // Cek tipe order untuk menentukan apakah ini perpanjangan (biasa atau dengan pindah kamar)
+            $isExtension   = $order->type === 'extension' || $order->type === 'extension_room_change';
+            $isRoomChange  = $order->type === 'extension_room_change'; // Flag pindah kamar
+            $createdNew    = false;
+            $plainPassword = null;
 
-        $isExtension   = $order->is_extension;
-        $createdNew    = false;
-        $plainPassword = null;
+            // Cegah overlap (TETAP)
+            if ($this->hasOverlap($order)) {
+                throw new \RuntimeException('Periode bertabrakan dengan kontrak lain.');
+            }
 
-        // Ambil / buat user
-        $user = $order->user ?: User::where('email',$order->email)->first();
-        if (!$user) {
-            // hanya order BARU yang berpotensi bikin user
-            $plainPassword = \Illuminate\Support\Str::random(10);
-            $user = User::create([
-                'name'     => $order->name,
-                'email'    => $order->email,
-                'password' => \Illuminate\Support\Facades\Hash::make($plainPassword),
-                'role'     => 'user',
+            // Ambil / buat user (TETAP)
+            $user = $order->user ?: User::where('email',$order->email)->first();
+            if (!$user) {
+                // hanya order BARU yang berpotensi bikin user
+                $plainPassword = \Illuminate\Support\Str::random(10);
+                $user = User::create([
+                    'name'     => $order->name,
+                    'email'    => $order->email,
+                    'password' => \Illuminate\Support\Facades\Hash::make($plainPassword),
+                    'role'     => 'user',
+                ]);
+                $createdNew = true;
+            }
+
+            // Tautkan order ke user + sinkron profil
+            $order->user_id = $user->id;
+            $order->status  = 'confirmed';
+            $order->confirmed_at = now();
+            $order->save();
+
+            // update profil user (phone, address, kost)
+            $user->fill([
+                'phone'   => $order->phone,
+                'address' => $order->alamat,
+                'kost_id' => $order->kost_id, // kost_id adalah kamar BARU/yang diperpanjang
+            ])->save();
+
+            // Kamar: Hanya Order BARU atau Perpanjangan dengan PINDAH KAMAR yang memicu perubahan kamar
+            if (!$isExtension || $isRoomChange) {
+
+                // 1. Logika Pindah Kamar: Kosongkan kamar lama jika ini adalah perpanjangan dengan pindah kamar
+                if ($isRoomChange && $order->parent_order_id) {
+                    $oldOrder = Order::find($order->parent_order_id);
+                    // Pastikan kamar lama berbeda dengan kamar baru sebelum direset statusnya
+                    if ($oldOrder && $oldOrder->kost_id !== $order->kost_id) {
+                        optional($oldOrder->kost)->update([
+                            'status'    => 'Kosong', // Kamar lama menjadi kosong
+                            'penghuni'  => null,
+                            'last_checkout' => now(),
+                        ]);
+                    }
+                }
+
+                // 2. Isi kamar baru/yang dipesan
+                optional($order->kost)->update([ // $order->kost mengacu pada kamar baru/yang dipesan
+                    'status'    => 'Terisi',
+                    'penghuni'  => $user->id,
+                    'last_checkin'  => $order->tanggal_masuk,
+                    'last_checkout' => $order->tanggal_keluar,
+                ]);
+            }
+
+            // Keuangan
+            Financial::create([
+                'kost_id'           => $order->kost_id,
+                'nama_transaksi'    => ($isExtension ? ($isRoomChange ? 'Perpanjangan + Pindah Kamar ' : 'Perpanjangan Kamar ') : 'Pembayaran Kamar ') . ($order->kost->nomor_kamar ?? ''),
+                'tanggal_transaksi' => now(),
+                'total'             => (int)optional($order->kost)->harga * (int)$order->duration,
+                'status'            => 'Pemasukan',
+                'bukti_pembayaran'  => $order->bukti_pembayaran,
+                'keterangan'        => $isRoomChange ? 'Konfirmasi perpanjangan dan pindah kamar' : ($isExtension ? 'Konfirmasi perpanjangan' : 'Konfirmasi order baru'),
+                'created_by'        => auth()->id(),
+                'updated_by'        => auth()->id(),
             ]);
-            $createdNew = true;
-        }
 
-        // Tautkan order ke user + sinkron profil
-        $order->user_id = $user->id;
-        $order->status  = 'confirmed';
-        $order->confirmed_at = now();
-        $order->save();
-
-        // update profil user (phone, address, kost)
-        $user->fill([
-            'phone'   => $order->phone,
-            'address' => $order->alamat,
-            'kost_id' => $order->kost_id,
-        ])->save();
-
-        // Kamar: hanya order BARU yang mengubah penghuni/status
-        if (!$isExtension) {
-            optional($order->kost)->update([
-                'status'   => 'Terisi',
-                'penghuni' => $user->id,
-                // opsional: simpan tanggal terakhir kontrak aktif
-                'last_checkin'  => $order->tanggal_masuk,
-                'last_checkout' => $order->tanggal_keluar,
-            ]);
-        }
-
-        // Keuangan
-        Financial::create([
-            'kost_id'           => $order->kost_id,
-            'nama_transaksi'    => ($isExtension ? 'Perpanjangan Kamar ' : 'Pembayaran Kamar ') . ($order->kost->nomor_kamar ?? ''),
-            'tanggal_transaksi' => now(),
-            'total'             => (int)optional($order->kost)->harga * (int)$order->duration,
-            'status'            => 'Pemasukan',
-            'bukti_pembayaran'  => $order->bukti_pembayaran,
-            'keterangan'        => $isExtension ? 'Konfirmasi perpanjangan' : 'Konfirmasi order baru',
-            'created_by'        => auth()->id(),
-            'updated_by'        => auth()->id(),
-        ]);
-
-        // Jika perpanjangan, pastikan data KTP tetap ada
-        if ($order->is_extension) {
-            // Pastikan KTP tersalin dari order sebelumnya
-            if (!$order->ktp_image && $order->parent_order_id) {
-                $parentOrder = Order::find($order->parent_order_id);
-                if ($parentOrder && $parentOrder->ktp_image) {
-                    $order->ktp_image = $parentOrder->ktp_image;
-                    $order->save();
+            // Jika perpanjangan, pastikan data KTP tetap ada (TETAP)
+            if ($isExtension) {
+                // Pastikan KTP tersalin dari order sebelumnya
+                if (!$order->ktp_image && $order->parent_order_id) {
+                    $parentOrder = Order::find($order->parent_order_id);
+                    if ($parentOrder && $parentOrder->ktp_image) {
+                        $order->ktp_image = $parentOrder->ktp_image;
+                        $order->save();
+                    }
                 }
             }
+
+            DB::commit();
+
+            // WhatsApp (di luar transaksi) - Perbarui pesan WA
+            $msg = ($isExtension && $isRoomChange)
+                ? "✅ *Perpanjangan & Pindah Kamar Dikonfirmasi*\n\nHalo {$order->name}, perpanjangan dan permintaan pindah kamar Anda sudah dikonfirmasi. Kamar lama Anda telah dikosongkan.\n\n🏠 Kamar Baru: {$order->kost->nomor_kamar}\n📅 {$order->tanggal_masuk->format('d/m/Y')} — {$order->tanggal_keluar->format('d/m/Y')}\n⏱️ Durasi: {$order->duration} bulan"
+                : ($isExtension
+                    ? "✅ *Perpanjangan Dikonfirmasi*\n\nHalo {$order->name}, perpanjangan kamar Anda sudah dikonfirmasi.\n\n🏠 Kamar: {$order->kost->nomor_kamar}\n📅 {$order->tanggal_masuk->format('d/m/Y')} — {$order->tanggal_keluar->format('d/m/Y')}\n⏱️ Durasi: {$order->duration} bulan"
+                    : "✅ *Konfirmasi Pesanan Kost Lolita*\n\nHalo {$order->name}, pesanan kamar Anda telah dikonfirmasi.\n\n🏠 Kamar: {$order->kost->nomor_kamar}\n📅 {$order->tanggal_masuk->format('d/m/Y')} — {$order->tanggal_keluar->format('d/m/Y')}\n⏱️ Durasi: {$order->duration} bulan" . (
+                        $createdNew && $plainPassword
+                        ? "\n\n*Akun Anda:*\n📧 {$user->email}\n🔑 {$plainPassword}\nHarap ganti password setelah login."
+                        : ''
+                    )
+                );
+
+            $this->trySendWhatsApp($order->phone, $msg);
+
+            return response()->json([
+                'success' => true,
+                'message' => $isRoomChange ? 'Perpanjangan dan pindah kamar dikonfirmasi.' : ($isExtension ? 'Perpanjangan dikonfirmasi.' : 'Order dikonfirmasi.'),
+                'data'    => [
+                    'order_id'       => $order->id,
+                    'type'           => $order->type,
+                    'name'           => $user->name,
+                    'email'          => $user->email,
+                    'duration'       => (int)$order->duration,
+                    'room_number'    => $order->kost->nomor_kamar ?? null,
+                    'tanggal_masuk'  => $order->tanggal_masuk->toDateString(),
+                    'tanggal_keluar' => $order->tanggal_keluar->toDateString(),
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            \DB::rollBack();
+            \Log::error('Confirmation failed: '.$e->getMessage());
+            return response()->json(['success'=>false,'message'=>'Gagal mengonfirmasi: '.$e->getMessage()],500);
         }
-
-        DB::commit();
-
-        // WhatsApp (di luar transaksi)
-        $msg = $isExtension
-            ? "✅ *Perpanjangan Dikonfirmasi*\n\nHalo {$order->name}, perpanjangan kamar Anda sudah dikonfirmasi.\n\n🏠 Kamar: {$order->kost->nomor_kamar}\n📅 {$order->tanggal_masuk->format('d/m/Y')} — {$order->tanggal_keluar->format('d/m/Y')}\n⏱️ Durasi: {$order->duration} bulan"
-            : "✅ *Konfirmasi Pesanan Kost Lolita*\n\nHalo {$order->name}, pesanan kamar Anda telah dikonfirmasi.\n\n🏠 Kamar: {$order->kost->nomor_kamar}\n📅 {$order->tanggal_masuk->format('d/m/Y')} — {$order->tanggal_keluar->format('d/m/Y')}\n⏱️ Durasi: {$order->duration} bulan" . (
-                $createdNew && $plainPassword
-                ? "\n\n*Akun Anda:*\n📧 {$user->email}\n🔑 {$plainPassword}\nHarap ganti password setelah login."
-                : ''
-              );
-
-        $this->trySendWhatsApp($order->phone, $msg);
-
-        return response()->json([
-            'success' => true,
-            'message' => $isExtension ? 'Perpanjangan dikonfirmasi.' : 'Order dikonfirmasi.',
-            'data'    => [
-                'order_id'       => $order->id,
-                'type'           => $isExtension ? 'extension' : 'new',
-                'name'           => $user->name,
-                'email'          => $user->email,
-                'duration'       => (int)$order->duration,
-                'room_number'    => $order->kost->nomor_kamar ?? null,
-                'tanggal_masuk'  => $order->tanggal_masuk->toDateString(),
-                'tanggal_keluar' => $order->tanggal_keluar->toDateString(),
-            ],
-        ]);
-    } catch (\Throwable $e) {
-        \DB::rollBack();
-        \Log::error('Confirmation failed: '.$e->getMessage());
-        return response()->json(['success'=>false,'message'=>'Gagal mengonfirmasi: '.$e->getMessage()],500);
     }
-}
 
 
     public function pendingOrders()
@@ -316,54 +339,55 @@ class FinancialController extends Controller
         }
     }
 
-        public function getFinancialSummary()
-        {
-            try {
-                $currentMonth = now()->format('m');
-                $currentYear = now()->format('Y');
+    public function getFinancialSummary()
+    {
+        try {
+            $currentMonth = now()->format('m');
+            $currentYear = now()->format('Y');
 
-                $summary = [
-                    'total_income' => Financial::where('status', 'Pemasukan')
-                        ->whereMonth('tanggal_transaksi', $currentMonth)
-                        ->whereYear('tanggal_transaksi', $currentYear)
-                        ->sum('total'),
+            $summary = [
+                'total_income' => Financial::where('status', 'Pemasukan')
+                    ->whereMonth('tanggal_transaksi', $currentMonth)
+                    ->whereYear('tanggal_transaksi', $currentYear)
+                    ->sum('total'),
 
-                    'total_expense' => Financial::where('status', 'Pengeluaran')
-                        ->whereMonth('tanggal_transaksi', $currentMonth)
-                        ->whereYear('tanggal_transaksi', $currentYear)
-                        ->sum('total'),
+                'total_expense' => Financial::where('status', 'Pengeluaran')
+                    ->whereMonth('tanggal_transaksi', $currentMonth)
+                    ->whereYear('tanggal_transaksi', $currentYear)
+                    ->sum('total'),
 
-                    'latest_transactions' => Financial::with('kost')
-                        ->latest('tanggal_transaksi')
-                        ->take(5)
-                        ->get(),
+                'latest_transactions' => Financial::with('kost')
+                    ->latest('tanggal_transaksi')
+                    ->take(5)
+                    ->get(),
 
-                    'monthly_stats' => Financial::selectRaw('
-                        YEAR(tanggal_transaksi) as year,
-                        MONTH(tanggal_transaksi) as month,
-                        status,
-                        SUM(total) as total
-                    ')
+                'monthly_stats' => Financial::selectRaw('
+                    YEAR(tanggal_transaksi) as year,
+                    MONTH(tanggal_transaksi) as month,
+                    status,
+                    SUM(total) as total
+                ')
                     ->whereYear('tanggal_transaksi', $currentYear)
                     ->groupBy('year', 'month', 'status')
                     ->get()
-                ];
+            ];
 
-                $summary['profit'] = $summary['total_income'] - $summary['total_expense'];
+            $summary['profit'] = $summary['total_income'] - $summary['total_expense'];
 
-                return response()->json([
-                    'success' => true,
-                    'data' => $summary
-                ]);
+            return response()->json([
+                'success' => true,
+                'data' => $summary
+            ]);
 
-            } catch (\Exception $e) {
-                \Log::error('Failed to get financial summary: ' . $e->getMessage());
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Gagal mengambil ringkasan keuangan'
-                ], 500);
-            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to get financial summary: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil ringkasan keuangan'
+            ], 500);
         }
+    }
+
     protected function hasOverlap(Order $order): bool
     {
         return Order::where('kost_id', $order->kost_id)

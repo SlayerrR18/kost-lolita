@@ -1,4 +1,3 @@
-{{-- resources/views/user/dashboard.blade.php --}}
 @extends('layouts.user')
 @section('title','Dashboard')
 
@@ -119,12 +118,6 @@
         margin-bottom: var(--gap);
     }
 
-    .row-2 {
-        display: grid;
-        gap: var(--gap);
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    }
-
     /* Modern typography & card elements */
     .kicker {
         font-size: 0.875rem;
@@ -164,13 +157,6 @@
         color: var(--primary);
     }
 
-    .card-actions {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        margin-top: 1rem;
-    }
-
     /* Modern buttons */
     .btn-action {
         padding: 0.75rem 1.5rem;
@@ -184,56 +170,38 @@
         cursor: pointer;
         text-decoration: none;
     }
-
     .btn-primary {
         background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
         color: #fff;
         box-shadow: 0 4px 12px rgba(26,127,90,0.2);
     }
-
     .btn-primary:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 16px rgba(26,127,90,0.3);
     }
-
     .btn-secondary {
         background: var(--primary-light);
         color: var(--primary);
     }
-
     .btn-secondary:hover {
         transform: translateY(-2px);
         background: rgba(26,127,90,0.15);
     }
 
-    /* Modern icons */
-    .icon-wrapper {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        background: var(--primary-light);
-        color: var(--primary);
-        margin-bottom: 0.5rem;
-    }
+    /* [KODE BARU] CSS untuk Alert Status Permohonan */
+    .status-alert { padding: 1.5rem; border-radius: var(--radius-lg); margin-bottom: var(--gap); display: flex; align-items: flex-start; gap: 1rem; border: 1px solid transparent; }
+    .status-alert .icon-area { flex-shrink: 0; }
+    .status-alert .icon-area .feather { width: 24px; height: 24px; }
+    .status-alert .content-area h4 { margin: 0 0 0.5rem 0; font-size: 1.125rem; font-weight: 600; }
+    .status-alert .content-area p { margin: 0; opacity: 0.9; }
+    .status-alert.status-pending { background-color: #fffbeb; border-color: #fef3c7; color: #b45309; }
+    .status-alert.status-rejected { background-color: #fef2f2; border-color: #fee2e2; color: #b91c1c; }
 
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .header-content {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .actions {
-            margin-top: var(--gap);
-            justify-content: flex-start;
-        }
-    }
+    /* [TAMBAHKAN INI] CSS untuk status diterima/sukses */
+    .status-alert.status-confirmed { background-color: #f0fdf4; border-color: #dcfce7; color: #15803d; }
 </style>
 @endpush
 
-{{-- Update content section with new classes and structure --}}
 @section('content')
     <div class="dashboard-container">
         <div class="container-narrow">
@@ -243,7 +211,7 @@
                         <h1 class="page-title">Selamat Datang, {{ auth()->user()->name }}!</h1>
                         <p class="page-subtitle">{{ now()->translatedFormat('l, d F Y') }}</p>
                     </div>
-                    @if($latestContract && $latestContract->tanggal_keluar->diffInDays(now()) <= 30)
+                    @if($shouldExtend)
                         <div class="status-badge pending">
                             <i data-feather="alert-circle"></i> Kontrak Akan Berakhir
                         </div>
@@ -251,36 +219,63 @@
                 </div>
             </div>
 
+           {{-- [GANTI BLOK INI] --}}
+            @if(isset($pendingExtension))
+                @php
+                    $isPending = $pendingExtension->status == 'pending';
+                    $isRejected = $pendingExtension->status == 'rejected';
+                    $isConfirmed = $pendingExtension->status == 'confirmed';
+
+                    if ($isPending) {
+                        $alertClass = 'status-pending';
+                        $icon = 'clock';
+                        $title = 'Permohonan Perpanjangan Sedang Diproses';
+                    } elseif ($isRejected) {
+                        $alertClass = 'status-rejected';
+                        $icon = 'x-circle';
+                        $title = 'Permohonan Perpanjangan Ditolak';
+                    } else { // Ini adalah kondisi untuk 'confirmed'
+                        $alertClass = 'status-confirmed';
+                        $icon = 'check-circle';
+                        $title = 'Permohonan Perpanjangan Diterima';
+                    }
+                @endphp
+                <div class="status-alert {{ $alertClass }}">
+                    <div class="icon-area">
+                        <i data-feather="{{ $icon }}"></i>
+                    </div>
+                    <div class="content-area">
+                        <h4>{{ $title }}</h4>
+                        @if($isPending)
+                            <p>
+                                Permohonan Anda untuk memperpanjang kontrak selama <strong>{{ $pendingExtension->duration }} bulan</strong> telah kami terima pada {{ $pendingExtension->created_at->translatedFormat('d M Y') }} dan sedang menunggu konfirmasi.
+                            </p>
+                        @elseif($isRejected)
+                            <p>
+                                Mohon maaf, permohonan perpanjangan kontrak Anda tidak dapat disetujui saat ini. Silakan hubungi pengelola untuk informasi lebih lanjut.
+                            </p>
+                        @else
+                            <p>
+                                Selamat! Permohonan perpanjangan Anda telah disetujui. Kontrak Anda sekarang berlaku hingga <strong>{{ $pendingExtension->tanggal_keluar->translatedFormat('d F Y') }}</strong>.
+                            </p>
+                        @endif
+                        <a href="{{ route('user.contract') }}" class="btn-link mt-2 d-inline-block">Lihat Detail Kontrak</a>
+                    </div>
+                </div>
+            @endif
             {{-- Kartu ringkas --}}
             <div class="grid">
                 <div class="card-base card-content">
                     <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">
                         <h4 class="kicker"><i data-feather="clock"></i> Sisa Kontrak</h4>
-                        @if($latestContract && $latestContract->tanggal_keluar->diffInDays(now()) <= 30)
+                        @if($shouldExtend)
                             <span class="badge status-badge pending">Segera berakhir</span>
                         @endif
                     </div>
-                    <div class="value large" id="remainText"
-                        @if($latestContract) data-end="{{ $latestContract->tanggal_keluar?->copy()->endOfDay()->toIso8601String() }}" @endif>
-                        @if($latestContract)
-                            @php
-                                $now = now();
-                                $end = $latestContract->tanggal_keluar;
-                                $days = $end->diffInDays($now);
-                                $months = floor($days / 30);
-                                $remainingDays = $days % 30;
-                            @endphp
-
-                            @if($days <= 30)
-                                {{ $days }} Hari
-                            @else
-                                {{ $months }} Bulan {{ $remainingDays }} Hari
-                            @endif
-                        @else
-                            -
-                        @endif
+                    <div class="value large">
+                        {{ $remainingDays !== null ? $remainingDays . ' Hari' : '-' }}
                     </div>
-                    <div class="hint" id="remainSub">
+                    <div class="hint">
                         @if($latestContract)
                             Berakhir pada {{ $latestContract->tanggal_keluar?->translatedFormat('d F Y') ?? '-' }}
                         @endif
@@ -333,8 +328,8 @@
                 <a href="{{ route('user.contract') }}" class="btn-action btn-secondary">
                     <i data-feather="file-text"></i> Detail Kontrak
                 </a>
-                @if($latestContract && $latestContract->tanggal_keluar->diffInDays(now()) <= 30)
-                    <a href="{{ route('user.contract') }}#extendModal" class="btn-action btn-primary">
+                @if($shouldExtend)
+                    <a href="{{ route('user.contract') }}" class="btn-action btn-primary">
                         <i data-feather="refresh-ccw"></i> Perpanjang Kontrak
                     </a>
                 @endif
@@ -345,71 +340,10 @@
 
 @push('js')
 <script>
-// Add smooth scroll behavior
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('href');
-        const targetEl = document.querySelector(targetId);
-        if (targetEl) {
-            targetEl.scrollIntoView({ behavior: 'smooth' });
-            // For modal, open it after scrolling if it's an ID
-            if (targetId.startsWith('#') && targetEl.classList.contains('modal')) {
-                const modal = new bootstrap.Modal(targetEl);
-                modal.show();
-            }
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof feather !== 'undefined') {
+            feather.replace();
         }
     });
-});
-
-// Initialize Feather icons
-function initIcons() {
-    if (typeof feather !== 'undefined') {
-        feather.replace({
-            'stroke-width': 2,
-            width: 20,
-            height: 20
-        });
-    }
-}
-
-// Update remaining days counter
-function updateRemaining() {
-    const remainEl = document.getElementById('remainText');
-    const subEl = document.getElementById('remainSub');
-    const badgeEl = document.querySelector('.status-badge.pending');
-
-    if (remainEl && remainEl.dataset.end) {
-        const end = new Date(remainEl.dataset.end);
-        const now = new Date();
-        const diffTime = end.getTime() - now.getTime(); // Use getTime for accurate difference
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays > 0) {
-            if (diffDays <= 30) {
-                remainEl.textContent = `${diffDays} Hari`;
-            } else {
-                const months = Math.floor(diffDays / 30);
-                const remainingDays = diffDays % 30;
-                remainEl.textContent = `${months} Bulan ${remainingDays} Hari`;
-            }
-
-            subEl.textContent = `Berakhir pada ${end.toLocaleDateString('id-ID', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            })}`;
-        } else {
-            remainEl.textContent = 'Kontrak Telah Berakhir';
-            subEl.textContent = 'Segera hubungi pengelola.';
-            if(badgeEl) badgeEl.textContent = 'Telah berakhir';
-        }
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    initIcons();
-    updateRemaining();
-});
 </script>
 @endpush
