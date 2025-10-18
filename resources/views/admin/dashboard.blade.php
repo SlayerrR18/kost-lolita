@@ -1,5 +1,5 @@
 {{-- filepath: d:\Kampus\Web\kost-lolita\resources\views\admin\dashboard.blade.php --}}
-@extends('layouts.main')
+@extends('layouts.admin')
 
 @section('title', 'Dashboard Admin')
 

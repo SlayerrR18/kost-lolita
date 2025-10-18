@@ -3,26 +3,25 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Kost; // Pastikan model Kost di-import
 
 class HomeController extends Controller
 {
     /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * Menampilkan halaman utama (single-page) yang berisi semua informasi.
      */
     public function index()
     {
-        return view('home');
+        // Ambil data untuk bagian "Kamar Tersedia"
+        // Hanya kamar dengan status "Kosong", ambil 6 terbaru
+        $kosts_tersedia = Kost::where('status', 'Kosong')->latest()->take(6)->get();
+
+        // Ambil semua data kost untuk bagian "Hubungi Kami" / Daftar semua kamar
+        // Diurutkan berdasarkan nomor kamar
+        $kosts_semua = Kost::orderBy('nomor_kamar', 'asc')->get();
+
+        // Kirim semua data yang dibutuhkan ke satu view 'home'
+        return view('home', compact('kosts_tersedia', 'kosts_semua'));
     }
 }
+

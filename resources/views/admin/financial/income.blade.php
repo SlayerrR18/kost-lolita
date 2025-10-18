@@ -1,5 +1,5 @@
 {{-- resources/views/admin/financial/pemasukan.blade.php --}}
-@extends('layouts.main')
+@extends('layouts.admin')
 
 @section('title', 'Pemasukan')
 

@@ -1,5 +1,5 @@
 {{-- resources/views/admin/financial/pending-orders.blade.php (Improved V3) --}}
-@extends('layouts.main')
+@extends('layouts.admin')
 
 @section('title', 'Konfirmasi Pesanan')
 

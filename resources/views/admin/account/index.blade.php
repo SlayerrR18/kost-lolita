@@ -1,5 +1,5 @@
 {{-- filepath: resources/views/admin/account/index.blade.php --}}
-@extends('layouts.main')
+@extends('layouts.admin')
 
 @push('css')
 <link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css">

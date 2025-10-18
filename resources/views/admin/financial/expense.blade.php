@@ -1,5 +1,5 @@
 {{-- resources/views/admin/financial/pengeluaran.blade.php --}}
-@extends('layouts.main')
+@extends('layouts.admin')
 
 @section('title', 'Pengeluaran')
 

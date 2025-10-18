@@ -1,5 +1,5 @@
 {{-- resources/views/admin/reports/index.blade.php --}}
-@extends('layouts.main')
+@extends('layouts.admin')
 
 @section('title','Report Penghuni')
 

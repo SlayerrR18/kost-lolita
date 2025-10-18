@@ -132,7 +132,7 @@
                         <i data-feather="x"></i>
                         Batal
                     </button>
-                    <form action="{{ route('admin.logout') }}" method="POST">
+                    <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit" class="btn btn-danger">
                             <i data-feather="log-out"></i>

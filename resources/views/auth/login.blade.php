@@ -5,10 +5,12 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">{{ __('Login') }}</div>
+                {{-- Judul dinamis: Cek apakah URL mengandung 'admin' --}}
+                <div class="card-header">{{ Request::is('admin/login') ? 'Admin Login' : 'Login' }}</div>
 
                 <div class="card-body">
-                    <form method="POST" action="{{ route('login') }}">
+                    {{-- Action form dinamis: Mengarah ke admin.login atau login biasa --}}
+                    <form method="POST" action="{{ Request::is('admin/login') ? route('admin.login') : route('login') }}">
                         @csrf
 
                         <div class="row mb-3">
@@ -57,7 +59,7 @@
                                     {{ __('Login') }}
                                 </button>
 
-                                @if (Route::has('password.request'))
+                                @if (Route::has('password.request') && !Request::is('admin/login'))
                                     <a class="btn btn-link" href="{{ route('password.request') }}">
                                         {{ __('Forgot Your Password?') }}
                                     </a>
