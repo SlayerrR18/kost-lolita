@@ -1,20 +1,21 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 // AUTH & HOME
 use App\Http\Controllers\Auth\AdminLoginController;
-use App\Http\Controllers\Auth\UserLogoutController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\MessageController;
 
-// ADMIN (PAKAI HURUF BESAR!)
+// ADMIN
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\KostController;
 use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\FinancialController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\BadgeController;
 
 // USER
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
@@ -22,126 +23,104 @@ use App\Http\Controllers\User\ContractController;
 use App\Http\Controllers\User\HistoryController;
 use App\Http\Controllers\User\ReportController as UserReportController;
 
+
 /*
 |--------------------------------------------------------------------------
-| Public pages
+| Halaman Publik
 |--------------------------------------------------------------------------
 */
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/kamar', [HomeController::class, 'kamarContact'])->name('kamar');
 
-/*
-|--------------------------------------------------------------------------
-| Order (umum)
-|--------------------------------------------------------------------------
-*/
-Route::get('/order/create/{kost}', [OrderController::class, 'create'])->name('order.create');
-Route::post('/order/store', [OrderController::class, 'store'])->name('order.store');
-Route::get('/order/{order}/confirmation', [OrderController::class, 'confirmation'])->name('order.confirmation');
 
 /*
 |--------------------------------------------------------------------------
-| Admin auth
+| Rute Otentikasi Pengguna
 |--------------------------------------------------------------------------
+| Ini akan membuat rute /login, /register, /logout, dll. untuk pengguna biasa.
+| Perintah ini sekarang akan berfungsi setelah Anda menjalankan perintah di terminal.
 */
-Route::get('admin/login', [AdminLoginController::class, 'showLoginForm'])->name('login');
-Route::post('admin/login', [AdminLoginController::class, 'login']);
-Route::post('admin/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
+Auth::routes(['verify' => true]);
+
 
 /*
 |--------------------------------------------------------------------------
-| Admin
+| Otentikasi & Logout Admin
+|--------------------------------------------------------------------------
+| Dipindahkan ke /admin/login untuk menghindari konflik dengan login pengguna.
+*/
+Route::prefix('admin')->group(function () {
+    Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
+    Route::post('/login', [AdminLoginController::class, 'login']);
+    Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Pesan Kamar (Order)
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin'])->group(function () {
+Route::middleware(['auth'])->group(function () {
+    Route::get('/order/create/{kost}', [OrderController::class, 'create'])->name('order.create');
+    Route::post('/order/store', [OrderController::class, 'store'])->name('order.store');
+    Route::get('/order/confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
+});
 
-    // Dashboard
+
+/*
+|--------------------------------------------------------------------------
+| Rute Grup Admin
+|--------------------------------------------------------------------------
+*/
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-
-    //Badge
-
-      Route::get('/badges', [BadgeController::class, 'index'])->name('badges');
-
-    // Kost (pakai route terpisah sesuai filemu)
-    Route::get('kost', [KostController::class, 'index'])->name('kost.index');
-    Route::get('kost/create', [KostController::class, 'create'])->name('kost.create');
-    Route::get('kost/{kost}/edit', [KostController::class, 'edit'])->name('kost.edit');
-    Route::put('kost/{kost}', [KostController::class, 'update'])->name('kost.update');
-    Route::post('kost/store', [KostController::class, 'store'])->name('kost.store');
-    Route::delete('kost/{kost}', [KostController::class, 'destroy'])->name('kost.destroy');
-
-    // Laporan (report) admin
+    Route::get('/badges', [BadgeController::class, 'index'])->name('badges');
+    Route::resource('kost', KostController::class);
     Route::resource('reports', AdminReportController::class);
+    Route::resource('account', AccountController::class);
 
-    // Manajemen akun user
-    Route::prefix('account')->name('account.')->group(function () {
-        Route::get('/', [AccountController::class, 'index'])->name('index');
-        Route::get('create', [AccountController::class, 'create'])->name('create');
-        Route::post('store', [AccountController::class, 'store'])->name('store');
-        Route::get('{user}/edit', [AccountController::class, 'edit'])->name('edit');
-        Route::put('{user}', [AccountController::class, 'update'])->name('update');
-        Route::delete('{user}', [AccountController::class, 'destroy'])->name('destroy');
-    });
-
-    // Keuangan (SATU grup saja, tidak dobel-dobel)
     Route::prefix('financial')->name('financial.')->group(function () {
-        // Daftar transaksi + ringkasan
         Route::get('/', [FinancialController::class, 'index'])->name('index');
         Route::get('/income', [FinancialController::class, 'income'])->name('income');
         Route::get('/expense', [FinancialController::class, 'expense'])->name('expense');
-
-        // CRUD transaksi
         Route::post('/store', [FinancialController::class, 'store'])->name('store');
         Route::delete('/{financial}', [FinancialController::class, 'destroy'])->name('destroy');
-
-        // Order pending & aksi admin
         Route::get('/pending-orders', [FinancialController::class, 'pendingOrders'])->name('pending-orders');
         Route::post('/orders/{order}/confirm', [FinancialController::class, 'confirmOrder'])->name('confirm-order');
-        Route::post('/orders/{order}/reject',  [FinancialController::class, 'rejectOrder'])->name('reject-order');
+        Route::post('/orders/{order}/reject', [FinancialController::class, 'rejectOrder'])->name('reject-order');
     });
-
-    /*
-     * OPSIONAL: alias route lama supaya view lama tidak rusak.
-     * Kalau kamu sudah memigrasikan semua view ke nama 'admin.financial.*',
-     * BLOK INI BOLEH DIHAPUS.
-     */
-    Route::post('/orders/{order}/confirm', [FinancialController::class, 'confirmOrder'])->name('orders.confirm');
-    Route::post('/orders/{order}/reject',  [FinancialController::class, 'rejectOrder'])->name('orders.reject');
-
 });
+
 
 /*
 |--------------------------------------------------------------------------
-| User
+| Rute Grup Pengguna (User)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth','role:user'])->group(function () {
-    Route::get('/user/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
-    Route::get('/user/history',   [HistoryController::class, 'index'])->name('user.history.index');
-});
+Route::prefix('user')->name('user.')->middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
 
-// Kontrak user (butuh login saja, role bebas kalau kamu izinkan)
-Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
-    // Contract routes
     Route::controller(ContractController::class)->group(function() {
         Route::get('/contract', 'index')->name('contract');
         Route::put('/contract/update-info', 'updateInfo')->name('contract.update-info');
         Route::get('available-rooms', 'availableRooms')->name('contract.available-rooms');
         Route::post('/contract/extend', 'extend')->name('contract.extend');
     });
+
+    Route::resource('reports', UserReportController::class);
 });
 
-// Pesan (chat)
+
+/*
+|--------------------------------------------------------------------------
+| Fitur Umum (butuh login)
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth'])->group(function () {
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
     Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
 });
 
-// Report user
-Route::prefix('user')->name('user.')->middleware('auth')->group(function () {
-    Route::resource('reports', UserReportController::class);
-});
-
-// Logout user
-Route::post('/logout', [UserLogoutController::class, 'logout'])->name('user.logout');

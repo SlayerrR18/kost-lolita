@@ -2,25 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Kost;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
     public function index()
     {
-        $kosts = Kost::all();
-        return view('home', compact('kosts'));
-    }
-
-    public function about()
-    {
-        return view('about');
-    }
-
-    public function kamarContact()
-    {
-        $kosts = Kost::all();
-        return view('kamar_contact', compact('kosts'));
+        return view('home');
     }
 }
