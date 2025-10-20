@@ -67,71 +67,161 @@ h6,
 }
 
 /*--------------------------------------------------------------
-# Navbar
+# Navbar (Glacia Style Improvement)
 --------------------------------------------------------------*/
-.navbar {
-    transition: all 0.3s ease;
+.custom-navbar {
+    background: transparent !important;
+    padding: 1.5rem 0;
+    transition: all 0.4s ease-in-out;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-navbar.scrolled {
     padding: 1rem 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border-bottom: none;
 }
 
-.navbar.scrolled {
-    padding: 0.5rem 0;
-    background: rgba(0, 0, 0, 0.95);
+.custom-navbar .navbar-brand,
+.custom-navbar .nav-link,
+.custom-navbar .navbar-toggler-icon,
+.custom-navbar .nav-dot,
+.custom-navbar .user-dropdown-nav i,
+.custom-navbar .user-dropdown-nav a {
+    color: var(--white-color) !important;
 }
 
-.navbar-brand {
-    font-weight: 700;
-    font-size: 1.5rem;
+.custom-navbar.scrolled .navbar-brand,
+.custom-navbar.scrolled .nav-link:not(.active),
+.custom-navbar.scrolled .navbar-toggler-icon,
+.custom-navbar.scrolled .nav-dot,
+.custom-navbar.scrolled .user-dropdown-nav i,
+.custom-navbar.scrolled .user-dropdown-nav a {
+    color: var(--dark-color) !important;
 }
 
-.nav-link {
+.custom-navbar .glacia-logo {
+    font-weight: 800;
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+    font-family: var(--font-primary);
+}
+
+.custom-navbar .navbar-logo {
+    height: 35px;
+    width: auto;
+    vertical-align: middle;
+}
+
+.custom-navbar.scrolled .navbar-logo {
+    opacity: 0.95;
+    transition: opacity 0.3s ease;
+}
+
+.custom-navbar .nav-link {
     font-weight: 500;
+    font-size: 0.95rem;
     padding: 0.5rem 1rem !important;
+    opacity: 0.8;
+}
+
+.custom-navbar .nav-link:hover {
+    opacity: 1;
+    color: var(--secondary-color) !important;
+}
+
+.custom-navbar .nav-dot {
+    font-size: 8px;
+    vertical-align: middle;
+    display: none;
+}
+
+.custom-navbar .nav-link.active {
+    font-weight: 700 !important;
+    opacity: 1;
+}
+
+.custom-navbar .nav-link.active .nav-dot {
+    display: inline-block;
+    color: var(--secondary-color) !important;
+}
+
+.user-toggle-button {
+    border: none !important;
+    padding: 0.6rem 1rem !important;
+    border-radius: 50px;
     transition: all 0.3s ease;
+    font-size: 0.95rem;
 }
 
-.nav-link:hover {
-    color: var(--primary-color) !important;
+.custom-navbar .user-toggle-button:hover,
+.custom-navbar .user-toggle-button.show {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
-.nav-link.active {
-    color: var(--primary-color) !important;
+.custom-navbar.scrolled .user-toggle-button:hover,
+.custom-navbar.scrolled .user-toggle-button.show {
+    background-color: rgba(44, 62, 80, 0.1);
 }
 
-/* User Avatar */
-.avatar-circle {
-    width: 32px;
-    height: 32px;
-    background: var(--primary-color);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 600;
-    font-size: 1rem;
+.dropdown-icon {
+    font-size: 0.7rem;
+    transition: transform 0.3s ease;
 }
 
-/* Dropdown Styling */
+.user-toggle-button[aria-expanded="true"] .dropdown-icon {
+    transform: rotate(180deg);
+}
+
+@media (max-width: 991.98px) {
+    .custom-navbar {
+        background: rgba(44, 62, 80, 0.95) !important;
+        padding: 1rem 0;
+        backdrop-filter: none;
+        border-bottom: none;
+    }
+    .custom-navbar .navbar-collapse {
+        margin-top: 0.5rem;
+        background-color: rgba(44, 62, 80, 0.95);
+        border-radius: 0 0 10px 10px;
+        padding: 1rem;
+    }
+    .custom-navbar .nav-link,
+    .custom-navbar .navbar-brand {
+        color: var(--white-color) !important;
+    }
+    .custom-navbar.scrolled .nav-link.active .nav-dot {
+        color: var(--secondary-color) !important;
+    }
+}
+
+/*--------------------------------------------------------------
+# Dropdown Styling (Improved Glacia Style)
+--------------------------------------------------------------*/
 .dropdown-menu {
     border: none;
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     padding: 0.5rem;
-    margin-top: 0.5rem;
+    margin-top: 0.8rem !important;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
 
 .dropdown-item {
     padding: 0.75rem 1rem;
     border-radius: 8px;
     font-weight: 500;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .dropdown-item:hover {
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(26, 127, 90, 0.1);
+    color: var(--dark-color) !important;
 }
 
 .dropdown-item.text-danger:hover {
@@ -140,15 +230,15 @@ h6,
 
 .dropdown-divider {
     margin: 0.5rem 0;
+    opacity: 0.1;
 }
-
 /*--------------------------------------------------------------
 # Hero Section
 --------------------------------------------------------------*/
 .hero-section {
     height: 100vh;
     background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-        url("../img/bg-1.jpg") no-repeat center center;
+        url("../img/home-1.jpg") no-repeat center center;
     background-size: cover;
     position: relative;
 }
@@ -215,7 +305,7 @@ h6,
 --------------------------------------------------------------*/
 .fasilitas-section.parallax-bg {
     background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-        url("../img/bg-5.jpg") no-repeat center center fixed;
+        url("../img/fasilitas.jpg") no-repeat center center fixed;
     background-size: cover;
 }
 

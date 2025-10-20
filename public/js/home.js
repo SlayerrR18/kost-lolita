@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
 
     // 1. Navbar Scroll Effect
-    const navbar = document.querySelector('.navbar');
+    const navbar = document.querySelector('.custom-navbar');
     if (navbar) {
         window.addEventListener('scroll', () => {
             if (window.scrollY > 50) {

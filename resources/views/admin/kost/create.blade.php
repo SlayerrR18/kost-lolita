@@ -414,17 +414,22 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="foto">Foto Kamar</label>
+                <label class="form-label" for="foto">Foto Kamar <span class="text-danger">*</span></label>
                 <div class="file-upload-container">
                     <div class="file-input-wrapper">
-                        <div class="file-input-trigger">
+                        {{-- Input File Utama (Disembunyikan) --}}
+                        <input type="file" id="foto-uploader" name="foto_files[]" accept="image/*" multiple style="display: none;">
+
+                        <button type="button" class="file-input-trigger w-100" id="file-trigger-button">
                             <i data-feather="upload" class="me-2"></i>
-                            <span id="file-label-text">Pilih Foto</span>
-                        </div>
-                        <input type="file" id="foto" name="foto[]" accept="image/*" multiple>
+                            <span id="file-label-text">Pilih Foto (Min. 1)</span>
+                        </button>
                     </div>
                     <small class="text-muted">Pilih minimal 1 foto. Format: JPG, PNG (maks. 5MB per file)</small>
-                    <div id="photo-preview-grid" class="photo-preview-grid"></div>
+
+                    {{-- Kontainer Preview --}}
+                    <div id="photo-preview-grid" class="photo-preview-grid">
+                        </div>
                 </div>
                 @error('foto')
                     <div class="text-danger small mt-2">{{ $message }}</div>
@@ -446,64 +451,121 @@
     </div>
 </div>
 
+@push('js')
 <script>
-function tambahFasilitas(button) {
-    const fasilitasList = document.getElementById('fasilitas-list');
-    const newFasilitas = document.createElement('div');
-    newFasilitas.className = 'fasilitas-container';
-    newFasilitas.innerHTML = `
-        <input type="text" name="fasilitas[]" class="form-control" placeholder="Masukkan nama fasilitas" required>
-        <button type="button" class="btn-action-icon btn-remove-fasilitas" onclick="this.closest('.fasilitas-container').remove()">
-            <i data-feather="minus"></i>
-        </button>
-    `;
-    fasilitasList.appendChild(newFasilitas);
-    feather.replace();
-}
+    // Inisialisasi DataTransfer untuk mengelola file yang akan di-submit
+    const dataTransfer = new DataTransfer();
 
-document.addEventListener('DOMContentLoaded', function() {
-    feather.replace();
-
-    // Event listener untuk preview foto
-    const fotoInput = document.getElementById('foto');
-    const previewGrid = document.getElementById('photo-preview-grid');
-    const fileLabelText = document.getElementById('file-label-text');
-
-    if (fotoInput && previewGrid) {
-        fotoInput.addEventListener('change', function(e) {
-            previewGrid.innerHTML = ''; // Hapus preview lama
-            const files = e.target.files;
-
-            if (files.length > 0) {
-                fileLabelText.textContent = `${files.length} file dipilih`;
-            } else {
-                fileLabelText.textContent = 'Pilih Foto';
-            }
-
-            Array.from(files).forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const previewItem = document.createElement('div');
-                    previewItem.className = 'photo-preview-item';
-                    previewItem.innerHTML = `
-                        <img src="${e.target.result}" alt="Preview Foto">
-                        <button type="button" class="remove-btn" onclick="removePhotoPreview(this)">
-                            <i data-feather="x"></i>
-                        </button>
-                    `;
-                    previewGrid.appendChild(previewItem);
-                    feather.replace();
-                }
-                reader.readAsDataURL(file);
-            });
-        });
+    // Fungsi untuk menambah Fasilitas (Sudah Bagus, hanya sedikit disesuaikan dengan feather.replace)
+    function tambahFasilitas(button) {
+        const fasilitasList = document.getElementById('fasilitas-list');
+        const newFasilitas = document.createElement('div');
+        newFasilitas.className = 'fasilitas-container';
+        newFasilitas.innerHTML = `
+            <input type="text" name="fasilitas[]" class="form-control" placeholder="Masukkan nama fasilitas" required>
+            <button type="button" class="btn-action-icon btn-remove-fasilitas" onclick="removeFasilitas(this)">
+                <i data-feather="minus"></i>
+            </button>
+        `;
+        fasilitasList.appendChild(newFasilitas);
+        feather.replace();
     }
 
-    window.removePhotoPreview = function(button) {
-        // Logika untuk menghapus preview (belum menghapus file dari input)
-        // Ini lebih untuk UX, file akan dihandle di server
+    function removeFasilitas(button) {
+        button.closest('.fasilitas-container').remove();
+    }
+
+    // Fungsi untuk menghapus file dari DataTransfer (Kunci UX File Upload)
+    function removePhotoPreview(button, fileName) {
+        // Hapus preview item dari DOM
         button.closest('.photo-preview-item').remove();
-    };
-});
+
+        // Hapus file dari DataTransfer
+        let files = dataTransfer.files;
+        for (let i = 0; i < files.length; i++) {
+            if (files[i].name === fileName) {
+                dataTransfer.items.remove(i);
+                break;
+            }
+        }
+
+        // Update input file utama (yang akan di-submit)
+        document.getElementById('foto-uploader').files = dataTransfer.files;
+
+        // Update teks label
+        const fileLabelText = document.getElementById('file-label-text');
+        const filesCount = dataTransfer.files.length;
+        if (filesCount > 0) {
+            fileLabelText.textContent = `${filesCount} file dipilih`;
+        } else {
+            fileLabelText.textContent = 'Pilih Foto (Min. 1)';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        feather.replace();
+
+        const fotoUploader = document.getElementById('foto-uploader');
+        const previewGrid = document.getElementById('photo-preview-grid');
+        const fileLabelText = document.getElementById('file-label-text');
+        const fileTriggerButton = document.getElementById('file-trigger-button');
+
+        // Mengaitkan tombol trigger dengan input file tersembunyi
+        if (fileTriggerButton) {
+            fileTriggerButton.addEventListener('click', () => {
+                fotoUploader.click();
+            });
+        }
+
+        if (fotoUploader && previewGrid) {
+            fotoUploader.addEventListener('change', function(e) {
+                // Tambahkan file yang baru dipilih ke DataTransfer
+                Array.from(e.target.files).forEach(file => {
+                    // Cek duplikasi (berdasarkan nama file) sebelum ditambahkan
+                    let isDuplicate = false;
+                    for (let i = 0; i < dataTransfer.files.length; i++) {
+                        if (dataTransfer.files[i].name === file.name) {
+                            isDuplicate = true;
+                            break;
+                        }
+                    }
+                    if (!isDuplicate) {
+                        dataTransfer.items.add(file);
+                    }
+                });
+
+                // Tampilkan semua preview dari DataTransfer
+                previewGrid.innerHTML = '';
+                Array.from(dataTransfer.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const previewItem = document.createElement('div');
+                        previewItem.className = 'photo-preview-item';
+                        previewItem.innerHTML = `
+                            <img src="${e.target.result}" alt="Preview Foto">
+                            <button type="button" class="remove-btn" onclick="removePhotoPreview(this, '${file.name}')">
+                                <i data-feather="x"></i>
+                            </button>
+                        `;
+                        previewGrid.appendChild(previewItem);
+                        feather.replace();
+                    }
+                    reader.readAsDataURL(file);
+                });
+
+                // Update input file utama (penting untuk submit)
+                e.target.files = dataTransfer.files;
+
+                // Update teks label
+                const filesCount = dataTransfer.files.length;
+                if (filesCount > 0) {
+                    fileLabelText.textContent = `${filesCount} file dipilih`;
+                } else {
+                    fileLabelText.textContent = 'Pilih Foto (Min. 1)';
+                }
+            });
+        }
+    });
 </script>
+@endpush
 @endsection

@@ -120,8 +120,8 @@
             </div>
             <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="400">
                 <div class="fasilitas-item">
-                    <i class="fas fa-tshirt fa-3x mb-3"></i>
-                    <h5 class="fw-bold">Layanan Laundry</h5>
+                    <i class="fas fa-square-parking fa-3x mb-3"></i>
+                    <h5 class="fw-bold">Parkir Mobil</h5>
                 </div>
             </div>
         </div>
