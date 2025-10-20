@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="row min-vh-100">
         <!-- Kolom Gambar Latar Belakang -->
-        <div class="col-lg-7 col-md-6 d-none d-md-block" style="background-image: url('{{ asset('img/bg-5.jpg') }}'); background-size: cover; background-position: center;">
+        <div class="col-lg-7 col-md-6 d-none d-md-block" style="background-image: url('{{ asset('img/order.jpg') }}'); background-size: cover; background-position: center;">
         </div>
 
         <!-- Kolom Form -->
