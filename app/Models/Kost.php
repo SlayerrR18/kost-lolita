@@ -46,6 +46,39 @@ class Kost extends Model
         $this->attributes['fasilitas'] = is_array($value) ? json_encode($value) : $value;
     }
 
+    public function getFotoAttribute($value)
+    {
+        // Jika value kosong, return array kosong
+        if (empty($value)) {
+            return [];
+        }
+
+        // Jika value sudah berbentuk array, return langsung
+        if (is_array($value)) {
+            return $value;
+        }
+
+        // Jika value string JSON, decode
+        try {
+            $decoded = json_decode($value, true);
+            return $decoded ?: [];
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    public function setFotoAttribute($value)
+    {
+        // Jika input array, encode ke JSON
+        if (is_array($value)) {
+            $this->attributes['foto'] = json_encode($value);
+        }
+        // Jika input string (JSON atau biasa), simpan apa adanya
+        else {
+            $this->attributes['foto'] = $value;
+        }
+    }
+
     public function orders()
     {
         return $this->hasMany(Order::class);

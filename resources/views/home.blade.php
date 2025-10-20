@@ -24,29 +24,60 @@
                     <div class="card kost-card h-100 shadow-sm border-0 overflow-hidden">
                         <div class="kost-card-img-container">
                             @php
-                                $fotoUrl = asset('img/bg-1.jpg'); // Gambar default
-                                if ($kost->foto) {
-                                    $fotoData = is_string($kost->foto) ? json_decode($kost->foto, true) : $kost->foto;
-                                    if (is_array($fotoData) && !empty($fotoData)) {
-                                        $fotoUrl = asset('storage/' . $fotoData[0]);
-                                    } elseif (is_string($kost->foto) && !is_null(json_decode($kost->foto))) {
-                                        $fotoData = json_decode($kost->foto, true);
-                                        if(is_array($fotoData) && !empty($fotoData)) $fotoUrl = asset('storage/' . $fotoData[0]);
-                                    } elseif (is_string($kost->foto)) {
-                                        $fotoUrl = asset('storage/' . $kost->foto);
-                                    }
-                                }
+                                $photos = $kost->foto; // Akan memanggil accessor getFotoAttribute
+                                $firstPhoto = !empty($photos) && is_array($photos) ? $photos[0] : null;
                             @endphp
-                            <img src="{{ $fotoUrl }}" class="card-img-top" alt="Kamar {{ $kost->nomor_kamar }}">
-                            <div class="status-badge">Tersedia</div>
+
+                            @if($firstPhoto)
+                                <img src="{{ asset('storage/' . $firstPhoto) }}"
+                                     class="card-img-top"
+                                     alt="Kamar {{ $kost->nomor_kamar }}"
+                                     onerror="this.src='{{ asset('img/default-room.jpg') }}'">
+                            @else
+                                <img src="{{ asset('img/default-room.jpg') }}"
+                                     class="card-img-top"
+                                     alt="Default Room">
+                            @endif
+
+                            @if($kost->status === 'Kosong')
+                                <div class="status-badge">Tersedia</div>
+                            @endif
                         </div>
                         <div class="card-body d-flex flex-column p-4">
-                            <h5 class="card-title fw-bold">{{ $kost->nama_kamar ?? 'Kamar ' . $kost->nomor_kamar }}</h5>
-                            <p class="card-price">Rp. {{ number_format($kost->harga, 0, ',', '.') }} <span class="text-muted fw-normal fs-6">/ bulan</span></p>
-                            <p class="card-text text-muted small flex-grow-1">{{ Str::limit($kost->keterangan, 75) }}</p>
-                            <a href="{{ route('order.create', $kost->id) }}" class="btn btn-primary rounded-pill mt-3">
-                                Pesan Sekarang <i class="fas fa-arrow-right ms-2"></i>
-                            </a>
+                            <h5 class="card-title fw-bold">Kamar {{ $kost->nomor_kamar }}</h5>
+                            <p class="card-price">
+                                Rp {{ number_format($kost->harga, 0, ',', '.') }}
+                                <span class="text-muted fw-normal fs-6">/ bulan</span>
+                            </p>
+
+                            @if(!empty($kost->fasilitas))
+                                <div class="facilities-list mb-3">
+                                    @foreach($kost->fasilitas as $fasilitas)
+                                        <span class="facility-badge">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            {{ $fasilitas }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            @auth
+                                @if($kost->status == 'Kosong')
+                                    <a href="{{ route('order.create', $kost->id) }}"
+                                       class="btn btn-primary rounded-pill mt-auto">
+                                        <i class="fas fa-key me-2"></i>Pesan Sekarang
+                                    </a>
+                                @else
+                                    <button class="btn btn-secondary rounded-pill mt-auto" disabled>
+                                        <i class="fas fa-lock me-2"></i>Sudah Terisi
+                                    </button>
+                                @endif
+                            @else
+                                <a href="{{ route('login') }}"
+                                   class="btn btn-outline-primary rounded-pill mt-auto">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login untuk Memesan
+                                </a>
+                            @endauth
                         </div>
                     </div>
                 </div>
@@ -170,6 +201,5 @@
         </div>
     </div>
 </section>
-
 @endsection
 

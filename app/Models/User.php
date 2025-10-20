@@ -82,4 +82,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Message::class, 'admin_id');
     }
+
+    public function hasApprovedOrder()
+    {
+        return $this->orders()
+            ->where('status', 'confirmed')
+            ->exists();
+    }
 }

@@ -17,8 +17,7 @@ class HomeController extends Controller
         $kosts_tersedia = Kost::where('status', 'Kosong')->latest()->take(6)->get();
 
         // Ambil semua data kost untuk bagian "Hubungi Kami" / Daftar semua kamar
-        // Diurutkan berdasarkan nomor kamar
-        $kosts_semua = Kost::orderBy('nomor_kamar', 'asc')->get();
+        $kosts_semua = Kost::all();
 
         // Kirim semua data yang dibutuhkan ke satu view 'home'
         return view('home', compact('kosts_tersedia', 'kosts_semua'));

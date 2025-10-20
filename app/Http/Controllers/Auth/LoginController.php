@@ -51,16 +51,25 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, $user)
     {
-        // Check user role and redirect accordingly
+        // Admin redirect
         if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 
+        // Regular user - allow them to browse and order rooms
         if ($user->role === 'user') {
-            return redirect()->route('user.dashboard');
+            // If user trying to access dashboard without approved order
+            if ($request->is('user/dashboard*') && !$user->hasApprovedOrder()) {
+                Auth::logout();
+                return redirect()->route('home')
+                    ->with('warning', 'Anda belum memiliki pesanan yang disetujui.');
+            }
+
+            // Otherwise, let them browse and order
+            return redirect()->intended(route('home'));
         }
 
-        // Fallback redirect if user has no role or an unknown role
+        // Fallback redirect
         return redirect($this->redirectTo);
     }
 }

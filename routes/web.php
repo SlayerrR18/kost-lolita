@@ -52,7 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
 
     // Grup Rute Pengguna (User)
-    Route::prefix('user')->name('user.')->middleware('role:user')->group(function () {
+    Route::middleware(['approved.order'])->prefix('user')->name('user.')->group(function () {
         Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
         Route::get('/history',   [HistoryController::class, 'index'])->name('history.index');
         Route::resource('reports', UserReportController::class);

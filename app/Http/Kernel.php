@@ -65,4 +65,16 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'role' => \App\Http\Middleware\CheckRole::class, // Middleware untuk cek role
     ];
+
+    /**
+     * The application's route middleware.
+     *
+     * These middleware may be assigned to specific routes.
+     *
+     * @var array<string, class-string|string>
+     */
+    protected $routeMiddleware = [
+        // ...existing middleware...
+        'approved.order' => \App\Http\Middleware\HasApprovedOrder::class,
+    ];
 }

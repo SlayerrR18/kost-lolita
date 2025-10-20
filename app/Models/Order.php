@@ -21,19 +21,34 @@ class Order extends Model
     public const TYPE_EXTENSION  = 'extension';
 
     protected $fillable = [
-        'user_id','kost_id','name','email','phone','alamat',
-        'duration','tanggal_masuk','tanggal_keluar','status',
-        'ktp_image','bukti_pembayaran','type','parent_order_id','confirmed_at',
-        'emergency_phone',
-        'ktp_number',
-        'emergency_contact_name',
-        'emergency_contact_relation'
+        'user_id',
+        'kost_id',
+        'name',
+        'email',
+        'phone',
+        'alamat',
+        'duration',
+        'tanggal_masuk',
+        'tanggal_keluar',
+        'ktp_image',
+        'bukti_pembayaran',
+        'status',
+        'type'
     ];
 
+    protected $dates = [
+        'tanggal_masuk',
+        'tanggal_keluar',
+        'confirmed_at',
+        'created_at',
+        'updated_at'
+    ];
+
+    // Atau gunakan casts untuk Laravel 8+
     protected $casts = [
-        'tanggal_masuk'  => 'date',
-        'tanggal_keluar' => 'date',
-        'confirmed_at'   => 'datetime',
+        'tanggal_masuk' => 'datetime',
+        'tanggal_keluar' => 'datetime',
+        'confirmed_at' => 'datetime'
     ];
 
     // Kalau sering butuh harga/nomor_kamar, ini membantu menghindari N+1

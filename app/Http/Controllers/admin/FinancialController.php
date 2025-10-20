@@ -11,6 +11,7 @@ use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class FinancialController extends Controller
 {
@@ -128,12 +129,22 @@ class FinancialController extends Controller
             DB::commit();
 
             // 5. Kirim notifikasi WhatsApp (tanpa password)
+            // Convert dates to Carbon instances if they're strings
+            $tanggal_masuk = $order->tanggal_masuk instanceof Carbon
+                ? $order->tanggal_masuk
+                : Carbon::parse($order->tanggal_masuk);
+
+            $tanggal_keluar = $order->tanggal_keluar instanceof Carbon
+                ? $order->tanggal_keluar
+                : Carbon::parse($order->tanggal_keluar);
+
+            // Update message with proper date formatting
             $message = "✅ *Pemesanan Dikonfirmasi*\n\n"
                      . "Halo {$user->name},\n"
                      . "Pesanan Anda untuk kamar *{$kost->nomor_kamar}* telah berhasil kami konfirmasi.\n\n"
                      . "Detail Periode Sewa:\n"
-                     . "Check-in: {$order->tanggal_masuk->format('d M Y')}\n"
-                     . "Check-out: {$order->tanggal_keluar->format('d M Y')}\n\n"
+                     . "Check-in: {$tanggal_masuk->format('d M Y')}\n"
+                     . "Check-out: {$tanggal_keluar->format('d M Y')}\n\n"
                      . "Terima kasih telah memilih Kost Lolita.";
 
             $this->trySendWhatsApp($user->phone, $message);
