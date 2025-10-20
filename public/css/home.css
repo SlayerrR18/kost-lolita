@@ -1,7 +1,8 @@
 :root {
-    --primary-color: #1a7f5a; /* Hijau tua untuk elemen utama */
-    --secondary-color: #16c79a; /* Hijau terang untuk aksen */
-    --dark-color: #2c3e50; /* Abu-abu gelap untuk teks */
+    --primary-color: #1a7f5a;
+    --primary-color-rgb: 26, 127, 90;
+    --secondary-color: #16c79a;
+    --dark-color: #2c3e50;
     --light-color: #f8f9fa;
     --white-color: #ffffff;
     --font-primary: "Playfair Display", serif;
@@ -66,8 +67,23 @@ h6,
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
+.btn-outline-primary {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    padding: 12px 30px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(var(--primary-color-rgb), 0.2);
+}
+
 /*--------------------------------------------------------------
-# Navbar (Glacia Style Improvement)
+# Navbar (KODE INI SUDAH BAGUS, DIBIARKAN)
 --------------------------------------------------------------*/
 .custom-navbar {
     background: transparent !important;
@@ -103,6 +119,7 @@ h6,
     color: var(--dark-color) !important;
 }
 
+/* ... (Sisa kode Navbar dan Dropdown tetap sama) ... */
 .custom-navbar .glacia-logo {
     font-weight: 800;
     font-size: 1.6rem;
@@ -232,6 +249,7 @@ h6,
     margin: 0.5rem 0;
     opacity: 0.1;
 }
+
 /*--------------------------------------------------------------
 # Hero Section
 --------------------------------------------------------------*/
@@ -248,65 +266,210 @@ h6,
 }
 
 /*--------------------------------------------------------------
-# Kamar Section
+# Kamar Card (NEW ELEGANT STYLE)
 --------------------------------------------------------------*/
 .kamar-section {
     background-color: var(--white-color);
 }
 
 .kost-card {
-    transition: transform 0.3s ease;
-    border-radius: 15px !important;
-}
-
-.kost-card:hover {
-    transform: translateY(-10px);
-}
-
-.kost-card-img-container {
-    position: relative;
-    height: 200px;
+    background: var(--white-color);
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     overflow: hidden;
 }
 
-.kost-card-img-container img {
+.kost-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Image Container */
+.kost-card-img-container {
+    position: relative;
+    height: 250px;
+    overflow: hidden;
+}
+
+/* -- GAMBAR TUNGGAL (JIKA CAROUSEL TIDAK ADA) -- */
+.kost-card-img-container > img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    transition: transform 0.4s ease;
 }
 
-.kost-card:hover .kost-card-img-container img {
-    transform: scale(1.1);
+.kost-card:hover .kost-card-img-container > img {
+    transform: scale(1.05);
 }
 
+/* -- PERUBAHAN 2.1: Styling untuk CAROUSEL di dalam Card -- */
+.kost-card .carousel {
+    height: 100%;
+}
+.kost-card .carousel-item {
+    height: 250px; /* Samakan dengan tinggi container */
+}
+.kost-card .carousel-item img {
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+.kost-card:hover .carousel-item img {
+    transform: scale(1.05); /* Efek zoom tetap ada */
+}
+
+/* Styling Indicators (titik-titik) */
+.kost-card .carousel-indicators {
+    margin-bottom: 0.5rem; /* Naikkan sedikit dari dasar */
+}
+.kost-card .carousel-indicators [data-bs-target] {
+    width: 8px; /* Perkecil ukuran */
+    height: 8px;
+    border-radius: 100%;
+    background-color: #fff;
+    opacity: 0.7;
+    border: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); /* Shadow agar terlihat di foto terang */
+}
+.kost-card .carousel-indicators .active {
+    opacity: 1;
+}
+/* -- AKHIR DARI STYLING CAROUSEL -- */
+
+/* Badges */
 .status-badge {
     position: absolute;
     top: 1rem;
-    right: 1rem;
-    background: rgba(22, 163, 74, 0.9);
-    color: white;
-    padding: 0.5rem 1rem;
+    left: 1rem;
+    background: var(--primary-color);
+    color: var(--white-color);
+    padding: 0.4rem 0.8rem;
     border-radius: 50px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    backdrop-filter: blur(4px);
+    font-weight: 700;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 10px rgba(var(--primary-color-rgb), 0.3);
+    z-index: 2; /* Pastikan di atas gambar carousel */
 }
 
-.card-price {
-    color: #16a34a;
-    font-size: 1.25rem;
+.rating-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: var(--white-color);
+    color: var(--dark-color);
+    border-radius: 50px;
+    padding: 0.4rem 0.75rem;
     font-weight: 700;
-    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    z-index: 2; /* Pastikan di atas gambar carousel */
+}
+
+.rating-badge .fa-star {
+    color: #facc15;
+}
+
+/* Card Body */
+.kost-card .card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.info-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-family: var(--font-primary);
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
+}
+
+.card-location {
+    font-size: 0.9rem;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.card-location i {
+    font-size: 0.8rem;
+}
+
+/* Price Pill */
+.price-pill {
+    flex-shrink: 0;
+    white-space: nowrap;
+    background: rgba(var(--primary-color-rgb), 0.1);
+    color: var(--primary-color);
+    font-weight: 700;
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: baseline;
+}
+
+.price-pill .unit {
+    color: var(--primary-color);
+    opacity: 0.8;
+    font-weight: 500;
+    font-size: 0.85rem;
+    margin-left: 0.25rem;
+}
+
+/* Amenities */
+.amenities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.amenities-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.amenities-item i {
+    color: var(--primary-color);
+    width: 18px;
+    text-align: center;
 }
 
 /*--------------------------------------------------------------
-# Fasilitas Section (Parallax)
+# Fasilitas Section
 --------------------------------------------------------------*/
 .fasilitas-section.parallax-bg {
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-        url("../img/fasilitas.jpg") no-repeat center center fixed;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+        url("../img/fasilitas.jpg") no-repeat center center;
     background-size: cover;
+    position: relative;
+}
+
+/* PERUBAHAN 3: Override warna font H2 dan P di dalam .fasilitas-section */
+.fasilitas-section .section-title h2,
+.fasilitas-section .section-title p {
+    color: var(--white-color); /* Paksa warna jadi putih */
 }
 
 .fasilitas-item i {
@@ -328,6 +491,10 @@ h6,
 /*--------------------------------------------------------------
 # Kontak & Daftar Kamar Section
 --------------------------------------------------------------*/
+.kontak-section {
+    background-color: var(--light-color);
+}
+
 .kontak-info p {
     display: flex;
     align-items: center;
@@ -339,11 +506,11 @@ h6,
 }
 
 .table-hover tbody tr:hover {
-    background-color: #f1f1f1;
+    background-color: rgba(var(--primary-color-rgb), 0.05);
 }
 
 /*--------------------------------------------------------------
-# Animations (AOS - Animate on Scroll)
+# Animations (AOS)
 --------------------------------------------------------------*/
 [data-aos="fade-up"] {
     transform: translateY(50px);
@@ -361,4 +528,42 @@ h6,
     transform: translateX(50px);
     opacity: 0;
     transition-property: transform, opacity;
+}
+
+/*--------------------------------------------------------------
+# Responsive Design
+--------------------------------------------------------------*/
+@media (max-width: 767.98px) {
+    .hero-section {
+        height: 90vh;
+    }
+    .hero-section h1,
+    .display-3 {
+        font-size: 2.5rem;
+    }
+
+    .display-5 {
+        font-size: 2rem;
+    }
+
+    .section-padding {
+        padding: 60px 0;
+    }
+
+    .fasilitas-item {
+        margin-bottom: 1.5rem;
+    }
+
+    .tentang-section .col-lg-6 {
+        text-align: center;
+    }
+
+    .info-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .price-pill {
+        font-size: 0.95rem;
+    }
 }

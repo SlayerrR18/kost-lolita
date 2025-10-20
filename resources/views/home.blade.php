@@ -2,99 +2,137 @@
 
 @section('container')
 
-{{-- Hero Section --}}
+
 <section class="hero-section d-flex align-items-center justify-content-center text-center text-white" id="home">
     <div class="container" data-aos="fade-up">
         <h1 class="display-3 fw-bold">Temukan Kenyamanan Anda di Kost Lolita</h1>
-        <p class="lead my-4">Hunian eksklusif dengan fasilitas lengkap dan lokasi strategis di jantung Kota Malang.</p>
+        <p class="lead my-4">Hunian eksklusif dengan fasilitas lengkap dan lokasi strategis di Pingiran Kota Ruteng.</p>
         <a href="#kamar" class="btn btn-primary btn-lg rounded-pill px-4">Lihat Pilihan Kamar</a>
     </div>
 </section>
 
-{{-- Kamar Unggulan Section --}}
+
 <section class="kamar-section section-padding" id="kamar">
     <div class="container">
         <div class="section-title text-center" data-aos="fade-up">
             <h2 class="display-5 fw-bold">Kamar Unggulan</h2>
             <p>Pilihan terbaik yang tersedia saat ini, siap untuk Anda tempati.</p>
         </div>
+
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
-            @forelse ($kosts_tersedia as $kost)
-                <div class="col" data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
-                    <div class="card kost-card h-100 shadow-sm border-0 overflow-hidden">
-                        <div class="kost-card-img-container">
-                            @php
-                                $photos = $kost->foto; // Akan memanggil accessor getFotoAttribute
-                                $firstPhoto = !empty($photos) && is_array($photos) ? $photos[0] : null;
-                            @endphp
+            @forelse($kosts_tersedia as $kost)
+            <div class="col" data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
+                <div class="card kost-card h-100">
 
-                            @if($firstPhoto)
-                                <img src="{{ asset('storage/' . $firstPhoto) }}"
-                                     class="card-img-top"
-                                     alt="Kamar {{ $kost->nomor_kamar }}"
-                                     onerror="this.src='{{ asset('img/default-room.jpg') }}'">
-                            @else
-                                <img src="{{ asset('img/default-room.jpg') }}"
-                                     class="card-img-top"
-                                     alt="Default Room">
-                            @endif
+                    <div class="kost-card-img-container">
+                        @php
+                            $photos = $kost->foto;
 
-                            @if($kost->status === 'Kosong')
-                                <div class="status-badge">Tersedia</div>
-                            @endif
-                        </div>
-                        <div class="card-body d-flex flex-column p-4">
-                            <h5 class="card-title fw-bold">Kamar {{ $kost->nomor_kamar }}</h5>
-                            <p class="card-price">
-                                Rp {{ number_format($kost->harga, 0, ',', '.') }}
-                                <span class="text-muted fw-normal fs-6">/ bulan</span>
-                            </p>
+                            $hasPhotos = !empty($photos) && is_array($photos) && count($photos) > 0;
+                        @endphp
 
-                            @if(!empty($kost->fasilitas))
-                                <div class="facilities-list mb-3">
-                                    @foreach($kost->fasilitas as $fasilitas)
-                                        <span class="facility-badge">
-                                            <i class="fas fa-check-circle me-1"></i>
-                                            {{ $fasilitas }}
-                                        </span>
+                        @if($hasPhotos)
+                            <div id="carouselKamar{{ $kost->id }}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+
+                                <div class="carousel-indicators">
+                                    @foreach ($photos as $index => $photo)
+                                        <button type="button" data-bs-target="#carouselKamar{{ $kost->id }}" data-bs-slide-to="{{ $index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : 'false' }}" aria-label="Slide {{ $index + 1 }}"></button>
                                     @endforeach
                                 </div>
-                            @endif
 
+
+                                <div class="carousel-inner">
+                                    @foreach ($photos as $photo)
+                                        <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+
+
+                                            <img src="{{ asset('storage/' . $photo) }}"
+                                                 class="d-block w-100"
+                                                 alt="Foto Kamar {{ $kost->nomor_kamar }}"
+                                                 onerror="this.src='{{ asset('img/default-room.jpg') }}'">
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <img src="{{ asset('img/default-room.jpg') }}"
+                                 class="card-img-top"
+                                 alt="Default Room">
+                        @endif
+
+                        @if($kost->status === 'Kosong')
+                            <div class="status-badge">Tersedia</div>
+                        @endif
+                        <div class="rating-badge">
+                            <i class="fas fa-star me-1"></i>{{ number_format($kost->rating ?? 4.9, 1) }}
+                        </div>
+                    </div>
+
+                    <div class="card-body d-flex flex-column">
+                        <div class="info-top">
+                            <div>
+                                <h5 class="card-title">Kamar {{ $kost->nomor_kamar }}</h5>
+                                <div class="card-location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>{{ $kost->alamat ?? 'Tenda, Kec. Langke Rembong.' }}</span>
+                                </div>
+                            </div>
+                            <div class="price-pill">
+                                Rp {{ number_format($kost->harga, 0, ',', '.') }}
+                                <span class="unit">/bulan</span>
+                            </div>
+                        </div>
+
+
+                        <div class="amenities">
+                            <div class="amenities-item">
+                                <i class="fas fa-bed"></i> 1 Tempat Tidur
+                            </div>
+                            <div class="amenities-item">
+                                <i class="fas fa-bath"></i> 1 Kamar Mandi
+                            </div>
+                            <div class="amenities-item">
+                                <i class="fas fa-wifi"></i> Wifi Gratis
+                            </div>
+                        </div>
+
+                        <div class="mt-auto pt-4">
                             @auth
                                 @if($kost->status == 'Kosong')
                                     <a href="{{ route('order.create', $kost->id) }}"
-                                       class="btn btn-primary rounded-pill mt-auto">
+                                       class="btn btn-primary rounded-pill w-100">
                                         <i class="fas fa-key me-2"></i>Pesan Sekarang
                                     </a>
                                 @else
-                                    <button class="btn btn-secondary rounded-pill mt-auto" disabled>
+                                    <button class="btn btn-secondary rounded-pill w-100" disabled>
                                         <i class="fas fa-lock me-2"></i>Sudah Terisi
                                     </button>
                                 @endif
                             @else
                                 <a href="{{ route('login') }}"
-                                   class="btn btn-outline-primary rounded-pill mt-auto">
+                                   class="btn btn-outline-primary rounded-pill w-100">
                                     <i class="fas fa-sign-in-alt me-2"></i>Login untuk Memesan
                                 </a>
                             @endauth
                         </div>
                     </div>
                 </div>
+            </div>
             @empty
-                <div class="col-12">
-                    <div class="alert alert-light text-center" data-aos="fade-up">
-                        Saat ini semua kamar unggulan sudah terisi. Lihat daftar lengkap di bawah.
-                    </div>
+            <div class="col-12">
+                <div class="alert alert-info text-center" role="alert">
+                    Maaf, saat ini tidak ada kamar tersedia.
                 </div>
+            </div>
             @endforelse
         </div>
     </div>
 </section>
 
-{{-- Fasilitas Section (Parallax) --}}
+
 <section class="fasilitas-section section-padding parallax-bg" id="fasilitas">
     <div class="container">
+
         <div class="section-title text-center text-white" data-aos="fade-up">
             <h2 class="display-5 fw-bold">Fasilitas Unggulan</h2>
             <p>Kami menyediakan semua yang Anda butuhkan untuk pengalaman tinggal yang tak terlupakan.</p>
@@ -128,7 +166,7 @@
     </div>
 </section>
 
-{{-- Tentang Section --}}
+
 <section class="tentang-section section-padding" id="tentang">
     <div class="container">
         <div class="row align-items-center">
@@ -147,7 +185,6 @@
     </div>
 </section>
 
-{{-- Kontak & Daftar Kamar Section --}}
 <section class="kontak-section section-padding bg-light" id="kontak">
     <div class="container">
         <div class="section-title text-center" data-aos="fade-up">
@@ -161,10 +198,10 @@
             <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
                 <div class="kontak-info p-4 shadow-sm bg-white rounded h-100">
                     <h4 class="fw-bold mb-3">Hubungi Kami</h4>
-                    <p><i class="fas fa-map-marker-alt me-2 text-primary"></i> Jl. Soekarno Hatta No. 10, Malang</p>
-                    <p><i class="fas fa-phone me-2 text-primary"></i> +62 812 3456 7890</p>
-                    <p><i class="fas fa-envelope me-2 text-primary"></i> kontak@kostlolita.com</p>
-                    <p><i class="fab fa-whatsapp me-2 text-primary"></i> 0812 3456 7890 (WhatsApp)</p>
+                    <p><i class="fas fa-map-marker-alt me-2 text-primary"></i>Tenda, Kec. Langke Rembong.</p>
+                    <p><i class="fas fa-phone me-2 text-primary"></i> 081 339 240 016 (Telepon)</p>
+                    <p><i class="fas fa-envelope me-2 text-primary"></i> kostlolita@gmail.com (Email)</p>
+                    <p><i class="fab fa-whatsapp me-2 text-primary"></i> 081 339 240 016 (WhatsApp)</p>
                 </div>
             </div>
             <div class="col-lg-8 mt-4 mt-lg-0" data-aos="fade-up" data-aos-delay="200">
@@ -202,4 +239,3 @@
     </div>
 </section>
 @endsection
-
