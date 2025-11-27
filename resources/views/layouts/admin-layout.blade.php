@@ -1,21 +1,95 @@
-<!-- resources/views/layouts/admin-layout.blade.php -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>Admin Dashboard - Kost Lolita</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        /* Konfigurasi Warna Admin */
+        :root { --c-primary: #222831; --c-secondary: #DFD0B8; --c-accent: #948979; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
-<body class="bg-gray-100">
-    <div class="flex">
-        <!-- Sidebar -->
+<body class="bg-gray-50 text-gray-800 font-sans antialiased">
+
+    <div x-data="{ sidebarOpen: false, logoutModalOpen: false }" class="flex h-screen overflow-hidden">
+
+        <div x-show="sidebarOpen" @click="sidebarOpen = false" x-transition.opacity class="fixed inset-0 z-20 bg-black bg-opacity-50 lg:hidden" x-cloak></div>
+
         @include('layouts.admin-sidebar')
 
-        <!-- Content Area -->
-        <div class="flex-1 p-6">
-            @yield('content')
+        <div class="flex-1 flex flex-col overflow-hidden relative">
+            <header class="flex justify-between items-center py-4 px-6 bg-white shadow-sm border-b border-gray-200 z-10">
+                <button @click="sidebarOpen = true" class="text-gray-500 focus:outline-none lg:hidden">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-semibold text-gray-700">{{ Auth::user()->name ?? 'Admin' }}</span>
+                    <img class="h-9 w-9 rounded-full border border-[#DFD0B8]" src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}&background=222831&color=DFD0B8" alt="Avatar">
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+                @yield('content')
+            </main>
         </div>
+
+        <div x-show="logoutModalOpen"
+             style="display: none;"
+             class="fixed inset-0 z-[9999] overflow-y-auto"
+             aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
+
+            <div x-show="logoutModalOpen"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"></div>
+
+            <div class="flex min-h-full items-center justify-center p-4 text-center">
+                <div x-show="logoutModalOpen"
+                     @click.away="logoutModalOpen = false"
+                     x-transition:enter="ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                     class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-gray-100">
+
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                                <i class="fa-solid fa-triangle-exclamation text-red-600"></i>
+                            </div>
+                            <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <h3 class="text-lg font-serif font-bold text-[#222831]">Konfirmasi Logout</h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500">Apakah Anda yakin ingin keluar? Sesi Anda akan berakhir.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-2">
+                        <form method="POST" action="{{ route('logout') }}" class="w-full sm:w-auto">
+                            @csrf
+                            <button type="submit" class="inline-flex w-full justify-center rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:w-auto">Ya, Keluar</button>
+                        </form>
+                        <button @click="logoutModalOpen = false" type="button" class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Batal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </body>
 </html>
