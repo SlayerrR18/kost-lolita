@@ -22,29 +22,19 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-     public function store(Request $request)
+    public function store(LoginRequest $request): RedirectResponse
     {
-        $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+        // Gunakan mekanisme autentikasi dari Breeze
+        $request->authenticate();
+        $request->session()->regenerate();
 
-        if (Auth::attempt($request->only('email', 'password'))) {
-            // Cek role user setelah login
-            $user = Auth::user();
+        $user = Auth::user();
 
-            if ($user->role === 'admin') {
-                // Redirect ke dashboard admin
-                return redirect()->route('admin.dashboard');
-            }
-
-            // Redirect ke dashboard penghuni
-            return redirect()->route('user.dashboard');
+        if ($user->role === 'admin') {
+            return redirect()->intended(route('admin.dashboard'));
         }
 
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ]);
+        return redirect()->intended(route('landing'));
     }
 
     /**
@@ -55,7 +45,6 @@ class AuthenticatedSessionController extends Controller
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');

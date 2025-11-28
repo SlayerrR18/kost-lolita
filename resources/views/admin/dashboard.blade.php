@@ -22,9 +22,9 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Kamar</p>
-                        <h3 class="text-3xl font-bold text-[#222831] mt-2">{{ $totalRooms ?? '20' }}</h3>
+                        <h3 class="text-3xl font-bold text-[#222831] mt-2">{{ $totalrooms }}</h3>
                     </div>
-                    <div class="p-3 bg-[#DFD0B8]/20 rounded-xl text-[#222831] group-hover:bg-[#222831] group-hover:text-[#DFD0B8] transition-colors">
+                    <div class="p-3 bg-[#DFD0B8]/20 rounded-xl text-[#222831] group-hover:bg-[#25477a] group-hover:text-[#DFD0B8] transition-colors">
                         <i class="fa-solid fa-bed text-xl"></i>
                     </div>
                 </div>
@@ -40,7 +40,7 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Tersedia</p>
-                        <h3 class="text-3xl font-bold text-[#222831] mt-2">{{ $availableRooms ?? '5' }}</h3>
+                        <h3 class="text-3xl font-bold text-[#222831] mt-2">{{ $availablerooms }}</h3>
                     </div>
                     <div class="p-3 bg-green-50 rounded-xl text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors">
                         <i class="fa-solid fa-door-open text-xl"></i>
@@ -50,7 +50,7 @@
                     <div class="w-full bg-gray-100 rounded-full h-1.5">
                         <div class="bg-green-500 h-1.5 rounded-full" style="width: 25%"></div>
                     </div>
-                    <p class="text-xs text-gray-400 mt-2">25% Kamar Kosong</p>
+                    <p class="text-xs text-gray-400 mt-2">25% dari total kamar</p>
                 </div>
             </div>
 
@@ -58,17 +58,18 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Penghuni Aktif</p>
-                        <h3 class="text-3xl font-bold text-[#222831] mt-2">{{ $totalUsers ?? '15' }}</h3>
+                        <h3 class="text-3xl font-bold text-[#222831] mt-2">{{ $activeusers }}</h3>
                     </div>
                     <div class="p-3 bg-blue-50 rounded-xl text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                         <i class="fa-solid fa-users text-xl"></i>
                     </div>
                 </div>
                 <div class="mt-4 flex -space-x-2 overflow-hidden">
-                    <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=User+One&background=random" alt=""/>
-                    <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=User+Two&background=random" alt=""/>
-                    <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=User+Three&background=random" alt=""/>
-                    <div class="h-8 w-8 rounded-full ring-2 ring-white bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500">+12</div>
+                    <div class="w-8 h-8 rounded-full border-2 border-white shadow-sm bg-cover bg-center" style="background-image: url('https://i.pravatar.cc/150?img=1');"></div>
+                    <div class="w-8 h-8 rounded-full border-2 border-white shadow-sm bg-cover bg-center" style="background-image: url('https://i.pravatar.cc/150?img=2');"></div>
+                    <div class="w-8 h-8 rounded-full border-2 border-white shadow-sm bg-cover bg-center" style="background-image: url('https://i.pravatar.cc/150?img=3');"></div>
+                    <div class="w-8 h-8 rounded-full border-2 border-white shadow-sm bg-cover bg-center" style="background-image: url('https://i.pravatar.cc/150?img=4');"></div>
+                    <div class="w-8 h-8 rounded-full border-2 border-white shadow-sm bg-cover bg-center flex items-center justify-center text-xs font-medium text-gray-700 bg-gray-200">+{{ $activeusers - 4 }}</div>
                 </div>
             </div>
 

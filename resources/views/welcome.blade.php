@@ -107,58 +107,68 @@
 </head>
 <body class="antialiased selection:bg-secondary selection:text-primary">
 
-    <header x-data="{ isScrolled: false }"
-            @scroll.window="isScrolled = (window.pageYOffset > 20)"
-            :class="isScrolled ? 'bg-white/95 backdrop-blur-md shadow-md py-4' : 'bg-transparent py-6'"
-            class="fixed top-0 w-full z-50 transition-all duration-300 ease-in-out">
+    @auth
+        @include('layouts.welcome-navbar')
+    @endauth
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between">
-                <a href="/" class="flex items-center gap-3 group">
-                    <img src="{{ asset('img/Logo.png') }}" alt="Kost Lolita" class="h-10 transition-transform duration-500 group-hover:rotate-6">
-                    <span class="font-serif text-2xl font-bold text-primary">Kost <span class="text-accent">Lolita</span></span>
-                </a>
+    @guest
+        <header x-data="{ isScrolled: false }"
+                @scroll.window="isScrolled = (window.pageYOffset > 20)"
+                :class="isScrolled ? 'bg-white/95 backdrop-blur-md shadow-md py-4' : 'bg-transparent py-6'"
+                class="fixed top-0 w-full z-50 transition-all duration-300 ease-in-out">
 
-                <nav class="hidden md:flex items-center gap-8 font-medium text-gray-500" id="desktop-nav">
-                    <a href="#hero" class="nav-link hover:text-primary">Home</a>
-                    <a href="#about" class="nav-link hover:text-primary">Tentang Kami</a>
-                    <a href="#features" class="nav-link hover:text-primary">Fitur</a>
-                    <a href="#rooms" class="nav-link hover:text-primary">Kamar</a>
-                    <a href="#contact" class="nav-link hover:text-primary">Kontak</a>
-                    <a href="{{ route('login') }}" class="ml-4 bg-secondary text-primary px-6 py-2 rounded-full hover:bg-opacity-80 transition hover:shadow-md transform hover:scale-105 active:scale-95 duration-200">Masuk</a>
-                </nav>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between">
+                    <a href="/" class="flex items-center gap-3 group">
+                        <img src="{{ asset('img/Logo.png') }}" alt="Kost Lolita" class="h-10 transition-transform duration-500 group-hover:rotate-6">
+                        <span class="font-serif text-2xl font-bold text-primary">Kost <span class="text-accent">Lolita</span></span>
+                    </a>
 
-                <div class="md:hidden" x-data="{ open: false }">
-                    <button @click="open = !open" class="p-2 rounded-md text-primary hover:bg-gray-100 text-xl transition-transform active:scale-90">
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-                    <div x-show="open"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 -translate-y-2"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         x-transition:leave="transition ease-in duration-150"
-                         x-transition:leave-start="opacity-100 translate-y-0"
-                         x-transition:leave-end="opacity-0 -translate-y-2"
-                         @click.away="open = false"
-                         class="absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-xl py-4 px-4 flex flex-col gap-4">
-                        <a href="#hero" @click="open=false" class="block text-primary hover:text-accent font-medium">Home</a>
-                        <a href="#about" @click="open=false" class="block text-primary hover:text-accent font-medium">Tentang Kami</a>
-                        <a href="#features" @click="open=false" class="block text-primary hover:text-accent font-medium">Fitur</a>
-                        <a href="#rooms" @click="open=false" class="block text-primary hover:text-accent font-medium">Kamar</a>
-                        <a href="#contact" @click="open=false" class="block text-primary hover:text-accent font-medium">Kontak</a>
-                        <a href="{{ route('login') }}" class="block text-center bg-secondary text-primary py-3 rounded-full font-bold">Masuk</a>
+                    <nav class="hidden md:flex items-center gap-8 font-medium text-gray-500" id="desktop-nav">
+                        <a href="#hero" class="nav-link hover:text-primary">Home</a>
+                        <a href="#about" class="nav-link hover:text-primary">Tentang Kami</a>
+                        <a href="#features" class="nav-link hover:text-primary">Fitur</a>
+                        <a href="#rooms" class="nav-link hover:text-primary">Kamar</a>
+                        <a href="#contact" class="nav-link hover:text-primary">Kontak</a>
+
+                        <a href="{{ route('login') }}"
+                        class="ml-4 bg-secondary text-primary px-6 py-2 rounded-full hover:bg-opacity-80 transition hover:shadow-md transform hover:scale-105 active:scale-95 duration-200">
+                            Masuk
+                        </a>
+                    </nav>
+
+                    <div class="md:hidden" x-data="{ open: false }">
+                        <button @click="open = !open" class="p-2 rounded-md text-primary hover:bg-gray-100 text-xl transition-transform active:scale-90">
+                            <i class="fa-solid fa-bars"></i>
+                        </button>
+                        <div x-show="open"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 -translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 -translate-y-2"
+                             @click.away="open = false"
+                             class="absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-xl py-4 px-4 flex flex-col gap-4">
+                            <a href="#hero" @click="open=false" class="block text-primary hover:text-accent font-medium">Home</a>
+                            <a href="#about" @click="open=false" class="block text-primary hover:text-accent font-medium">Tentang Kami</a>
+                            <a href="#features" @click="open=false" class="block text-primary hover:text-accent font-medium">Fitur</a>
+                            <a href="#rooms" @click="open=false" class="block text-primary hover:text-accent font-medium">Kamar</a>
+                            <a href="#contact" @click="open=false" class="block text-primary hover:text-accent font-medium">Kontak</a>
+                            <a href="{{ route('login') }}" class="block text-center bg-secondary text-primary py-3 rounded-full font-bold">Masuk</a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </header>
+        </header>
+    @endguest
 
     <section id="hero" class="relative bg-bg-light pt-32 pb-24 overflow-hidden min-h-screen flex items-center">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="space-y-8 max-w-lg reveal-element">
                     <div class="inline-block px-4 py-1.5 rounded-full border border-accent/30 bg-white/50 backdrop-blur-sm text-accent text-sm font-semibold tracking-wider uppercase mb-2">
-                        Welcome to Kost Lolita
+                        Selamat Datang Di Kost Lolita
                     </div>
                     <h1 class="text-5xl lg:text-7xl font-bold leading-tight text-primary font-serif">
                         Temukan <span class="text-accent italic relative">
@@ -256,7 +266,7 @@
                         <i class="fa-solid fa-star"></i>
                     </div>
                     <h3 class="text-2xl font-bold font-serif mb-3">Fasilitas Premium</h3>
-                    <p class="text-gray-600 leading-relaxed">Nikmati AC dingin, Wi-Fi berkecepatan tinggi, laundry, dan area komunal yang nyaman.</p>
+                    <p class="text-gray-600 leading-relaxed">Nikmati Kamar Luas, Wi-Fi berkecepatan tinggi, Tempat Parkir, dan area komunal yang nyaman.</p>
                 </div>
 
                 <div class="bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group reveal-element reveal-delay-200 border border-gray-100">
@@ -272,7 +282,7 @@
                         <i class="fa-solid fa-shield-halved"></i>
                     </div>
                     <h3 class="text-2xl font-bold font-serif mb-3">Keamanan 24/7</h3>
-                    <p class="text-gray-600 leading-relaxed">Sistem CCTV 24 jam, akses gerbang kartu pintar, dan penjaga malam untuk ketenangan Anda.</p>
+                    <p class="text-gray-600 leading-relaxed">Sistem CCTV 24 jam, dan penjaga malam untuk ketenangan Anda.</p>
                 </div>
             </div>
         </div>
@@ -296,7 +306,14 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                @forelse($rooms as $room)
+                @php
+                    $availableRoomsList = collect($rooms ?? [])->filter(function($r){
+                        $status = is_array($r) ? ($r['status'] ?? null) : ($r->status ?? null);
+                        return $status === 'available';
+                    })->values();
+                @endphp
+
+                @forelse($availableRoomsList as $room)
                     @php $photos = !empty($room->photos) ? $room->photos : []; @endphp
 
                     <div x-data='{
@@ -360,8 +377,9 @@
                                     <p class="text-xs text-gray-400 mb-1 uppercase tracking-wider">Harga Sewa</p>
                                     <p class="text-xl font-bold text-primary font-serif">Rp {{ number_format($room->price, 0, ',', '.') }}<span class="text-xs font-sans font-normal text-gray-500">/bln</span></p>
                                 </div>
-                                <a href="{{ route('user.dashboard') }}" class="bg-primary text-white px-5 py-2.5 rounded-full flex items-center gap-2 text-sm font-medium shadow-md transition-all duration-300 hover:bg-accent hover:shadow-lg transform hover:-translate-y-1">
-                                    <span>Pesan Sekarang</span>
+                                <a href="{{ route('user.orders.create', $room) }}"
+                                    class="bg-primary text-white px-5 py-2.5 rounded-full flex items-center gap-2 text-sm font-medium shadow-md transition-all duration-300 hover:bg-accent hover:shadow-lg transform hover:-translate-y-1">
+                                        <span>Pesan Sekarang</span>
                                     <i class="fa-regular fa-calendar-check"></i>
                                 </a>
                             </div>
@@ -376,13 +394,6 @@
                         <p class="text-gray-500">Silakan periksa kembali nanti untuk update terbaru.</p>
                     </div>
                 @endforelse
-            </div>
-
-            <div class="text-center mt-16 reveal-element">
-                <a href="{{ route('user.dashboard') }}" class="inline-flex items-center gap-3 px-10 py-4 rounded-full border border-primary text-primary font-medium hover:bg-primary hover:text-white transition-all duration-300 hover:shadow-xl group">
-                    Lihat Katalog Lengkap
-                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                </a>
             </div>
         </div>
     </section>

@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\User\OrderController as UserOrderController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,7 +15,8 @@ use App\Http\Controllers\LandingPageController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', [LandingPageController::class, 'index']);
+Route::get('/', [LandingPageController::class, 'index'])->name('landing');
+
 
 
 /*
@@ -32,20 +35,61 @@ Route::middleware('auth')->group(function () {
 | Admin Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
 
-        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-        // Room Management (named as admin.rooms.*)
+        // Dashboard Admin
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        // Manajemen Kamar (CRUD)
         Route::resource('rooms', RoomController::class);
+
+        // Manajemen Order (Konfirmasi Pesanan)
+        Route::get('/orders', [AdminOrderController::class, 'index'])
+            ->name('orders.index');
+        Route::get('/orders/{order}', [AdminOrderController::class, 'show'])
+            ->name('orders.show');
+        Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
+            ->name('orders.updateStatus');
+        Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
     });
 
 /*
 |--------------------------------------------------------------------------
-| Tenant Routes
+| Tenant Routes - Order Management (Independent)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'tenant'])->group(function () {
-    Route::get('/user/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+Route::middleware('auth')->group(function () {
+    // Form pemesanan kamar (user pilih kamar -> create order)
+    // Route ini independent, tidak perlu approved order
+    Route::get('/user/rooms/{room}/order', [UserOrderController::class, 'create'])
+        ->name('user.orders.create');
+
+    // Simpan pesanan kamar
+    Route::post('/user/rooms/{room}/order', [UserOrderController::class, 'store'])
+        ->name('user.orders.store');
+
+    // Daftar pesanan milik user
+    Route::get('/user/orders', [UserOrderController::class, 'index'])
+        ->name('user.orders.index');
+
+    // Detail 1 pesanan milik user
+    Route::get('/user/orders/{order}', [UserOrderController::class, 'show'])
+        ->name('user.orders.show');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Tenant Dashboard Route (Protected by ApprovedOrderMiddleware)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'approved.order'])->group(function () {
+    // Dashboard Penghuni - hanya bisa diakses jika punya order yang approved
+    Route::get('/user/dashboard', [UserDashboardController::class, 'index'])
+        ->name('user.dashboard');
 });
 
 require __DIR__.'/auth.php';

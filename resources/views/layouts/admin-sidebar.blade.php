@@ -46,7 +46,8 @@
         <a href="#"
            class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1">
             <i class="fa-solid fa-users w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
-            <span class="mx-3">Data Penghuni</span>
+            <span class="mx-3">Penghuni Kost
+            </span>
         </a>
 
         <div x-data="{ openKeuangan: {{ request()->routeIs('admin.finance.*') ? 'true' : 'false' }} }">
@@ -91,7 +92,7 @@
             </div>
         </div>
 
-         <a href="#"
+         <a href="{{ route('admin.orders.index') }}"
            class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1">
             <i class="fa-solid fa-book w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
             <span class="mx-3">Konfirmasi Pembayaran</span>

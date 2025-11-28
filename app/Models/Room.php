@@ -13,9 +13,14 @@ class Room extends Model
         'room_number', 'price', 'facilities', 'photos', 'status'
     ];
 
-    
+
     protected $casts = [
         'facilities' => 'array',
         'photos' => 'array',
     ];
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }

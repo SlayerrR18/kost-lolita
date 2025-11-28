@@ -24,5 +24,16 @@
                 Laporan
             </a>
         </li>
+
+        {{-- logout --}}
+
+        <li>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="w-full text-left block p-4 hover:bg-gray-700">
+                    Logout
+                </button>
+            </form>
+        </li>
     </ul>
 </aside>
