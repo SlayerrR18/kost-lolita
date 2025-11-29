@@ -48,4 +48,20 @@ class User extends Authenticatable
         return $this->hasMany(Order::class);
     }
 
+    /**
+     * Current room (via last approved order)
+     * Uses hasOneThrough from User -> Order -> Room filtered to approved orders.
+     */
+    public function room()
+    {
+        return $this->hasOneThrough(
+            Room::class,
+            Order::class,
+            'user_id', // Foreign key on orders table...
+            'id',      // Foreign key on rooms table (primary key)
+            'id',      // Local key on users table
+            'room_id'  // Local key on orders table
+        )->where('orders.status', 'approved');
+    }
+
 }

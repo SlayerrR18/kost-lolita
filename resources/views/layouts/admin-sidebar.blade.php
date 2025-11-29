@@ -43,11 +43,14 @@
             <span class="mx-3">Manajemen Kamar</span>
         </a>
 
-        <a href="#"
-           class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1">
-            <i class="fa-solid fa-users w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
-            <span class="mx-3">Penghuni Kost
-            </span>
+        <a href="{{ route('admin.tenants.index') }}"
+              class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group
+              {{ request()->routeIs('admin.tenants.*')
+                  ? 'bg-[#DFD0B8] text-[#222831] font-bold shadow-md transform translate-x-1'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1' }}">
+
+                <i class="fa-solid fa-users w-6 text-lg {{ request()->routeIs('admin.tenants.*') ? '' : 'text-gray-400 group-hover:text-[#222831]' }}"></i>
+                <span class="mx-3">Penghuni Kost</span>
         </a>
 
         <div x-data="{ openKeuangan: {{ request()->routeIs('admin.finance.*') ? 'true' : 'false' }} }">
@@ -72,30 +75,34 @@
                  x-transition:enter-end="opacity-100 translate-y-0"
                  class="mt-1 space-y-1">
 
-                <a href="{{-- route('admin.finance.income') --}} #"
+                <a href="{{ route('admin.finance.income.index') }}"
                    class="flex items-center pl-14 pr-4 py-2.5 rounded-xl transition-all duration-300 group text-sm
-                   {{ request()->routeIs('admin.finance.income')
+                   {{ request()->routeIs('admin.finance.income.*')
                       ? 'bg-[#DFD0B8] text-[#222831] font-bold shadow-sm'
                       : 'text-gray-500 hover:text-[#222831] hover:bg-gray-50' }}">
-                    <span class="w-1.5 h-1.5 rounded-full mr-3 {{ request()->routeIs('admin.finance.income') ? 'bg-[#222831]' : 'bg-gray-300 group-hover:bg-[#222831]' }}"></span>
+                    <span class="w-1.5 h-1.5 rounded-full mr-3 {{ request()->routeIs('admin.finance.income.*') ? 'bg-[#222831]' : 'bg-gray-300 group-hover:bg-[#222831]' }}"></span>
                     Pemasukan
                 </a>
 
-                <a href="{{-- route('admin.finance.expense') --}} #"
+                <a href="{{ route('admin.finance.expense.index') }}"
                    class="flex items-center pl-14 pr-4 py-2.5 rounded-xl transition-all duration-300 group text-sm
-                   {{ request()->routeIs('admin.finance.expense')
+                   {{ request()->routeIs('admin.finance.expense.*')
                       ? 'bg-[#DFD0B8] text-[#222831] font-bold shadow-sm'
                       : 'text-gray-500 hover:text-[#222831] hover:bg-gray-50' }}">
-                    <span class="w-1.5 h-1.5 rounded-full mr-3 {{ request()->routeIs('admin.finance.expense') ? 'bg-[#222831]' : 'bg-gray-300 group-hover:bg-[#222831]' }}"></span>
+                    <span class="w-1.5 h-1.5 rounded-full mr-3 {{ request()->routeIs('admin.finance.expense.*') ? 'bg-[#222831]' : 'bg-gray-300 group-hover:bg-[#222831]' }}"></span>
                     Pengeluaran
                 </a>
             </div>
         </div>
 
          <a href="{{ route('admin.orders.index') }}"
-           class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1">
-            <i class="fa-solid fa-book w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
-            <span class="mx-3">Konfirmasi Pembayaran</span>
+              class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group
+              {{ request()->routeIs('admin.orders.*')
+                  ? 'bg-[#DFD0B8] text-[#222831] font-bold shadow-md transform translate-x-1'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1' }}">
+
+                <i class="fa-solid fa-box w-6 text-lg {{ request()->routeIs('admin.orders.*') ? '' : 'text-gray-400 group-hover:text-[#222831]' }}"></i>
+                <span class="mx-3">Konfirmasi Pesanan</span>
         </a>
 
         <div class="my-4 border-t border-gray-100"></div>

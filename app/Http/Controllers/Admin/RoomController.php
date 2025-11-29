@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Room;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -128,6 +129,17 @@ class RoomController extends Controller
     // HAPUS KAMAR
     public function destroy(Room $room)
     {
+        // Periksa apakah kamar memiliki order yang approved
+        $hasApprovedOrder = Order::where('room_id', $room->id)
+            ->where('status', 'approved')
+            ->exists();
+
+        if ($hasApprovedOrder) {
+            return redirect()
+                ->route('admin.rooms.index')
+                ->with('error', 'Tidak dapat menghapus kamar yang sedang ditempati. Batalkan pesanan terlebih dahulu.');
+        }
+
         if (is_array($room->photos)) {
             foreach ($room->photos as $photo) {
                 Storage::disk('public')->delete($photo);

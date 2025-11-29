@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Income;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -44,10 +45,23 @@ class OrderController extends Controller
             'admin_note' => $request->admin_note,
         ]);
 
-        // Jika order disetujui (approved) → update room status menjadi 'occupied'
+        // Jika order disetujui (approved) → update room status menjadi 'occupied' dan buat record pemasukan
         if ($request->status === 'approved') {
             $order->room()->update([
                 'status' => 'occupied',
+            ]);
+
+            // Buat record pemasukan otomatis
+            $roomPrice = $order->room->price ?? 0;
+            Income::create([
+                'source' => 'Sewa Kamar ' . $order->room->room_number,
+                'description' => 'Penyewa: ' . $order->full_name . ' | Durasi: ' . $order->rent_duration . ' bulan',
+                'amount' => $roomPrice,
+                'date' => now()->toDateString(),
+                'category' => 'room_rent',
+                'payment_method' => 'transfer',
+                'reference' => 'ORD-' . $order->id,
+                'order_id' => $order->id,
             ]);
         }
 

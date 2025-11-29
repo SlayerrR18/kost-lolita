@@ -5,7 +5,6 @@
             <div class="flex">
                 <div class="shrink-0 flex items-center">
                     @php
-                        // Untuk order page, link logo ke landing
                         $logoRoute = 'landing';
                     @endphp
 
@@ -18,8 +17,6 @@
                         </span>
                     </a>
                 </div>
-
-                {{-- Tidak ada menu navigasi di order flow --}}
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">
