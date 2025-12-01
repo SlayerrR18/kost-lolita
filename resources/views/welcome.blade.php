@@ -244,7 +244,7 @@
                             <i class="fa-solid fa-phone"></i>
                         </div>
                         <div>
-                            <p class="font-bold text-xl text-primary font-serif">+62 812 3456 7890</p>
+                            <p class="font-bold text-xl text-primary font-serif">081 339 240 016</p>
                             <p class="text-gray-600 text-sm">Hubungi Layanan Pelanggan</p>
                         </div>
                     </div>
@@ -431,15 +431,15 @@
                     <ul class="space-y-4 text-gray-400">
                         <li class="flex items-start gap-3">
                             <i class="fa-solid fa-map-location-dot mt-1 text-secondary"></i>
-                            <span>Jl. Pendidikan No. 123,<br>Kota Malang, Jawa Timur</span>
+                            <span>Tenda, Kec. Langke Rembong,<br>Kota Ruteng, Nusa Tenggara Timur</span>
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="fa-solid fa-envelope text-secondary"></i>
-                            <span>info@kost-lolita.example</span>
+                            <span>KostLolitaRuteng@gmail.com</span>
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="fa-solid fa-phone text-secondary"></i>
-                            <span class="font-bold text-white">+62 812 3456 7890</span>
+                            <span class="font-bold text-white">081 339 240 016</span>
                         </li>
                     </ul>
                 </div>
