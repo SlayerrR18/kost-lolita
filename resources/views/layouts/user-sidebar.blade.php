@@ -37,23 +37,23 @@
 
         <a href="#"
            class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1">
-            <i class="fa-solid fa-cart-shopping w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
-            <span class="mx-3">Pesanan</span>
+            <i class="fa-solid fa-money-bill-transfer w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
+            <span class="mx-3">Laporan Keuangan</span>
         </a>
 
         <div class="my-4 border-t border-gray-100"></div>
-        <p class="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Keuangan</p>
+        <p class="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Menu Lainnya</p>
 
         <a href="#"
            class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1">
-            <i class="fa-solid fa-wallet w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
-            <span class="mx-3">Tagihan & Bayar</span>
+            <i class="fa-solid fa-flag w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
+            <span class="mx-3">Laporan Masalah</span>
         </a>
 
         <a href="#"
            class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1">
-            <i class="fa-solid fa-triangle-exclamation w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
-            <span class="mx-3">Lapor Masalah</span>
+            <i class="fa-solid fa-envelope w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
+            <span class="mx-3">Pesan</span>
         </a>
     </nav>
 
