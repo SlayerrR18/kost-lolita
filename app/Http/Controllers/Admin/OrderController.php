@@ -65,7 +65,6 @@ class OrderController extends Controller
             ]);
         }
 
-        // Jika order ditolak (rejected) → pastikan room kembali ke 'available' jika tidak ada order approved lain
         if ($request->status === 'rejected') {
             $hasOtherApprovedOrders = Order::where('room_id', $order->room_id)
                 ->where('status', 'approved')

@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
-    // halaman form order untuk kamar tertentu
     public function create(Room $room)
     {
         $user = Auth::user();
@@ -22,7 +21,6 @@ class OrderController extends Controller
         ]);
     }
 
-    // menyimpan order
     public function store(Request $request, Room $room)
     {
         $user = Auth::user();
@@ -56,14 +54,11 @@ class OrderController extends Controller
             'status'             => 'pending',
         ]);
 
-        // Setelah submit, langsung ke halaman "tunggu konfirmasi" (detail pesanan)
         return redirect()
             ->route('user.orders.show', $order)
             ->with('success', 'Pesanan berhasil dibuat. Silakan menunggu konfirmasi dari admin.');
     }
 
-
-    // list pesanan milik user
     public function index()
     {
         $user = Auth::user();
@@ -75,7 +70,6 @@ class OrderController extends Controller
         return view('user.orders.index', compact('orders'));
     }
 
-    // detail 1 pesanan milik user
     public function show(Order $order)
     {
         return view('user.orders.show', compact('order'));

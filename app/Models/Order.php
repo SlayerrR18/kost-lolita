@@ -12,9 +12,12 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'room_id',
+        'parent_order_id',
+        'type',
         'email',
         'full_name',
         'phone',
+        'emergency_phone',
         'address',
         'id_number',
         'id_photo_path',
@@ -29,6 +32,15 @@ class Order extends Model
         'start_date' => 'date',
     ];
 
+
+    public function getEndDateAttribute()
+    {
+        if ($this->start_date && $this->rent_duration) {
+            return $this->start_date->copy()->addMonths($this->rent_duration);
+        }
+        return null;
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -38,4 +50,10 @@ class Order extends Model
     {
         return $this->belongsTo(Room::class);
     }
+
+    public function parentOrder()
+    {
+        return $this->belongsTo(Order::class, 'parent_order_id');
+    }
+
 }

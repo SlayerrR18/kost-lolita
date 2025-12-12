@@ -29,31 +29,43 @@
             <span class="mx-3">Dashboard</span>
         </a>
 
-        <a href="#"
-           class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1">
-            <i class="fa-solid fa-file-contract w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
-            <span class="mx-3">Kontrak Saya</span>
+        <a href="{{ route('user.contract.index') }}"
+            class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group
+            {{ request()->routeIs('user.contract.*')
+                ? 'bg-[#DFD0B8] text-[#222831] font-bold shadow-md transform translate-x-1'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1' }}">
+                <i class="fa-solid fa-file-contract w-6 text-lg {{ request()->routeIs('user.contract.*') ? '' : 'text-gray-400 group-hover:text-[#222831]' }}"></i>
+                <span class="mx-3">Kontrak Saya</span>
         </a>
 
-        <a href="#"
-           class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1">
-            <i class="fa-solid fa-money-bill-transfer w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
-            <span class="mx-3">Laporan Keuangan</span>
+       <a href="{{ route('user.finance.index') }}"
+            class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group
+            {{ request()->routeIs('user.finance.index')
+                ? 'bg-[#DFD0B8] text-[#222831] font-bold shadow-md transform translate-x-1'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1' }}">
+                <i class="fa-solid fa-money-bill-transfer w-6 text-lg {{ request()->routeIs('user.finance.index') ? '' : 'text-gray-400 group-hover:text-[#222831]' }}"></i>
+                <span class="mx-3">Laporan Keuangan</span>
         </a>
 
         <div class="my-4 border-t border-gray-100"></div>
         <p class="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Menu Lainnya</p>
 
-        <a href="#"
-           class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1">
-            <i class="fa-solid fa-flag w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
-            <span class="mx-3">Laporan Masalah</span>
+        <a href="{{ route('user.reports.index') }}"
+            class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group
+            {{ request()->routeIs('user.reports.*')
+                ? 'bg-[#DFD0B8] text-[#222831] font-bold shadow-md transform translate-x-1'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1' }}">
+                <i class="fa-solid fa-bullhorn w-6 text-lg {{ request()->routeIs('user.reports.*') ? '' : 'text-gray-400 group-hover:text-[#222831]' }}"></i>
+                <span class="mx-3">Laporan & Masukan</span>
         </a>
 
-        <a href="#"
-           class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1">
-            <i class="fa-solid fa-envelope w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
-            <span class="mx-3">Pesan</span>
+        <a href="{{ route('messages.index') }}"
+            class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group
+            {{ request()->routeIs('messages.*')
+                ? 'bg-[#DFD0B8] text-[#222831] font-bold shadow-md transform translate-x-1'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1' }}">
+                <i class="fa-solid fa-envelope w-6 text-lg {{ request()->routeIs('messages.*') ? '' : 'text-gray-400 group-hover:text-[#222831]' }}"></i>
+                <span class="mx-3">Pesan</span>
         </a>
     </nav>
 

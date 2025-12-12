@@ -11,6 +11,11 @@ use App\Http\Controllers\User\OrderController as UserOrderController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\IncomeController;
 use App\Http\Controllers\Admin\ExpenseController;
+use App\Http\Controllers\User\ContractController;
+use App\Http\Controllers\User\FinanceController;
+use App\Http\Controllers\User\ReportController as UserReportController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\MessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +36,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Message System (Chat)
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
 });
 
 /*
@@ -47,7 +56,7 @@ Route::middleware(['auth', 'admin'])
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])
             ->name('dashboard');
 
-        // Manajemen Kamar (CRUD)
+        // Manajemen Kamar Kost
         Route::resource('rooms', RoomController::class);
 
         // Manajemen Order (Konfirmasi Pesanan)
@@ -82,6 +91,12 @@ Route::middleware(['auth', 'admin'])
         Route::get('/finance/expense/{expense}/edit', [ExpenseController::class, 'edit'])->name('finance.expense.edit');
         Route::patch('/finance/expense/{expense}', [ExpenseController::class, 'update'])->name('finance.expense.update');
         Route::delete('/finance/expense/{expense}', [ExpenseController::class, 'destroy'])->name('finance.expense.destroy');
+
+        // Manajemen Laporan & Masukan Penghuni
+        Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/{report}', [AdminReportController::class, 'show'])->name('reports.show');
+        Route::put('/reports/{report}', [AdminReportController::class, 'update'])->name('reports.update');
+        Route::delete('/reports/{report}', [AdminReportController::class, 'destroy'])->name('reports.destroy');
     });
 
 /*
@@ -117,6 +132,21 @@ Route::middleware(['auth', 'approved.order'])->group(function () {
     // Dashboard Penghuni - hanya bisa diakses jika punya order yang approved
     Route::get('/user/dashboard', [UserDashboardController::class, 'index'])
         ->name('user.dashboard');
+
+    // Manajemen Kontrak Penghuni
+    Route::get('/user/contract', [ContractController::class, 'index'])->name('user.contract.index');
+    Route::get('/user/contract/available-rooms', [ContractController::class, 'availableRooms'])->name('user.contract.available-rooms');
+    Route::post('/user/contract/extend', [ContractController::class, 'extend'])->name('user.contract.extend');
+    Route::post('/user/contract/update-info', [ContractController::class, 'updateInfo'])->name('user.contract.update-info');
+
+    // Laporan Keuangan Penghuni
+    Route::get('/user/finance', [FinanceController::class, 'index'])->name('user.finance.index');
+
+    // Manajemen Laporan & Masukan
+    Route::get('/user/reports', [UserReportController::class, 'index'])->name('user.reports.index');
+    Route::get('/user/reports/create', [UserReportController::class, 'create'])->name('user.reports.create');
+    Route::get('/user/reports/{report}', [UserReportController::class, 'show'])->name('user.reports.show');
+    Route::post('/user/reports', [UserReportController::class, 'store'])->name('user.reports.store');
 });
 
 require __DIR__.'/auth.php';

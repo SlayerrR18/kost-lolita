@@ -109,16 +109,22 @@
         <p class="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Lainnya</p>
 
 
-        <a href="#"
-           class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1">
-            <i class="fa-solid fa-wallet w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
-            <span class="mx-3">Laporan Dan Masukan</span>
+        <a href="{{ route('admin.reports.index') }}"
+            class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group
+            {{ request()->routeIs('admin.reports.*')
+                ? 'bg-[#DFD0B8] text-[#222831] font-bold shadow-md transform translate-x-1'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1' }}">
+                <i class="fa-solid fa-bullhorn w-6 text-lg {{ request()->routeIs('admin.reports.*') ? '' : 'text-gray-400 group-hover:text-[#222831]' }}"></i>
+                <span class="mx-3">Laporan & Masukan</span>
         </a>
 
-        <a href="#"
-           class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1">
-            <i class="fa-solid fa-envelope w-6 text-lg text-gray-400 group-hover:text-[#222831]"></i>
-            <span class="mx-3">Pesan</span>
+        <a href="{{ route('messages.index') }}"
+            class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 group
+            {{ request()->routeIs('messages.*')
+                ? 'bg-[#DFD0B8] text-[#222831] font-bold shadow-md transform translate-x-1'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1' }}">
+                <i class="fa-solid fa-comments w-6 text-lg {{ request()->routeIs('messages.*') ? '' : 'text-gray-400 group-hover:text-[#222831]' }}"></i>
+                <span class="mx-3">Pesan</span>
         </a>
 
 

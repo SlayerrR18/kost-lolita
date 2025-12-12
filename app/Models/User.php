@@ -64,4 +64,11 @@ class User extends Authenticatable
         )->where('orders.status', 'approved');
     }
 
+    public function sentMessages() {
+    return $this->hasMany(Message::class, 'sender_id');
+    }
+    public function receivedMessages() {
+        return $this->hasMany(Message::class, 'recipient_id');
+    }
+
 }
