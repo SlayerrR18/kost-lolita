@@ -26,13 +26,6 @@
                         $activeStyle = "border-[#DFD0B8] text-[#222831] font-bold";
                         $inactiveStyle = "border-transparent text-gray-500 hover:text-[#222831] hover:border-gray-300";
                     @endphp
-
-                    @if(auth()->user()->role !== 'admin')
-                        <a href="{{ route('user.orders.index') }}"
-                           class="{{ $navClass }} {{ request()->routeIs('user.orders.*') ? $activeStyle : $inactiveStyle }}">
-                            {{ __('Status Pesanan') }}
-                        </a>
-                    @endif
                 </div>
             </div>
 
@@ -70,9 +63,11 @@
                             <i class="fa-regular fa-chart-bar mr-2 text-gray-400"></i> {{ __('Dashboard') }}
                         </a>
 
+                        @if(auth()->user()->role === 'admin')
                         <a href="{{ route('profile.edit') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-[#DFD0B8]/20 hover:text-[#222831] transition-colors">
                             <i class="fa-regular fa-user mr-2 text-gray-400"></i> {{ __('Profile') }}
                         </a>
+                        @endif
 
                         <div class="border-t border-gray-100"></div>
 
@@ -106,12 +101,6 @@
                 $respActive = "border-[#222831] text-[#222831] bg-[#DFD0B8]/20 font-bold";
                 $respInactive = "border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300";
             @endphp
-
-            @if(auth()->user()->role !== 'admin')
-                <a href="{{ route('user.orders.index') }}" class="{{ $respClass }} {{ request()->routeIs('user.orders.*') ? $respActive : $respInactive }}">
-                    {{ __('Status Pesanan') }}
-                </a>
-            @endif
         </div>
 
         <div class="pt-4 pb-1 border-t border-gray-200 bg-gray-50">
@@ -130,9 +119,11 @@
                     {{ __('Dashboard') }}
                 </a>
 
+                @if(auth()->user()->role === 'admin')
                 <a href="{{ route('profile.edit') }}" class="{{ $respClass }} {{ $respInactive }}">
                     {{ __('Profile') }}
                 </a>
+                @endif
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

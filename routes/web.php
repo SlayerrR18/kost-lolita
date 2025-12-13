@@ -37,6 +37,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // User-specific profile edit (separate page for tenants)
+    Route::get('/user/profile', [\App\Http\Controllers\User\UserProfileController::class, 'edit'])->name('user.profile.edit');
+    Route::patch('/user/profile', [\App\Http\Controllers\User\UserProfileController::class, 'update'])->name('user.profile.update');
+
     // Message System (Chat)
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
     Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');

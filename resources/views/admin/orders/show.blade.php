@@ -52,7 +52,12 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
                         <h3 class="font-bold text-[#222831]">Informasi Sewa</h3>
-                        <span class="text-xs text-gray-500"><i class="fa-regular fa-calendar mr-1"></i> {{ $order->created_at->format('d M Y, H:i') }}</span>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-gray-500"><i class="fa-regular fa-calendar mr-1"></i> {{ $order->created_at->format('d M Y, H:i') }}</span>
+                            <span class="text-xs px-2 py-1 rounded text-white bg-gray-500 ml-2">
+                                {{ $order->type ?? 'order' }}
+                            </span>
+                        </div>
                     </div>
 
                     <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -167,7 +172,7 @@
 
                             <div class="mb-4">
                                 <label class="block text-xs font-bold text-gray-500 mb-1">Catatan (Opsional)</label>
-                                <textarea name="note" rows="3" class="w-full border-gray-200 rounded-lg text-sm focus:ring-[#222831] focus:border-[#222831] bg-gray-50" placeholder="Contoh: Pembayaran diterima, terima kasih."></textarea>
+                                <textarea name="admin_note" rows="3" class="w-full border-gray-200 rounded-lg text-sm focus:ring-[#222831] focus:border-[#222831] bg-gray-50" placeholder="Contoh: Pembayaran diterima, terima kasih."></textarea>
                             </div>
 
                             <div class="space-y-3">

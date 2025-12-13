@@ -64,7 +64,7 @@
 
                                 <td class="px-6 py-4">
                                     <div class="flex flex-col">
-                                        <span class="text-sm text-gray-700 font-medium">{{ $tenant->phone ?? '-' }}</span>
+                                        <span class="text-sm text-gray-700 font-medium">{{ $tenant->room->orders->count() > 0 ? $tenant->room->orders->last()->phone : 'N/A' }}</span>
                                         @if($tenant->phone)
                                             <a href="https://wa.me/{{ $tenant->phone }}" target="_blank" class="text-[10px] text-green-600 hover:underline flex items-center gap-1 mt-0.5">
                                                 <i class="fa-brands fa-whatsapp"></i> Chat WA

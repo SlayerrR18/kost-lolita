@@ -21,6 +21,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'emergency_contact',
     ];
 
     /**
@@ -41,6 +42,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'emergency_contact' => 'array',
     ];
 
     public function orders()
@@ -61,7 +63,8 @@ class User extends Authenticatable
             'id',      // Foreign key on rooms table (primary key)
             'id',      // Local key on users table
             'room_id'  // Local key on orders table
-        )->where('orders.status', 'approved');
+        )->where('orders.status', 'approved')
+         ->orderBy('orders.start_date', 'desc');
     }
 
     public function sentMessages() {

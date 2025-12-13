@@ -63,6 +63,25 @@ class OrderController extends Controller
                 'reference' => 'ORD-' . $order->id,
                 'order_id' => $order->id,
             ]);
+
+            // Jika ini adalah perpanjangan dengan pergantian kamar, coba bebaskan kamar lama (parent)
+            if ($order->type === 'extension_change' && $order->parent_order_id) {
+                $parent = Order::find($order->parent_order_id);
+                if ($parent && $parent->room_id) {
+                    $hasOtherApproved = Order::where('room_id', $parent->room_id)
+                        ->where('status', 'approved')
+                        ->where('id', '!=', $parent->id)
+                        ->exists();
+
+                    if (!$hasOtherApproved) {
+                        $parent->room()->update(['status' => 'available']);
+                    }
+                }
+                // Tandai parent order sebagai selesai/gantikan agar tidak lagi dianggap kontrak aktif
+                if ($parent) {
+                    $parent->update(['status' => 'completed']);
+                }
+            }
         }
 
         if ($request->status === 'rejected') {

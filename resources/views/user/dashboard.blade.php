@@ -69,10 +69,14 @@
 
                             <div class="mt-6 flex flex-col sm:flex-row gap-3">
                                 <button class="flex-1 py-3 rounded-xl bg-[#DFD0B8] text-[#222831] font-bold hover:bg-[#d4c2a3] transition shadow-sm flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-rotate"></i> Perpanjang Sewa
+                                    <a href="{{ route('user.contract.index') }}">
+                                        <i class="fa-solid fa-file-invoice"></i> Lihat Detail Kontrak
+                                    </a>
                                 </button>
                                 <button class="flex-1 px-6 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold hover:bg-gray-50 transition flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-triangle-exclamation"></i> Lapor Masalah
+                                    <a href="{{ route('user.reports.index') }}">
+                                        <i class="fa-solid fa-file-circle-exclamation"></i> Laporkan Masalah
+                                    </a>
                                 </button>
                             </div>
                         </div>

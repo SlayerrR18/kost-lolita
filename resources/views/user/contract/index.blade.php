@@ -8,8 +8,14 @@
     contactModal: false,
     changeRoom: false,
     duration: 1,
+    availableRooms: [],
+    originalPrice: {{ $latestContract ? $latestContract->room->price : 0 }},
     pricePerMonth: {{ $latestContract ? $latestContract->room->price : 0 }}
-}" class="min-h-screen bg-gray-50 py-8">
+}" x-init="fetch('{{ route('user.contract.available-rooms') }}')
+        .then(res => res.json())
+        .then(data => availableRooms = data)
+        .catch(() => availableRooms = [])
+" class="min-h-screen bg-gray-50 py-8">
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -105,16 +111,16 @@
                     <div class="space-y-3 pt-3 border-t border-gray-100">
                         <div>
                             <p class="text-[10px] text-gray-400 uppercase font-bold">No. HP</p>
-                            <p class="text-sm text-gray-700">{{ $user->phone ?? '-' }}</p>
+                            <p class="text-sm text-gray-700">{{ $user->phone ?? ($latestContract->phone ?? '-') }}</p>
                         </div>
                         <div>
                             <p class="text-[10px] text-gray-400 uppercase font-bold">NIK / Identitas</p>
-                            <p class="text-sm text-gray-700">{{ $user->id_number ?? '-' }}</p>
+                            <p class="text-sm text-gray-700">{{ $user->id_number ?? ($latestContract->id_number ?? '-') }}</p>
                         </div>
                     </div>
 
                     <div class="mt-4">
-                        <a href="{{ route('profile.edit') }}" class="text-xs font-bold text-[#222831] underline hover:text-[#DFD0B8]">Edit Data Profil</a>
+                        <a href="{{ route('user.profile.edit') }}" class="text-xs font-bold text-[#222831] underline hover:text-[#DFD0B8]">Edit Akun</a>
                     </div>
                 </div>
 
@@ -197,7 +203,7 @@
                                 <div>
                                     <p class="text-xs text-gray-400 uppercase font-bold mb-1">Mulai Tanggal</p>
                                     <p class="font-medium text-gray-800 text-lg">
-                                        {{ \Carbon\Carbon::parse($latestContract->start_date)->format('d F Y') }}
+                                            {{ \Carbon\Carbon::parse($firstContract->start_date ?? $latestContract->start_date)->format('d F Y') }}
                                     </p>
                                 </div>
                                 <div>
@@ -290,7 +296,7 @@
                     <p class="text-sm text-gray-500 mt-1">Kamar {{ $latestContract->room->room_number ?? '-' }}</p>
                 </div>
 
-                <form action="{{ route('user.contract.extend', $latestContract->id ?? 0) }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('user.contract.extend') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div class="space-y-5">
@@ -305,18 +311,29 @@
 
                         <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
                             <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" name="request_change_room" x-model="changeRoom" class="w-5 h-5 rounded border-gray-300 text-[#222831] focus:ring-[#222831]">
+                                <input type="checkbox" name="request_change_room" value="1" x-model="changeRoom" class="w-5 h-5 rounded border-gray-300 text-[#222831] focus:ring-[#222831]">
                                 <span class="text-sm font-bold text-gray-700">Saya ingin pindah kamar</span>
                             </label>
 
                             <div x-show="changeRoom" class="mt-4" x-transition>
                                 <label class="block text-xs font-bold text-gray-500 mb-1">Pilih Kamar Baru</label>
-                                <select name="new_kost_id" class="w-full rounded-lg border-gray-300 text-sm focus:ring-[#222831]">
+                                <select name="new_kost_id" x-on:change="
+                                        const opt = $event.target.selectedOptions[0];
+                                        if (opt && opt.dataset && opt.dataset.price) {
+                                            pricePerMonth = Number(opt.dataset.price);
+                                        } else {
+                                            pricePerMonth = originalPrice;
+                                        }
+                                    " class="w-full rounded-lg border-gray-300 text-sm focus:ring-[#222831]">
                                     <option value="">-- Pilih Kamar Kosong --</option>
-                                    <option value="99">Kamar 102 (Rp 1.200.000)</option>
+                                    <template x-for="r in availableRooms" :key="r.id">
+                                        <option :value="r.id" :data-price="r.price" x-text="'Kamar ' + r.room_number + ' (Rp ' + new Intl.NumberFormat('id-ID').format(r.price) + ')' "></option>
+                                    </template>
                                 </select>
                                 <p class="text-[10px] text-gray-400 mt-1">*Harga sewa akan menyesuaikan kamar baru.</p>
                             </div>
+
+                            <input type="hidden" name="current_kost_id" value="{{ $latestContract->room->id }}">
                         </div>
 
                         <div class="flex justify-between items-center bg-[#222831] text-[#DFD0B8] p-4 rounded-xl shadow-sm">

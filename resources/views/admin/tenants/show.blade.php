@@ -76,21 +76,6 @@
                         </p>
                     </div>
                 </div>
-                <div class="bg-gray-50 rounded-2xl p-4 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center text-green-600 text-xl">
-                        <i class="fa-brands fa-whatsapp"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Kontak</p>
-                        @if($user->phone)
-                            <a href="https://wa.me/{{ $user->phone }}" target="_blank" class="text-lg font-bold text-green-600 hover:underline">
-                                {{ $user->phone }}
-                            </a>
-                        @else
-                            <p class="text-lg font-bold text-gray-400">-</p>
-                        @endif
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -130,15 +115,15 @@
                             </div>
                             <div>
                                 <p class="text-xs font-bold text-gray-400 uppercase mb-1">Nomor Telepon</p>
-                                <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">{{ $user->phone ?? '-' }}</p>
+                                <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">{{ $user->room->orders->count() > 0 ? $user->room->orders->last()->phone : '-' }}</p>
                             </div>
                             <div>
                                 <p class="text-xs font-bold text-gray-400 uppercase mb-1">Nomor Identitas (NIK)</p>
-                                <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">{{ $user->id_number ?? '-' }}</p>
+                                <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">{{ $user->room->orders->count() > 0 ? $user->room->orders->last()->id_number : '-' }}</p>
                             </div>
                             <div class="sm:col-span-2">
                                 <p class="text-xs font-bold text-gray-400 uppercase mb-1">Alamat Asal</p>
-                                <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">{{ $user->address ?? '-' }}</p>
+                                <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">{{ $user->room->orders->count() > 0 ? $user->room->orders->last()->address : '-' }}</p>
                             </div>
                         </div>
                     </div>

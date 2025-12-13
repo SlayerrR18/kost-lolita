@@ -62,8 +62,22 @@
                         @forelse($orders as $order)
                             <tr class="hover:bg-gray-50 transition-colors duration-200 group">
                                 <td class="px-6 py-4">
-                                    <span class="block text-sm font-bold text-[#222831] font-mono">#{{ $order->id }}</span>
-                                    <span class="text-xs text-gray-400">{{ $order->created_at->format('d M Y') }}</span>
+                                    <div class="flex items-center gap-3">
+                                        <div>
+                                            <span class="block text-sm font-bold text-[#222831] font-mono">#{{ $order->id }}</span>
+                                            <span class="text-xs text-gray-400">{{ $order->created_at->format('d M Y') }}</span>
+                                        </div>
+                                        <div>
+                                            @php
+                                                $typeLabel = match($order->type) {
+                                                    'extension' => 'Perpanjang',
+                                                    'extension_change' => 'Perpanjangan (Ganti Kamar)',
+                                                    default => 'Order Baru',
+                                                };
+                                            @endphp
+                                            <span class="text-[10px] px-2 py-1 rounded-full bg-gray-100 text-gray-600 font-bold">{{ $typeLabel }}</span>
+                                        </div>
+                                    </div>
                                 </td>
 
                                 <td class="px-6 py-4">

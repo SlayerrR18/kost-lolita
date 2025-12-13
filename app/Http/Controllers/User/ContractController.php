@@ -142,6 +142,8 @@ class ContractController extends Controller
                 'room_id'             => $roomId,
                 'parent_order_id'     => $contract->id, // Relasi ke order lama
 
+                'type'                => $type,
+
 
 
                 'full_name'           => $contract->full_name,
@@ -178,7 +180,7 @@ class ContractController extends Controller
 
         try {
             $user = Auth::user();
-            $user->emergency_contact = $data; 
+            $user->emergency_contact = $data;
             $user->save();
 
             return redirect()->back()->with('success', 'Kontak darurat berhasil diperbarui.');
