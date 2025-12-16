@@ -15,5 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // Seeder khusus admin
         $this->call(AdminUserSeeder::class);
+        // Seeder khusus penghuni kost
+        $this->call(TenantUserSeeder::class);
     }
 }
