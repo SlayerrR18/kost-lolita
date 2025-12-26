@@ -71,8 +71,8 @@
                     </div>
                     <div>
                         <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Kamar Saat Ini</p>
-                        <p class="text-lg font-bold text-gray-800">
-                            {{ $orders->where('status', 'approved')->last()->room->room_number ?? '-' }}
+                            <p class="text-lg font-bold text-gray-800">
+                            {{ optional(optional(optional($orders->where('status', 'approved'))->last())->room)->room_number ?? '-' }}
                         </p>
                     </div>
                 </div>
@@ -115,15 +115,15 @@
                             </div>
                             <div>
                                 <p class="text-xs font-bold text-gray-400 uppercase mb-1">Nomor Telepon</p>
-                                <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">{{ $user->room->orders->count() > 0 ? $user->room->orders->last()->phone : '-' }}</p>
+                                <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">{{ optional(optional(optional($user->room)->orders)->last())->phone ?? '-' }}</p>
                             </div>
                             <div>
                                 <p class="text-xs font-bold text-gray-400 uppercase mb-1">Nomor Identitas (NIK)</p>
-                                <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">{{ $user->room->orders->count() > 0 ? $user->room->orders->last()->id_number : '-' }}</p>
+                                <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">{{ optional(optional(optional($user->room)->orders)->last())->id_number ?? '-' }}</p>
                             </div>
                             <div class="sm:col-span-2">
                                 <p class="text-xs font-bold text-gray-400 uppercase mb-1">Alamat Asal</p>
-                                <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">{{ $user->room->orders->count() > 0 ? $user->room->orders->last()->address : '-' }}</p>
+                                <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">{{ optional(optional(optional($user->room)->orders)->last())->address ?? '-' }}</p>
                             </div>
                         </div>
                     </div>

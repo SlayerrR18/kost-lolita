@@ -110,10 +110,12 @@
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Durasi Sewa (Bulan)</label>
-                            <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden">
-                                <button type="button" @click="if(duration > 1) duration--" class="px-4 py-3 bg-gray-50 hover:bg-gray-100 border-r border-gray-200 text-gray-600 font-bold">-</button>
-                                <input type="number" name="rent_duration" x-model.number="duration" min="1" class="w-full border-none text-center focus:ring-0 appearance-none p-3" required readonly>
-                                <button type="button" @click="duration++" class="px-4 py-3 bg-gray-50 hover:bg-gray-100 border-l border-gray-200 text-gray-600 font-bold">+</button>
+                            <div>
+                                <select name="rent_duration" x-model.number="duration" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:border-[#222831] focus:ring focus:ring-[#222831]/20 transition-all" required>
+                                    @for ($i = 1; $i <= 12; $i++)
+                                        <option value="{{ $i }}" {{ old('rent_duration', 1) == $i ? 'selected' : '' }}>{{ $i }} Bulan</option>
+                                    @endfor
+                                </select>
                             </div>
                             @error('rent_duration') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
@@ -132,9 +134,9 @@
                         <p class="text-sm text-gray-500 mb-2">Silakan transfer Total Pembayaran ke:</p>
                         <div class="flex items-center justify-center gap-3 mb-2">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" alt="BCA" class="h-6">
-                            <span class="font-bold text-lg text-[#222831]">123 456 7890</span>
+                            <span class="font-bold text-lg text-[#222831]">7065037157</span>
                         </div>
-                        <p class="text-xs text-gray-400">a.n. Kost Lolita Management</p>
+                        <p class="text-xs text-gray-400">a.n. Yoseph Zosimus Sakera</p>
                     </div>
 
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Bukti Transfer</label>

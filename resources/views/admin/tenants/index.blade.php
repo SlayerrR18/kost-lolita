@@ -54,7 +54,7 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
                                         <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-md bg-[#222831]/10 text-[#222831] text-xs font-bold border border-[#222831]/20">
-                                            {{ $tenant->room->room_number ?? 'N/A' }}
+                                            {{ optional($tenant->room)->room_number ?? 'N/A' }}
                                         </span>
                                     </div>
                                     <div class="text-[10px] text-gray-400 mt-1">
@@ -64,7 +64,7 @@
 
                                 <td class="px-6 py-4">
                                     <div class="flex flex-col">
-                                        <span class="text-sm text-gray-700 font-medium">{{ $tenant->room->orders->count() > 0 ? $tenant->room->orders->last()->phone : 'N/A' }}</span>
+                                        <span class="text-sm text-gray-700 font-medium">{{ $tenant->room && $tenant->room->orders && $tenant->room->orders->count() > 0 ? $tenant->room->orders->last()->phone : 'N/A' }}</span>
                                         @if($tenant->phone)
                                             <a href="https://wa.me/{{ $tenant->phone }}" target="_blank" class="text-[10px] text-green-600 hover:underline flex items-center gap-1 mt-0.5">
                                                 <i class="fa-brands fa-whatsapp"></i> Chat WA
