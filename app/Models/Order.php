@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
 
 class Order extends Model
 {
@@ -33,12 +34,12 @@ class Order extends Model
     ];
 
 
-    public function getEndDateAttribute()
+   public function getEndDateAttribute()
     {
-        if ($this->start_date && $this->rent_duration) {
-            return $this->start_date->copy()->addMonths($this->rent_duration);
+        if (!$this->start_date || !$this->rent_duration) {
+            return null;
         }
-        return null;
+        return Carbon::parse($this->start_date)->addMonths($this->rent_duration);
     }
 
     public function user()

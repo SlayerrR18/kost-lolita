@@ -15,6 +15,12 @@ class OrderController extends Controller
     {
         $user = Auth::user();
 
+        // 1. CEGAH BOOKING GANDA
+        if ($user->hasActiveContract()) {
+            return redirect()->route('user.contract.index')
+                ->with('error', 'Anda sudah memiliki kamar aktif. Silakan kelola kontrak Anda di sini.');
+        }
+
         return view('user.orders.create', [
             'room' => $room,
             'user' => $user,
@@ -25,6 +31,11 @@ class OrderController extends Controller
     {
         $user = Auth::user();
 
+        if ($user->hasActiveContract()) {
+            return redirect()->route('user.contract.index')
+                ->with('error', 'Gagal memproses. Anda sudah memiliki kontrak aktif.');
+        }
+        
         $request->validate([
             'full_name'      => 'required|string|max:255',
             'phone'          => 'required|string|max:30',

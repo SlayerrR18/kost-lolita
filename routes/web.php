@@ -145,6 +145,7 @@ Route::middleware(['auth', 'approved.order'])->group(function () {
 
     // Laporan Keuangan Penghuni
     Route::get('/user/finance', [FinanceController::class, 'index'])->name('user.finance.index');
+    Route::get('/user/finance/{order}', [FinanceController::class, 'show'])->name('user.finance.show');
 
     // Manajemen Laporan & Masukan
     Route::get('/user/reports', [UserReportController::class, 'index'])->name('user.reports.index');

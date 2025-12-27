@@ -377,11 +377,28 @@
                                     <p class="text-xs text-gray-400 mb-1 uppercase tracking-wider">Harga Sewa</p>
                                     <p class="text-xl font-bold text-primary font-serif">Rp {{ number_format($room->price, 0, ',', '.') }}<span class="text-xs font-sans font-normal text-gray-500">/bln</span></p>
                                 </div>
-                                <a href="{{ route('user.orders.create', $room) }}"
+                                @auth
+                                    @if(Auth::user()->hasActiveContract())
+                                        <a href="{{ route('user.contract.index') }}"
+                                        class="bg-gray-100 text-gray-600 px-5 py-2.5 rounded-full flex items-center gap-2 text-sm font-medium transition hover:bg-gray-200">
+                                            <span>Lihat Kontrak Saya</span>
+                                            <i class="fa-solid fa-file-contract"></i>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('user.orders.create', $room) }}"
+                                        class="bg-primary text-white px-5 py-2.5 rounded-full flex items-center gap-2 text-sm font-medium shadow-md transition-all duration-300 hover:bg-accent hover:shadow-lg transform hover:-translate-y-1">
+                                            <span>Pesan Sekarang</span>
+                                            <i class="fa-regular fa-calendar-check"></i>
+                                        </a>
+                                    @endif
+                                @else
+                                    {{-- Jika belum login, arahkan ke login --}}
+                                    <a href="{{ route('login') }}"
                                     class="bg-primary text-white px-5 py-2.5 rounded-full flex items-center gap-2 text-sm font-medium shadow-md transition-all duration-300 hover:bg-accent hover:shadow-lg transform hover:-translate-y-1">
                                         <span>Pesan Sekarang</span>
-                                    <i class="fa-regular fa-calendar-check"></i>
-                                </a>
+                                        <i class="fa-regular fa-calendar-check"></i>
+                                    </a>
+                                @endauth
                             </div>
                         </div>
                     </div>

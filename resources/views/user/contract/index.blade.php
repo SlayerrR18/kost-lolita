@@ -233,7 +233,6 @@
                                     <p><strong>Catatan:</strong> Ini adalah kontrak digital yang sah. Harap perhatikan tanggal jatuh tempo.</p>
                                     <ul class="list-disc pl-4">
                                         <li>Keterlambatan pembayaran > 3 hari dikenakan denda.</li>
-                                        <li>Kerusakan fasilitas menjadi tanggung jawab penyewa.</li>
                                     </ul>
                                 </div>
                             </div>

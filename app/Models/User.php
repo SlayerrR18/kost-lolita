@@ -59,10 +59,10 @@ class User extends Authenticatable
         return $this->hasOneThrough(
             Room::class,
             Order::class,
-            'user_id', // Foreign key on orders table...
-            'id',      // Foreign key on rooms table (primary key)
-            'id',      // Local key on users table
-            'room_id'  // Local key on orders table
+            'user_id', 
+            'id',      
+            'id',      
+            'room_id'  
         )->where('orders.status', 'approved')
          ->orderBy('orders.start_date', 'desc');
     }
@@ -72,6 +72,14 @@ class User extends Authenticatable
     }
     public function receivedMessages() {
         return $this->hasMany(Message::class, 'recipient_id');
+    }
+
+   public function hasActiveContract()
+    {
+        return $this->orders()
+            ->where('status', 'approved')
+            ->whereRaw("DATE_ADD(start_date, INTERVAL rent_duration MONTH) >= ?", [now()->toDateString()])
+            ->exists();
     }
 
 }

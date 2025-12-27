@@ -32,8 +32,7 @@ return new class extends Migration
             // bukti transfer
             $table->string('transfer_proof_path');
             // status order
-            $table->enum('status', ['pending', 'approved', 'rejected'])
-                  ->default('pending');
+            $table->string('status')->default('pending');
 
             // opsional: catatan admin
             $table->text('admin_note')->nullable();

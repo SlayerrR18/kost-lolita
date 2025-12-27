@@ -16,11 +16,16 @@ class Report extends Model
         'date',
         'status',
         'response',
-        'handler_id'
+        'handler_id',
+        'response_photo', // Baru
+        'processing_at',  // Baru
+        'completed_at',
     ];
 
     protected $casts = [
         'date' => 'date',
+        'processing_at' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
     // Relasi ke User (Pelapor)

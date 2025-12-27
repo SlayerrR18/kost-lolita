@@ -44,7 +44,7 @@
                 ? 'bg-[#DFD0B8] text-[#222831] font-bold shadow-md transform translate-x-1'
                 : 'text-gray-500 hover:bg-gray-50 hover:text-[#222831] hover:translate-x-1' }}">
                 <i class="fa-solid fa-money-bill-transfer w-6 text-lg {{ request()->routeIs('user.finance.index') ? '' : 'text-gray-400 group-hover:text-[#222831]' }}"></i>
-                <span class="mx-3">Laporan Keuangan</span>
+                <span class="mx-3">Laporan Transaksi</span>
         </a>
 
         <div class="my-4 border-t border-gray-100"></div>

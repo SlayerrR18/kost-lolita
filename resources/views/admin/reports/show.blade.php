@@ -101,14 +101,14 @@
                         @endif
                     </div>
 
-                    <form action="{{ route('admin.reports.update', $report->id) }}" method="POST">
+                    <form action="{{ route('admin.reports.update', $report->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
                         <div class="mb-5">
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Update Status</label>
                             <div class="relative">
-                                <select name="status" class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 rounded-xl px-4 py-3 pr-8 focus:outline-none focus:ring-2 focus:ring-[#222831] focus:border-transparent cursor-pointer font-medium">
+                                <select name="status" class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 rounded-xl px-4 py-3 pr-8 focus:outline-none focus:ring-2 focus:ring-[#222831] cursor-pointer">
                                     <option value="dikirim" {{ $report->status == 'dikirim' ? 'selected' : '' }}>⏳ Menunggu (Baru)</option>
                                     <option value="sedang_dikerjakan" {{ $report->status == 'sedang_dikerjakan' ? 'selected' : '' }}>🛠️ Sedang Dikerjakan</option>
                                     <option value="selesai" {{ $report->status == 'selesai' ? 'selected' : '' }}>✅ Selesai</option>
@@ -119,14 +119,28 @@
                             </div>
                         </div>
 
-                        <div class="mb-6">
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Berikan Tanggapan</label>
-                            <textarea name="response" rows="6"
-                                      class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#222831] focus:border-transparent placeholder-gray-400"
-                                      placeholder="Tulis pesan balasan untuk penghuni di sini...">{{ old('response', $report->response) }}</textarea>
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Tanggapan Text</label>
+                            <textarea name="response" rows="4"
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#222831]"
+                                    placeholder="Tulis pesan balasan...">{{ old('response', $report->response) }}</textarea>
                         </div>
 
-                        <button type="submit" class="w-full bg-[#222831] text-[#DFD0B8] font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2">
+                        <div class="mb-6">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Lampirkan Foto Bukti (Opsional)</label>
+                            <div class="flex items-center gap-3">
+                                @if($report->response_photo)
+                                    <div class="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 group">
+                                        <img src="{{ asset('storage/' . $report->response_photo) }}" class="w-full h-full object-cover">
+                                        <div class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center text-white text-xs">Ada</div>
+                                    </div>
+                                @endif
+                                <input type="file" name="response_photo" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#222831] file:text-[#DFD0B8] hover:file:bg-black transition"/>
+                            </div>
+                            <p class="text-[10px] text-gray-400 mt-1">Format: JPG, PNG. Max: 2MB. (Misal: Foto perbaikan selesai)</p>
+                        </div>
+
+                        <button type="submit" class="w-full bg-[#222831] text-[#DFD0B8] font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2">
                             <i class="fa-solid fa-paper-plane"></i> Simpan & Kirim
                         </button>
                     </form>
