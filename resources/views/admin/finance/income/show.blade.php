@@ -1,162 +1,167 @@
 @extends('layouts.admin-layout')
 
-@section('title', 'Detail Pendapatan - Admin Kost Lolita')
+@section('title', 'Detail Pendapatan')
 
 @section('content')
-<div x-data="{ deleteModalOpen: false }" class="py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+@php use Illuminate\Support\Str; @endphp
 
-        <div class="flex items-center gap-4 mb-8">
-            <a href="{{ route('admin.finance.income.index') }}" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-500 hover:bg-[#222831] hover:text-[#DFD0B8] transition-colors shadow-sm">
-                <i class="fa-solid fa-arrow-left"></i>
-            </a>
-            <div>
-                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Keuangan</span>
-                <h1 class="text-2xl font-serif font-bold text-[#222831]">Rincian Pemasukan</h1>
+<div x-data="{ deleteModalOpen: false, lightboxOpen: false, lightboxSrc: '' }" class="py-8">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-4">
+                <a href="{{ route('admin.finance.income.index') }}" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-500 hover:bg-[#222831] hover:text-[#DFD0B8] transition-colors shadow-sm">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Keuangan</span>
+                    <h1 class="text-2xl font-serif font-bold text-[#222831]">Detail Transaksi</h1>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <a href="{{ route('admin.finance.income.edit', $income) }}" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-bold shadow-sm hover:bg-gray-50 transition">
+                    <i class="fa-solid fa-pen-to-square"></i> <span class="hidden sm:inline ml-1">Edit</span>
+                </a>
+                <button @click="deleteModalOpen = true" class="px-4 py-2 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm font-bold shadow-sm hover:bg-red-100 transition">
+                    <i class="fa-solid fa-trash-can"></i> <span class="hidden sm:inline ml-1">Hapus</span>
+                </button>
             </div>
         </div>
 
         <div class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden relative">
-
-            <div class="bg-[#222831] p-8 text-white flex flex-col md:flex-row justify-between items-start md:items-center relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                    <i class="fa-solid fa-hand-holding-dollar text-9xl text-white"></i>
-                </div>
-
-                <div class="relative z-10">
-                    <p class="text-green-400 text-sm font-bold uppercase tracking-widest mb-1">Total Terima</p>
-                    <h2 class="text-4xl font-bold font-mono text-white">
-                        + Rp {{ number_format($income->amount, 0, ',', '.') }}
-                    </h2>
-                </div>
-
-                <div class="mt-4 md:mt-0 relative z-10">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
-                        <i class="fa-regular fa-calendar text-green-400"></i>
-                        <span class="font-medium">{{ $income->date->format('d F Y') }}</span>
-                    </div>
-                </div>
-            </div>
+            <div class="h-2 bg-gradient-to-r from-[#222831] to-[#393E46]"></div>
 
             <div class="p-8">
 
-                <div class="mb-8 border-b border-dashed border-gray-200 pb-6">
-                    <h3 class="text-xl font-bold text-[#222831] mb-2">{{ $income->source }}</h3>
-                    @if($income->description)
-                        <p class="text-gray-500 text-sm leading-relaxed">{{ $income->description }}</p>
-                    @else
-                        <p class="text-gray-400 text-sm italic">Tidak ada catatan tambahan.</p>
-                    @endif
+                <div class="text-center mb-8 pb-8 border-b border-dashed border-gray-200">
+                    <p class="text-gray-500 text-sm font-medium mb-1">Total Pemasukan</p>
+                    <h2 class="text-4xl md:text-5xl font-bold font-mono text-[#222831] tracking-tight">
+                        <span class="text-2xl text-gray-400 align-top mr-1">Rp</span>{{ number_format($income->amount, 0, ',', '.') }}
+                    </h2>
+                    <div class="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 text-xs font-bold uppercase tracking-wide rounded-full border border-green-100">
+                        <i class="fa-solid fa-circle-check"></i> Terverifikasi
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 mb-8">
 
                     <div>
-                        <p class="text-xs font-bold text-gray-400 uppercase mb-2">Kategori Pendapatan</p>
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-1">Sumber Dana</p>
+                        <p class="text-lg font-bold text-gray-800">{{ $income->source }}</p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-1">Tanggal Terima</p>
+                        <p class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fa-regular fa-calendar text-gray-400"></i>
+                            {{ $income->date->format('d F Y') }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-1">Kategori</p>
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 text-xs">
                                 <i class="fa-solid fa-layer-group"></i>
                             </div>
-                            <div>
-                                <p class="font-bold text-gray-800">
-                                    {{ $categories[$income->category] ?? ucfirst($income->category) }}
-                                </p>
-                            </div>
+                            <span class="font-medium text-gray-700">
+                                {{ $categories[$income->category] ?? ucfirst($income->category) }}
+                            </span>
                         </div>
                     </div>
 
                     <div>
-                        <p class="text-xs font-bold text-gray-400 uppercase mb-2">Metode Pembayaran</p>
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600">
-                                <i class="fa-solid fa-wallet"></i>
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-1">Metode Pembayaran</p>
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 text-xs">
+                                <i class="fa-solid fa-credit-card"></i>
                             </div>
-                            <div>
-                                <p class="font-bold text-gray-800 capitalize">
-                                    {{ $paymentMethods[$income->payment_method] ?? $income->payment_method }}
-                                </p>
-                                @if($income->reference)
-                                    <p class="text-xs text-gray-500">Ref: {{ $income->reference }}</p>
-                                @endif
-                            </div>
+                            <span class="font-medium text-gray-700 capitalize">
+                                {{ $paymentMethods[$income->payment_method] ?? $income->payment_method }}
+                            </span>
                         </div>
                     </div>
 
                 </div>
 
-                <div class="flex justify-between items-center text-xs text-gray-400 pt-6 border-t border-gray-100">
-                    <span>Dibuat: {{ $income->created_at->format('d M Y, H:i') }}</span>
-                    <span>Terakhir Update: {{ $income->updated_at->format('d M Y, H:i') }}</span>
-                </div>
+                @if($income->description)
+                    <div class="bg-gray-50 rounded-2xl p-5 mb-8 border border-gray-100">
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-2">Catatan / Keterangan</p>
+                        <p class="text-gray-700 text-sm leading-relaxed">{{ $income->description }}</p>
+                    </div>
+                @endif
+
+                @if($income->bukti_transfer)
+                    <div class="border-t border-gray-100 pt-6">
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-paperclip"></i> Bukti Lampiran
+                        </p>
+
+                        @if(Str::endsWith($income->bukti_transfer, ['.jpg', '.jpeg', '.png', '.gif', '.webp']))
+                            <div class="relative group w-full md:w-64 h-40 rounded-xl overflow-hidden border border-gray-200 cursor-pointer shadow-sm"
+                                 @click="lightboxSrc = '{{ asset('storage/' . $income->bukti_transfer) }}'; lightboxOpen = true">
+                                <img src="{{ asset('storage/' . $income->bukti_transfer) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
+                                    <i class="fa-solid fa-magnifying-glass-plus text-2xl mb-1"></i>
+                                    <span class="text-[10px] font-bold uppercase">Lihat Detail</span>
+                                </div>
+                            </div>
+                        @else
+                            <a href="{{ asset('storage/' . $income->bukti_transfer) }}" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition group">
+                                <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center text-red-500 group-hover:scale-110 transition">
+                                    <i class="fa-solid fa-file-pdf text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-gray-800">Dokumen Bukti</p>
+                                    <p class="text-xs text-gray-500">Klik untuk mengunduh</p>
+                                </div>
+                                <i class="fa-solid fa-download ml-auto text-gray-400"></i>
+                            </a>
+                        @endif
+                    </div>
+                @endif
 
             </div>
-        </div>
 
-        <div class="mt-8 flex justify-end gap-3">
-            <a href="{{ route('admin.finance.income.edit', $income) }}"
-               class="px-6 py-3 rounded-xl border border-gray-200 bg-white text-gray-700 font-bold hover:bg-gray-50 hover:text-yellow-600 hover:border-yellow-200 transition-all shadow-sm flex items-center gap-2">
-                <i class="fa-solid fa-pen-to-square"></i> Edit Data
-            </a>
-
-            <button @click="deleteModalOpen = true"
-                    class="px-6 py-3 rounded-xl bg-red-50 text-red-600 border border-red-100 font-bold hover:bg-red-100 transition-all shadow-sm flex items-center gap-2">
-                <i class="fa-solid fa-trash-can"></i> Hapus
-            </button>
+            <div class="bg-gray-50 px-8 py-4 border-t border-gray-100 flex justify-between items-center text-xs text-gray-400">
+                <span>Dibuat: {{ $income->created_at->format('d M Y, H:i') }}</span>
+                <span class="font-mono">ID: #INC-{{ str_pad($income->id, 5, '0', STR_PAD_LEFT) }}</span>
+            </div>
         </div>
 
     </div>
 
-    <div x-show="deleteModalOpen"
-         style="display: none;"
-         class="fixed inset-0 z-[999] overflow-y-auto"
-         aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
-
-        <div x-show="deleteModalOpen"
-             x-transition:enter="ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"></div>
-
-        <div class="flex min-h-full items-center justify-center p-4 text-center">
-            <div x-show="deleteModalOpen"
-                 @click.away="deleteModalOpen = false"
-                 x-transition:enter="ease-out duration-300"
-                 x-transition:enter-start="opacity-0 translate-y-4 scale-95"
-                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                 class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-gray-100">
-
-                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                            <i class="fa-solid fa-triangle-exclamation text-red-600"></i>
-                        </div>
-                        <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                            <h3 class="text-lg font-serif font-bold text-[#222831]">Hapus Data Pendapatan?</h3>
-                            <div class="mt-2">
-                                <p class="text-sm text-gray-500">
-                                    Anda yakin ingin menghapus data dari <strong>{{ $income->source }}</strong> senilai <strong>Rp {{ number_format($income->amount, 0, ',', '.') }}</strong>? <br>
-                                    Data yang dihapus akan mempengaruhi laporan keuangan.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+    <div x-show="deleteModalOpen" style="display: none;" class="fixed inset-0 z-[99] overflow-y-auto" x-cloak>
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" x-show="deleteModalOpen" x-transition.opacity></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div x-show="deleteModalOpen" @click.away="deleteModalOpen = false" x-transition class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl p-6 border border-gray-100 text-center">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
+                    <i class="fa-solid fa-trash-can text-xl"></i>
                 </div>
-
-                <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-2">
-                    <form action="{{ route('admin.finance.income.destroy', $income) }}" method="POST" class="w-full sm:w-auto">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="inline-flex w-full justify-center rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:w-auto transition-colors">
-                            Ya, Hapus
-                        </button>
+                <h3 class="text-lg font-bold text-[#222831]">Hapus Data?</h3>
+                <p class="text-sm text-gray-500 mt-2 mb-6">
+                    Data pendapatan senilai <strong>Rp {{ number_format($income->amount, 0, ',', '.') }}</strong> akan dihapus permanen.
+                </p>
+                <div class="flex gap-2 justify-center">
+                    <button @click="deleteModalOpen = false" class="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-bold text-sm hover:bg-gray-50">Batal</button>
+                    <form action="{{ route('admin.finance.income.destroy', $income) }}" method="POST">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="px-4 py-2.5 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 shadow-md">Ya, Hapus</button>
                     </form>
-                    <button @click="deleteModalOpen = false" type="button" class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition-colors">
-                        Batal
-                    </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="lightboxOpen" style="display: none;" class="fixed inset-0 z-[100] overflow-hidden" x-cloak>
+        <div class="absolute inset-0 bg-black/95 backdrop-blur-sm transition-opacity" @click="lightboxOpen = false"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+            <div class="relative max-w-4xl w-full pointer-events-auto" x-show="lightboxOpen" x-transition.scale>
+                <button @click="lightboxOpen = false" class="absolute -top-12 right-0 text-white hover:text-gray-300 text-2xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <img :src="lightboxSrc" class="w-full h-auto max-h-[85vh] object-contain rounded-lg shadow-2xl">
             </div>
         </div>
     </div>

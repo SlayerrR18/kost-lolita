@@ -6,6 +6,7 @@ use App\Models\Expense;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class ExpenseController extends Controller
 {
@@ -68,7 +69,14 @@ class ExpenseController extends Controller
             'category' => 'required|in:' . implode(',', array_keys(Expense::getCategoryOptions())),
             'payment_method' => 'required|in:' . implode(',', array_keys($this->getPaymentMethods())),
             'reference' => 'nullable|string|max:100',
+            'bukti_transfer' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
+
+        // Handle uploaded bukti transfer
+        if ($request->hasFile('bukti_transfer')) {
+            $path = $request->file('bukti_transfer')->store('expenses/bukti_transfer', 'public');
+            $validated['bukti_transfer'] = $path;
+        }
 
         Expense::create($validated);
 
@@ -113,7 +121,17 @@ class ExpenseController extends Controller
             'category' => 'required|in:' . implode(',', array_keys(Expense::getCategoryOptions())),
             'payment_method' => 'required|in:' . implode(',', array_keys($this->getPaymentMethods())),
             'reference' => 'nullable|string|max:100',
+            'bukti_transfer' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
+
+        // Handle uploaded bukti transfer (replace old file if present)
+        if ($request->hasFile('bukti_transfer')) {
+            if ($expense->bukti_transfer) {
+                Storage::disk('public')->delete($expense->bukti_transfer);
+            }
+            $path = $request->file('bukti_transfer')->store('expenses/bukti_transfer', 'public');
+            $validated['bukti_transfer'] = $path;
+        }
 
         $expense->update($validated);
 
@@ -126,6 +144,11 @@ class ExpenseController extends Controller
      */
     public function destroy(Expense $expense)
     {
+        // delete associated file
+        if ($expense->bukti_transfer) {
+            Storage::disk('public')->delete($expense->bukti_transfer);
+        }
+
         $expense->delete();
 
         return redirect()->route('admin.finance.expense.index')

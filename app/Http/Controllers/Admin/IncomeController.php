@@ -6,6 +6,7 @@ use App\Models\Income;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class IncomeController extends Controller
 {
@@ -68,7 +69,14 @@ class IncomeController extends Controller
             'category' => 'required|in:' . implode(',', array_keys(Income::getCategoryOptions())),
             'payment_method' => 'required|in:' . implode(',', array_keys($this->getPaymentMethods())),
             'reference' => 'nullable|string|max:100',
+            'bukti_transfer' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
+
+        // Handle uploaded bukti transfer
+        if ($request->hasFile('bukti_transfer')) {
+            $path = $request->file('bukti_transfer')->store('incomes/bukti_transfer', 'public');
+            $validated['bukti_transfer'] = $path;
+        }
 
         Income::create($validated);
 
@@ -113,7 +121,18 @@ class IncomeController extends Controller
             'category' => 'required|in:' . implode(',', array_keys(Income::getCategoryOptions())),
             'payment_method' => 'required|in:' . implode(',', array_keys($this->getPaymentMethods())),
             'reference' => 'nullable|string|max:100',
+            'bukti_transfer' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
+
+        // Handle uploaded bukti transfer (replace old file if present)
+        if ($request->hasFile('bukti_transfer')) {
+            // delete old file
+            if ($income->bukti_transfer) {
+                Storage::disk('public')->delete($income->bukti_transfer);
+            }
+            $path = $request->file('bukti_transfer')->store('incomes/bukti_transfer', 'public');
+            $validated['bukti_transfer'] = $path;
+        }
 
         $income->update($validated);
 
@@ -126,6 +145,11 @@ class IncomeController extends Controller
      */
     public function destroy(Income $income)
     {
+        // delete associated file
+        if ($income->bukti_transfer) {
+            Storage::disk('public')->delete($income->bukti_transfer);
+        }
+
         $income->delete();
 
         return redirect()->route('admin.finance.income.index')

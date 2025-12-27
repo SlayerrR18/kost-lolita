@@ -17,6 +17,7 @@ class Expense extends Model
         'category',
         'payment_method',
         'reference',
+        'bukti_transfer',
     ];
 
     protected $casts = [

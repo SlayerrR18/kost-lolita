@@ -125,6 +125,18 @@
                                 <p class="text-xs font-bold text-gray-400 uppercase mb-1">Alamat Asal</p>
                                 <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">{{ optional(optional(optional($user->room)->orders)->last())->address ?? '-' }}</p>
                             </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase mb-1">Tanggal Masuk Kost</p>
+                                <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">
+                                    {{ optional(optional(optional($user->room)->orders)->last())->start_date ? optional(optional(optional($user->room)->orders)->last())->start_date->format('d M Y') : '-' }}
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase mb-1">Tanggal Keluar Kost</p>
+                                <p class="font-medium text-gray-800 border-b border-gray-100 pb-2">
+                                    {{ optional(optional(optional($user->room)->orders)->last())->end_date ? optional(optional(optional($user->room)->orders)->last())->end_date->format('d M Y') : '-' }}
+                                </p>
+                            </div>
                         </div>
                     </div>
 

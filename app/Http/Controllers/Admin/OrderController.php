@@ -62,6 +62,8 @@ class OrderController extends Controller
                 'payment_method' => 'transfer',
                 'reference' => 'ORD-' . $order->id,
                 'order_id' => $order->id,
+                // copy transfer proof from order if present so it appears in Income
+                'bukti_transfer' => $order->transfer_proof_path ?? null,
             ]);
 
             // Jika ini adalah perpanjangan dengan pergantian kamar, coba bebaskan kamar lama (parent)

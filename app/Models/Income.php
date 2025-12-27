@@ -17,6 +17,7 @@ class Income extends Model
         'category',
         'payment_method',
         'reference',
+        'bukti_transfer',
         'order_id',
     ];
 
