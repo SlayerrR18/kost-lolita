@@ -19,7 +19,6 @@ class AdminDashboardController extends Controller
         $selectedYear = (int) $request->input('year', now()->year);
         $selectedMonth = (int) $request->input('month', now()->month);
 
-        // List tahun yang tersedia di DB (untuk dropdown)
         $availableYears = Income::selectRaw('YEAR(date) as year')
             ->union(Expense::selectRaw('YEAR(date) as year'))
             ->distinct()
@@ -29,33 +28,31 @@ class AdminDashboardController extends Controller
 
         if (empty($availableYears)) $availableYears = [now()->year];
 
-        // 2. Card Stats (Berdasarkan Bulan & Tahun yang dipilih)
+        // Card Metrics
         $totalrooms = Room::count();
         $availablerooms = Room::where('status', 'available')->count();
 
-        // Penghuni Aktif (User yang punya order approved & masih dalam periode sewa)
+        // Penghuni Aktif
         $activeusers = User::whereHas('orders', function ($query) {
             $query->where('status', 'approved');
         })->count();
 
-        // Sample Avatar User
         $activeUserSamples = User::whereHas('orders', function ($query) {
             $query->where('status', 'approved');
         })->take(5)->get();
 
-        // Hitung Keuangan Bulan Ini (Selected) vs Bulan Lalu
+        // Keuangan
         $currentIncome = Income::whereYear('date', $selectedYear)->whereMonth('date', $selectedMonth)->sum('amount');
         $currentExpense = Expense::whereYear('date', $selectedYear)->whereMonth('date', $selectedMonth)->sum('amount');
         $currentProfit = $currentIncome - $currentExpense;
 
-        // Hitung Bulan Sebelumnya untuk Komparasi
         $lastDate = Carbon::createFromDate($selectedYear, $selectedMonth, 1)->subMonth();
         $lastProfit = Income::whereYear('date', $lastDate->year)->whereMonth('date', $lastDate->month)->sum('amount')
                     - Expense::whereYear('date', $lastDate->year)->whereMonth('date', $lastDate->month)->sum('amount');
 
-        // Persentase Kenaikan/Penurunan Profit
+        // Perhitungan Profit
         $profitPercentage = 0;
-        $profitTrend = 'neutral'; // up, down, neutral
+        $profitTrend = 'neutral';
         if ($lastProfit > 0) {
             $profitPercentage = (($currentProfit - $lastProfit) / $lastProfit) * 100;
             $profitTrend = $profitPercentage > 0 ? 'up' : 'down';
@@ -64,7 +61,6 @@ class AdminDashboardController extends Controller
             $profitTrend = 'up';
         }
 
-        // 3. Main Chart Data (Selalu Tampilkan 1 Tahun Penuh dari Tahun yang Dipilih)
         $monthlyIncomes = [];
         $monthlyExpenses = [];
         for ($m = 1; $m <= 12; $m++) {
@@ -72,7 +68,6 @@ class AdminDashboardController extends Controller
             $monthlyExpenses[] = (int) Expense::whereYear('date', $selectedYear)->whereMonth('date', $m)->sum('amount');
         }
 
-        // 4. Expense Distribution & Top Categories (Berdasarkan Tahun yang Dipilih)
         $expenseByCategory = Expense::whereYear('date', $selectedYear)
             ->select('category', DB::raw('SUM(amount) as total'))
             ->groupBy('category')
@@ -81,22 +76,20 @@ class AdminDashboardController extends Controller
 
         $totalExpenseYearly = $expenseByCategory->sum('total');
 
-        // Warna Chart Konsisten
         $chartColors = ['#222831', '#DFD0B8', '#9CA3AF', '#60A5FA', '#F97316', '#10B981'];
 
         $topExpenseCategories = $expenseByCategory->take(3)->map(function ($item, $key) use ($totalExpenseYearly, $chartColors) {
             $item->formatted_total = 'Rp ' . number_format($item->total, 0, ',', '.');
-            // Hindari division by zero
             $item->percentage = $totalExpenseYearly > 0 ? round(($item->total / $totalExpenseYearly) * 100, 1) : 0;
             $item->color = $chartColors[$key] ?? '#cccccc';
             return $item;
         });
 
-        // Data untuk Donut Chart
+        // Donut Chart
         $expenseLabels = $expenseByCategory->pluck('category');
         $expenseValues = $expenseByCategory->pluck('total');
 
-        // 5. Recent Payments
+        // Pembayaran Terbaru
         $recentPayments = Income::with(['order.user', 'order.room'])
             ->whereNotNull('order_id')
             ->orderBy('date', 'desc')

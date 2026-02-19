@@ -10,10 +10,9 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminTenantController extends Controller
 {
-    // Menampilkan daftar penghuni kost
     public function index()
     {
-        // Ambil semua user dengan role 'tenant' dan eager-load current room + orders
+        // Ambil semua user dengan role 'tenant' dan + orders
         $tenants = User::where('role', 'tenant')
             ->with(['room', 'orders'])
             ->get();

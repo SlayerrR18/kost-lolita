@@ -45,9 +45,7 @@ class ExpenseController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+
     public function create()
     {
         return view('admin.finance.expense.create', [
@@ -56,9 +54,7 @@ class ExpenseController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -84,9 +80,6 @@ class ExpenseController extends Controller
                         ->with('success', 'Pengeluaran berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Expense $expense)
     {
         return view('admin.finance.expense.show', [
@@ -96,9 +89,7 @@ class ExpenseController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+
     public function edit(Expense $expense)
     {
         return view('admin.finance.expense.edit', [
@@ -108,9 +99,7 @@ class ExpenseController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(Request $request, Expense $expense)
     {
         $validated = $request->validate([
@@ -124,7 +113,7 @@ class ExpenseController extends Controller
             'bukti_transfer' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
-        // Handle uploaded bukti transfer (replace old file if present)
+        // Handle uploaded bukti transfer
         if ($request->hasFile('bukti_transfer')) {
             if ($expense->bukti_transfer) {
                 Storage::disk('public')->delete($expense->bukti_transfer);
@@ -139,12 +128,10 @@ class ExpenseController extends Controller
                         ->with('success', 'Pengeluaran berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(Expense $expense)
     {
-        // delete associated file
+
         if ($expense->bukti_transfer) {
             Storage::disk('public')->delete($expense->bukti_transfer);
         }
@@ -155,9 +142,6 @@ class ExpenseController extends Controller
                         ->with('success', 'Pengeluaran berhasil dihapus.');
     }
 
-    /**
-     * Get available payment methods.
-     */
     private function getPaymentMethods()
     {
         return [

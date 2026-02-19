@@ -24,7 +24,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        // Gunakan mekanisme autentikasi dari Breeze
+
         $request->authenticate();
         $request->session()->regenerate();
 

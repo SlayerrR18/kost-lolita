@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\Storage;
 
 class IncomeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $query = Income::latest();
@@ -45,9 +42,7 @@ class IncomeController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+
     public function create()
     {
         return view('admin.finance.income.create', [
@@ -56,9 +51,7 @@ class IncomeController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -84,9 +77,7 @@ class IncomeController extends Controller
                         ->with('success', 'Pendapatan berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
+
     public function show(Income $income)
     {
         return view('admin.finance.income.show', [
@@ -96,9 +87,7 @@ class IncomeController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+
     public function edit(Income $income)
     {
         return view('admin.finance.income.edit', [
@@ -108,9 +97,7 @@ class IncomeController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(Request $request, Income $income)
     {
         $validated = $request->validate([
@@ -140,9 +127,7 @@ class IncomeController extends Controller
                         ->with('success', 'Pendapatan berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(Income $income)
     {
         // delete associated file
@@ -156,9 +141,6 @@ class IncomeController extends Controller
                         ->with('success', 'Pendapatan berhasil dihapus.');
     }
 
-    /**
-     * Get available payment methods.
-     */
     private function getPaymentMethods()
     {
         return [

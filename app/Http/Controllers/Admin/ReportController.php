@@ -12,10 +12,10 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        // Query Dasar
+
         $query = Report::with('user')->latest();
 
-        // 1. Filter Pencarian (Nama User atau Isi Pesan)
+
         if ($request->filled('q')) {
             $search = $request->q;
             $query->where(function($q) use ($search) {
@@ -26,12 +26,12 @@ class ReportController extends Controller
             });
         }
 
-        // 2. Filter Status
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // 3. Filter Tanggal (Dari - Sampai)
+
         if ($request->filled('from')) {
             $query->whereDate('date', '>=', $request->from);
         }
@@ -54,7 +54,7 @@ class ReportController extends Controller
     $request->validate([
         'status' => 'required|in:dikirim,sedang_dikerjakan,selesai',
         'response' => 'nullable|string',
-        'response_photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Validasi foto
+        'response_photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
     ]);
 
     $data = [
@@ -62,18 +62,17 @@ class ReportController extends Controller
         'response' => $request->response,
     ];
 
-    // 1. Logika Timestamp (Mencatat Waktu Perubahan Status)
+
     if ($request->status == 'sedang_dikerjakan' && is_null($report->processing_at)) {
         $data['processing_at'] = now();
     } elseif ($request->status == 'selesai' && is_null($report->completed_at)) {
-        // Jika langsung loncat ke selesai, pastikan processing juga terisi
+
         if (is_null($report->processing_at)) {
             $data['processing_at'] = now();
         }
         $data['completed_at'] = now();
     }
 
-    // 2. Logika Upload Foto Balasan Admin
     if ($request->hasFile('response_photo')) {
         // Hapus foto lama jika ada
         if ($report->response_photo) {
@@ -88,7 +87,7 @@ class ReportController extends Controller
 }
     public function destroy(Report $report)
     {
-        // Hapus foto jika ada
+       
         if ($report->photo) {
             Storage::disk('public')->delete($report->photo);
         }

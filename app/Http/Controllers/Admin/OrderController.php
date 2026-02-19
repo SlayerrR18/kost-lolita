@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    // 1. IMPROVE INDEX: Filter agar tampil 1 data relevan per user
+
     public function index(Request $request)
     {
         $status = $request->query('status');
@@ -20,9 +20,6 @@ class OrderController extends Controller
         if ($status) {
             $query->where('status', $status);
         } else {
-            // JIKA TIDAK ADA FILTER STATUS KHUSUS:
-            // Sembunyikan yang 'finished' (kontrak lama) dan 'rejected'
-            // Jadi yang tampil hanya: Pending (Baru masuk) atau Approved (Sedang Kost)
             $query->whereNotIn('status', ['finished', 'rejected']);
         }
 
@@ -44,13 +41,9 @@ class OrderController extends Controller
             ->get();
 
         // HITUNG TOTAL DURASI (Akumulasi)
-        // Menjumlahkan semua durasi dari order yang statusnya 'approved' atau 'finished'
         $totalDuration = Order::where('user_id', $order->user_id)
             ->whereIn('status', ['approved', 'finished'])
             ->sum('rent_duration');
-
-        // Jika order saat ini statusnya 'approved', dia sudah termasuk di hitungan atas.
-        // Jika 'pending', kita bisa menambahkannya secara visual nanti sebagai "+ X bulan".
 
         return view('admin.orders.show', compact('order', 'history', 'totalDuration'));
     }
@@ -73,18 +66,13 @@ class OrderController extends Controller
                 'admin_note' => $request->admin_note,
             ]);
 
-            // =========================================================
-            // LOGIKA JIKA DISETUJUI (APPROVED)
-            // =========================================================
+            // aprove
             if ($request->status === 'approved') {
 
-                // A. Update kamar yang dipesan menjadi 'occupied'
                 if ($order->room) {
                     $order->room->update(['status' => 'occupied']);
                 }
 
-                // B. Buat record Pemasukan (Income) dengan PERHITUNGAN BENAR
-                // PERBAIKAN: Harga dikali Durasi
                 $pricePerMonth = $order->room->price ?? 0;
                 $duration      = $order->rent_duration ?? 1; // Default 1 bulan jika null
                 $totalAmount   = $pricePerMonth * $duration;
@@ -101,18 +89,16 @@ class OrderController extends Controller
                     'bukti_transfer' => $order->transfer_proof_path ?? null,
                 ]);
 
-                // C. LOGIKA PERPANJANGAN (HANDLE PARENT ORDER)
                 if ($order->parent_order_id) {
                     $parent = Order::find($order->parent_order_id);
 
                     if ($parent) {
-                        // 1. Tandai kontrak lama sebagai 'finished'
-                        // (Pastikan kolom status di DB sudah diubah jadi VARCHAR, bukan ENUM)
+
                         $parent->update(['status' => 'finished']);
 
-                        // 2. Jika Perpanjangan + Ganti Kamar (extension_change)
+
                         if ($order->type === 'extension_change') {
-                            // Kosongkan kamar lama (milik parent)
+
                             if ($parent->room) {
                                 $parent->room->update(['status' => 'available']);
                             }
@@ -121,9 +107,7 @@ class OrderController extends Controller
                 }
             }
 
-            // =========================================================
-            // LOGIKA JIKA DITOLAK (REJECTED)
-            // =========================================================
+           // reject
             if ($request->status === 'rejected') {
                 // Cek apakah kamar ini punya order lain yang aktif (approved) selain order ini
                 $isOccupiedByOthers = Order::where('room_id', $order->room_id)
@@ -131,7 +115,7 @@ class OrderController extends Controller
                     ->where('id', '!=', $order->id)
                     ->exists();
 
-                // Jika tidak ada yang menempati, kembalikan jadi available
+                // Jika tidak ada yang menempati,
                 if (!$isOccupiedByOthers && $order->room) {
                     $order->room->update(['status' => 'available']);
                 }

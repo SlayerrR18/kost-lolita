@@ -68,7 +68,7 @@ class RoomController extends Controller
     }
 
 
-    // ✅ DETAIL KAMAR (INI YANG BIKIN ERROR KALAU GA ADA)
+    
     public function show(Room $room)
     {
         return view('admin.rooms.show', compact('room'));
