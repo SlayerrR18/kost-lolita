@@ -76,18 +76,21 @@ class OrderController extends Controller
                 $pricePerMonth = $order->room->price ?? 0;
                 $duration      = $order->rent_duration ?? 1; // Default 1 bulan jika null
                 $totalAmount   = $pricePerMonth * $duration;
+                $paymentMethod = $order->transfer_proof_path ? 'transfer' : 'midtrans';
 
-                Income::create([
-                    'source'         => 'Sewa Kamar ' . ($order->room->room_number ?? '-'),
-                    'description'    => 'Penyewa: ' . $order->full_name . ' | Durasi: ' . $order->rent_duration . ' bulan',
-                    'amount'         => $totalAmount, // Menggunakan total hasil perkalian
-                    'date'           => now()->toDateString(),
-                    'category'       => 'room_rent',
-                    'payment_method' => 'transfer',
-                    'reference'      => 'ORD-' . $order->id,
-                    'order_id'       => $order->id,
-                    'bukti_transfer' => $order->transfer_proof_path ?? null,
-                ]);
+                if (!Income::where('order_id', $order->id)->exists()) {
+                    Income::create([
+                        'source'         => 'Sewa Kamar ' . ($order->room->room_number ?? '-'),
+                        'description'    => 'Penyewa: ' . $order->full_name . ' | Durasi: ' . $order->rent_duration . ' bulan',
+                        'amount'         => $totalAmount, // Menggunakan total hasil perkalian
+                        'date'           => now()->toDateString(),
+                        'category'       => 'room_rent',
+                        'payment_method' => $paymentMethod,
+                        'reference'      => 'ORD-' . $order->id,
+                        'order_id'       => $order->id,
+                        'bukti_transfer' => $order->transfer_proof_path ?: null,
+                    ]);
+                }
 
                 if ($order->parent_order_id) {
                     $parent = Order::find($order->parent_order_id);

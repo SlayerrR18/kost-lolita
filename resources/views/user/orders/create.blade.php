@@ -127,21 +127,13 @@
                         <div class="w-10 h-10 rounded-full bg-[#DFD0B8]/20 flex items-center justify-center text-[#222831]">
                             <i class="fa-solid fa-wallet text-lg"></i>
                         </div>
-                        <h2 class="text-xl font-bold text-[#222831]">Bukti Pembayaran</h2>
+                        <h2 class="text-xl font-bold text-[#222831]">Pembayaran Online</h2>
                     </div>
 
-                    <div class="bg-gray-50 rounded-xl p-5 mb-5 border border-dashed border-gray-300 text-center">
-                        <p class="text-sm text-gray-500 mb-2">Silakan transfer Total Pembayaran ke:</p>
-                        <div class="flex items-center justify-center gap-3 mb-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" alt="BCA" class="h-6">
-                            <span class="font-bold text-lg text-[#222831]">7065037157</span>
-                        </div>
-                        <p class="text-xs text-gray-400">a.n. Yoseph Zosimus Sakera</p>
+                    <div class="bg-gray-50 rounded-xl p-5 border border-dashed border-gray-300 text-center text-sm text-gray-600">
+                        <p class="mb-2">Setelah klik <strong>Bayar Sekarang</strong>, Anda akan diarahkan ke halaman pembayaran Midtrans.</p>
+                        <p class="text-xs">Pilih metode pembayaran yang tersedia seperti virtual account, e-wallet, atau kartu debit/kredit.</p>
                     </div>
-
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Bukti Transfer</label>
-                    <input type="file" name="transfer_proof" class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#222831] file:text-[#DFD0B8] hover:file:bg-gray-800 transition-all cursor-pointer border border-gray-200 rounded-xl" required accept="image/*">
-                    @error('transfer_proof') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
             </div>

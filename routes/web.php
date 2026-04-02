@@ -15,6 +15,7 @@ use App\Http\Controllers\User\ContractController;
 use App\Http\Controllers\User\FinanceController;
 use App\Http\Controllers\User\ReportController as UserReportController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\MidtransNotificationController;
 use App\Http\Controllers\MessageController;
 
 /*
@@ -123,6 +124,10 @@ Route::middleware('auth')->group(function () {
         ->name('user.orders.index');
 
     // Detail 1 pesanan milik user
+    Route::get('/user/orders/{order}/payment', [UserOrderController::class, 'payment'])
+        ->name('user.orders.payment');
+    Route::post('/user/orders/{order}/payment/complete', [UserOrderController::class, 'completePayment'])
+        ->name('user.orders.payment.complete');
     Route::get('/user/orders/{order}', [UserOrderController::class, 'show'])
         ->name('user.orders.show');
 });
@@ -153,5 +158,7 @@ Route::middleware(['auth', 'approved.order'])->group(function () {
     Route::get('/user/reports/{report}', [UserReportController::class, 'show'])->name('user.reports.show');
     Route::post('/user/reports', [UserReportController::class, 'store'])->name('user.reports.store');
 });
+
+Route::post('/midtrans/notification', [MidtransNotificationController::class, 'handle'])->name('midtrans.notification');
 
 require __DIR__.'/auth.php';

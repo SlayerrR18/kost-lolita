@@ -4,6 +4,11 @@
 
 @section('content')
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    @if(session('error'))
+        <div class="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 text-red-800">
+            {{ session('error') }}
+        </div>
+    @endif
 
     {{-- LOGIC STATUS WARNA & ICON --}}
     @php
@@ -99,7 +104,7 @@
                 </a>
             </div>
 
-            <div class="flex gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                 <button onclick="window.print()" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm">
                     <i class="fa-solid fa-print mr-1"></i> Cetak
                 </button>
@@ -107,6 +112,10 @@
                 @if($order->status === 'approved')
                     <a href="{{ route('user.dashboard') }}" class="px-5 py-2 bg-[#222831] text-[#DFD0B8] rounded-lg text-sm font-bold hover:shadow-lg transition">
                         Dashboard
+                    </a>
+                @elseif($order->status === 'pending' && !$order->transfer_proof_path)
+                    <a href="{{ route('user.orders.payment', $order) }}" class="px-5 py-2 bg-[#222831] text-[#DFD0B8] rounded-lg text-sm font-bold hover:shadow-lg transition">
+                        Bayar Sekarang
                     </a>
                 @else
                     <a href="{{ route('landing') }}" class="px-5 py-2 bg-[#222831] text-[#DFD0B8] rounded-lg text-sm font-bold hover:shadow-lg transition">

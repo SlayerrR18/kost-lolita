@@ -17,7 +17,7 @@
         </div>
 
         <div class="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100 relative print:shadow-none print:border-2">
-            
+
             <div class="bg-[#222831] px-8 py-6 flex justify-between items-center text-white print:bg-gray-800">
                 <div>
                     <h2 class="font-serif text-2xl font-bold text-[#DFD0B8]">KWITANSI</h2>
@@ -61,7 +61,7 @@
 
                 <div class="bg-gray-50 rounded-xl p-6 mb-8 border border-gray-100">
                     <p class="text-xs text-gray-400 uppercase font-bold mb-4">Rincian Pembayaran</p>
-                    
+
                     <div class="flex justify-between items-center mb-3">
                         <div>
                             <p class="text-gray-800 font-bold">Sewa Kamar {{ optional($order->room)->room_number }}</p>
@@ -95,6 +95,13 @@
                             <a href="{{ asset('storage/' . $order->transfer_proof_path) }}" target="_blank" class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition font-bold text-sm">
                                 <i class="fa-solid fa-magnifying-glass mr-2"></i> Lihat Gambar Penuh
                             </a>
+                        </div>
+                    </div>
+                @elseif($order->status === 'pending' && !$order->transfer_proof_path)
+                    <div class="mb-8 print:hidden">
+                        <p class="text-xs text-gray-400 uppercase font-bold mb-3">Metode Pembayaran</p>
+                        <div class="rounded-2xl border border-dashed border-gray-200 bg-[#F8FAFC] p-6 text-sm text-gray-700">
+                            <p>Pembayaran dilakukan melalui Midtrans. Silakan lanjutkan pembayaran pada halaman detail pesanan.</p>
                         </div>
                     </div>
                 @endif
